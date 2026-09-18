@@ -2,7 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import type { Group, InstancedMesh } from "three";
-import { Object3D, SRGBColorSpace } from "three";
+import { CanvasTexture, Object3D, SRGBColorSpace } from "three";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
 
@@ -103,6 +103,29 @@ function Monitor() {
 }
 
 function DeskProps() {
+  const mugLogo = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 256;
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = "700 88px Outfit, Arial, sans-serif";
+      context.fillStyle = "#0d563f";
+      context.fillText("Kleanup", 256, 88);
+      context.fillStyle = "#8fd14f";
+      context.fillText("Crew", 256, 176);
+    }
+    const texture = new CanvasTexture(canvas);
+    texture.colorSpace = SRGBColorSpace;
+    texture.anisotropy = 4;
+    return texture;
+  }, []);
+
+  useEffect(() => () => mugLogo.dispose(), [mugLogo]);
+
   return (
     <group position={[0, 0.78, -2.4]}>
       {/* keyboard */}
@@ -172,6 +195,10 @@ function DeskProps() {
         <mesh position={[0.09, 0.004, 0]} scale={[1, 1.18, 1]} castShadow>
           <torusGeometry args={[0.049, 0.012, 12, 32]} />
           <meshStandardMaterial color={CREAM} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, -0.004, 0.079]}>
+          <planeGeometry args={[0.12, 0.063]} />
+          <meshBasicMaterial map={mugLogo} transparent toneMapped={false} />
         </mesh>
       </group>
       {/* desk lamp */}

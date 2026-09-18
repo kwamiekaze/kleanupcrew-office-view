@@ -11,6 +11,12 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { BRAND_SLOGAN } from "../lib/brand";
+
+const SITE_TITLE = `KleanupCrew — ${BRAND_SLOGAN}`;
+const SITE_DESCRIPTION =
+  "Local, insured crews for cleaning, junk removal, lawn care, tree work and complete property care.";
+const SOCIAL_IMAGE = "https://kleanupcrew.com/kleanupcrew-social.jpg";
 
 function NotFoundComponent() {
   return (
@@ -77,14 +83,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESCRIPTION },
+      { name: "author", content: "KleanupCrew" },
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESCRIPTION },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://kleanupcrew.com/" },
+      { property: "og:site_name", content: "KleanupCrew" },
+      { property: "og:image", content: SOCIAL_IMAGE },
+      { property: "og:image:secure_url", content: SOCIAL_IMAGE },
+      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:width", content: "1280" },
+      { property: "og:image:height", content: "720" },
+      {
+        property: "og:image:alt",
+        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+      },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { name: "twitter:image", content: SOCIAL_IMAGE },
+      {
+        name: "twitter:image:alt",
+        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+      },
     ],
     links: [
       {

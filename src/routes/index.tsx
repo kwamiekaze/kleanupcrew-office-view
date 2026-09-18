@@ -11,6 +11,7 @@ const OfficeCanvas = lazy(() => import("@/components/kleanup/OfficeCanvas"));
 const TITLE = `KleanupCrew — ${BRAND_SLOGAN}`;
 const DESC =
   "KleanupCrew connects property owners with insured local crews for cleaning, junk removal, lawn care, tree work and curb-appeal property care.";
+const SOCIAL_IMAGE = "https://kleanupcrew.com/kleanupcrew-social.jpg";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -21,7 +22,23 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://kleanupcrew.com/" },
+      { property: "og:site_name", content: "KleanupCrew" },
+      { property: "og:image", content: SOCIAL_IMAGE },
+      { property: "og:image:secure_url", content: SOCIAL_IMAGE },
+      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:width", content: "1280" },
+      { property: "og:image:height", content: "720" },
+      {
+        property: "og:image:alt",
+        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+      },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: SOCIAL_IMAGE },
+      {
+        name: "twitter:image:alt",
+        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+      },
     ],
   }),
   component: Home,
