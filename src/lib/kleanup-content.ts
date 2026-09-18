@@ -37,7 +37,7 @@ export const VIEWS: OfficeView[] = [
     title: "Residential & commercial cleaning",
     line: "Standard, deep, recurring and move-in/move-out cleans, rental turnovers, carpet, upholstery, window, gutter and pressure washing.",
     cta: "Book a cleaning estimate",
-    pos: [2.0, 2.2, 1.4],
+    pos: [1.7, 2.4, 2.0],
     target: [5.2, 1.5, -1.0],
   },
   {
@@ -47,7 +47,7 @@ export const VIEWS: OfficeView[] = [
     title: "Lawn & yard maintenance",
     line: "Mowing, edging, trimming, leaf and yard cleanup, hedge shaping and brush clearing on a one-off or recurring schedule.",
     cta: "Set up lawn service",
-    pos: [-1.4, 1.6, 3.0],
+    pos: [-0.5, 2.4, 4.1],
     target: [-3.9, 0.5, 0.4],
   },
   {
@@ -67,7 +67,7 @@ export const VIEWS: OfficeView[] = [
     title: "Tree & heavy yard work",
     line: "Trimming, pruning, removal and stump grinding handled by qualified, equipped providers in your area.",
     cta: "Request a site visit",
-    pos: [-2.6, 2.1, -0.2],
+    pos: [-1.9, 2.4, 1.1],
     target: [-5.4, 1.7, -2.0],
   },
   {

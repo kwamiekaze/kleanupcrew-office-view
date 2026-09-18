@@ -487,8 +487,8 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <>
       <color attach="background" args={["#e8e2d3"]} />
-      <hemisphereLight args={["#dfefff", "#8a6b4a", 0.75]} />
-      <ambientLight intensity={0.35} />
+      <hemisphereLight args={["#dfefff", "#a07c56", 1.0]} />
+      <ambientLight intensity={0.55} />
       <directionalLight
         position={[-2.5, 6, -7]}
         intensity={2.4}
