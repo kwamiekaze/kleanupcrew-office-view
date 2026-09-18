@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RigInput } from "@/components/office/CameraRig";
 import { QuoteDrawer } from "@/components/kleanup/QuoteDrawer";
+import { SplashScreen } from "@/components/kleanup/SplashScreen";
 import { useAmbientAudio } from "@/lib/use-ambient-audio";
 import { TRUST_CHIPS, VIEWS, type ViewId } from "@/lib/kleanup-content";
 import { BRAND_LOGO, BRAND_SLOGAN } from "@/lib/brand";
@@ -62,6 +63,7 @@ function clamp(value: number, minimum: number, maximum: number) {
 function Home() {
   const [activeId, setActiveId] = useState<ViewId>("welcome");
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [splashDone, setSplashDone] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches,
   );
@@ -351,6 +353,8 @@ function Home() {
       </nav>
 
       <QuoteDrawer open={quoteOpen} onClose={() => setQuoteOpen(false)} viewId={activeId} />
+
+      {!splashDone && <SplashScreen onDismiss={() => setSplashDone(true)} />}
     </main>
   );
 }
