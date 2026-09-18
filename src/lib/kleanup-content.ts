@@ -34,7 +34,7 @@ export const VIEWS: OfficeView[] = [
     line: "Standard, deep, recurring and move-in/move-out cleans, rental turnovers, carpet, upholstery, window, gutter and pressure washing.",
     cta: "Book a cleaning estimate",
     pos: [1.7, 2.4, 2.0],
-    target: [5.2, 1.5, -1.0],
+    target: [5.2, 1.15, -1.0],
   },
   {
     id: "lawn",

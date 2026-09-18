@@ -2,7 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import type { Group, InstancedMesh } from "three";
-import { CanvasTexture, Object3D, SRGBColorSpace } from "three";
+import { Object3D, SRGBColorSpace } from "three";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
 
@@ -103,29 +103,6 @@ function Monitor() {
 }
 
 function DeskProps() {
-  const mugLogo = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 256;
-    const context = canvas.getContext("2d");
-    if (context) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      context.font = "700 88px Outfit, Arial, sans-serif";
-      context.fillStyle = "#0d563f";
-      context.fillText("Kleanup", 256, 88);
-      context.fillStyle = "#8fd14f";
-      context.fillText("Crew", 256, 176);
-    }
-    const texture = new CanvasTexture(canvas);
-    texture.colorSpace = SRGBColorSpace;
-    texture.anisotropy = 4;
-    return texture;
-  }, []);
-
-  useEffect(() => () => mugLogo.dispose(), [mugLogo]);
-
   return (
     <group position={[0, 0.78, -2.4]}>
       {/* keyboard */}
@@ -195,10 +172,6 @@ function DeskProps() {
         <mesh position={[0.09, 0.004, 0]} scale={[1, 1.18, 1]} castShadow>
           <torusGeometry args={[0.049, 0.012, 12, 32]} />
           <meshStandardMaterial color={CREAM} roughness={0.3} />
-        </mesh>
-        <mesh position={[0, -0.004, 0.079]}>
-          <planeGeometry args={[0.12, 0.063]} />
-          <meshBasicMaterial map={mugLogo} transparent toneMapped={false} />
         </mesh>
       </group>
       {/* desk lamp */}
@@ -274,6 +247,84 @@ function Chair({ reducedMotion }: { reducedMotion: boolean }) {
   );
 }
 
+function CleaningEquipment() {
+  return (
+    <group>
+      {/* Freestanding broom with a shaped head and visible bristles. */}
+      <group position={[1.48, 0, 0.22]} rotation-z={-0.06}>
+        <mesh position={[0, 0.82, 0]} castShadow>
+          <cylinderGeometry args={[0.022, 0.025, 1.42, 12]} />
+          <meshStandardMaterial color="#b67a3d" roughness={0.72} />
+        </mesh>
+        <mesh position={[0, 0.15, 0]} castShadow>
+          <boxGeometry args={[0.38, 0.08, 0.14]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.68} />
+        </mesh>
+        <mesh position={[0, 0.065, 0]} castShadow>
+          <boxGeometry args={[0.34, 0.13, 0.11]} />
+          <meshStandardMaterial color="#d7b46b" roughness={0.95} />
+        </mesh>
+        {[-0.13, -0.065, 0, 0.065, 0.13].map((x) => (
+          <mesh key={x} position={[x, 0.035, 0.059]}>
+            <boxGeometry args={[0.012, 0.12, 0.012]} />
+            <meshStandardMaterial color="#9f7d43" roughness={1} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Long-handled dustpan, stored beside the broom rather than on the shelf. */}
+      <group position={[1.13, 0, 0.36]} rotation-z={0.04}>
+        <mesh position={[0, 0.58, -0.03]} castShadow>
+          <cylinderGeometry args={[0.018, 0.022, 0.96, 10]} />
+          <meshStandardMaterial color="#47534d" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 1.07, -0.03]} castShadow>
+          <boxGeometry args={[0.12, 0.07, 0.06]} />
+          <meshStandardMaterial color={LIME} roughness={0.55} />
+        </mesh>
+        <mesh position={[0, 0.09, 0.02]} rotation-x={-0.1} castShadow>
+          <boxGeometry args={[0.34, 0.08, 0.3]} />
+          <meshStandardMaterial color={LIME} roughness={0.58} />
+        </mesh>
+        <mesh position={[0, 0.155, -0.11]} castShadow>
+          <boxGeometry args={[0.34, 0.15, 0.055]} />
+          <meshStandardMaterial color="#6cae39" roughness={0.62} />
+        </mesh>
+      </group>
+
+      {/* Compact upright vacuum with base, wheels, body and handle. */}
+      <group position={[-1.48, 0, 0.28]}>
+        <mesh position={[0, 0.13, 0.02]} castShadow receiveShadow>
+          <boxGeometry args={[0.5, 0.2, 0.4]} />
+          <meshStandardMaterial color={FOREST} roughness={0.48} />
+        </mesh>
+        <mesh position={[0, 0.47, 0]} castShadow>
+          <cylinderGeometry args={[0.16, 0.23, 0.56, 18]} />
+          <meshStandardMaterial color="#315f43" roughness={0.46} />
+        </mesh>
+        <mesh position={[0, 0.5, 0.155]} castShadow>
+          <boxGeometry args={[0.16, 0.2, 0.025]} />
+          <meshStandardMaterial color={LIME} roughness={0.42} />
+        </mesh>
+        <mesh position={[0, 1.02, 0]} castShadow>
+          <cylinderGeometry args={[0.025, 0.03, 0.7, 12]} />
+          <meshStandardMaterial color={CHARCOAL} roughness={0.5} />
+        </mesh>
+        <mesh position={[0, 1.37, 0.02]} castShadow>
+          <boxGeometry args={[0.3, 0.08, 0.08]} />
+          <meshStandardMaterial color={CHARCOAL} roughness={0.5} />
+        </mesh>
+        {[-0.2, 0.2].map((x) => (
+          <mesh key={x} position={[x, 0.11, 0.08]} rotation-z={Math.PI / 2} castShadow>
+            <cylinderGeometry args={[0.075, 0.075, 0.06, 16]} />
+            <meshStandardMaterial color="#202624" roughness={0.78} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 function Shelves() {
   const bottles: Array<[number, number, string]> = [
     [-0.3, 1.34, LIME],
@@ -324,6 +375,7 @@ function Shelves() {
           <meshStandardMaterial color={LIME} roughness={0.5} />
         </mesh>
       </group>
+      <CleaningEquipment />
     </group>
   );
 }
