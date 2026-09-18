@@ -59,6 +59,117 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-forest: var(--forest);
+  --color-forest-deep: var(--forest-deep);
+  --color-lime: var(--lime);
+  --color-cream: var(--cream);
+  --color-wood: var(--wood);
+  --color-charcoal: var(--charcoal);
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --forest: oklch(0.42 0.082 155);
+  --forest-deep: oklch(0.26 0.052 158);
+  --lime: oklch(0.85 0.19 128);
+  --cream: oklch(0.96 0.025 92);
+  --wood: oklch(0.58 0.09 60);
+  --charcoal: oklch(0.25 0.012 160);
+}
+
+@layer components {
+  .kc-glass {
+    background: color-mix(in oklab, var(--forest-deep) 78%, transparent);
+    backdrop-filter: blur(14px);
+    border: 1px solid color-mix(in oklab, var(--cream) 18%, transparent);
+    box-shadow: 0 18px 50px -20px oklch(0.2 0.03 150 / 0.75);
+  }
+
+  .kc-focus:focus-visible,
+  .kc-btn:focus-visible,
+  .kc-field input:focus-visible,
+  .kc-field select:focus-visible,
+  .kc-field textarea:focus-visible {
+    outline: 2px solid var(--lime);
+    outline-offset: 2px;
+  }
+
+  .kc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    background: var(--lime);
+    color: var(--charcoal);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.55rem 1.1rem;
+    transition: transform 0.18s ease, filter 0.18s ease;
+  }
+  .kc-btn:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .kc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .kc-field > span {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: color-mix(in oklab, var(--cream) 65%, transparent);
+  }
+  .kc-field input,
+  .kc-field select,
+  .kc-field textarea {
+    width: 100%;
+    border-radius: 0.6rem;
+    border: 1px solid color-mix(in oklab, var(--cream) 20%, transparent);
+    background: color-mix(in oklab, var(--charcoal) 55%, transparent);
+    color: var(--cream);
+    font-size: 0.85rem;
+    padding: 0.5rem 0.65rem;
+  }
+  .kc-field ::placeholder {
+    color: color-mix(in oklab, var(--cream) 40%, transparent);
+  }
+
+  .kc-rail-btn {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    width: 100%;
+    border-radius: 0.7rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+    color: color-mix(in oklab, var(--cream) 78%, transparent);
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+  }
+  .kc-rail-btn:hover {
+    background: color-mix(in oklab, var(--cream) 12%, transparent);
+  }
+  .kc-rail-btn[aria-current="true"] {
+    background: color-mix(in oklab, var(--lime) 88%, transparent);
+    color: var(--charcoal);
+    font-weight: 600;
+  }
+  .kc-rail-btn .idx {
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kc-btn,
+  .kc-rail-btn {
+    transition: none;
+  }
 }
 
 :root {
@@ -140,5 +251,6 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
   }
 }
