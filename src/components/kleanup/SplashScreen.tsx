@@ -45,8 +45,8 @@ export function SplashScreen({ onDismiss }: { onDismiss: () => void }) {
           src={splashVideo.url}
           autoPlay
           muted
-          loop
           playsInline
+          onEnded={dismiss}
           preload="auto"
           disablePictureInPicture
           controls={false}
