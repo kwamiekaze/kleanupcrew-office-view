@@ -14,6 +14,12 @@ export function SplashScreen({ onDismiss }: { onDismiss: () => void }) {
 
   const dismiss = useCallback(() => {
     if (leaving) return;
+    const v = videoRef.current;
+    if (v) {
+      v.pause();
+      v.removeAttribute("src");
+      v.load();
+    }
     setLeaving(true);
     window.setTimeout(onDismiss, 560);
   }, [leaving, onDismiss]);
