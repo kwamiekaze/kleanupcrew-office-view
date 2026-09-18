@@ -14,6 +14,7 @@ export function SplashScreen({ onDismiss }: { onDismiss: () => void }) {
 
   const dismiss = useCallback(() => {
     if (leaving) return;
+    videoRef.current?.pause();
     setLeaving(true);
     window.setTimeout(onDismiss, 560);
   }, [leaving, onDismiss]);
@@ -44,8 +45,8 @@ export function SplashScreen({ onDismiss }: { onDismiss: () => void }) {
           src={splashVideo.url}
           autoPlay
           muted
-          loop
           playsInline
+          onEnded={dismiss}
           preload="auto"
           disablePictureInPicture
           controls={false}
