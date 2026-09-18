@@ -19,12 +19,14 @@ function Desk() {
         <boxGeometry args={[3.0, 0.08, 1.35]} />
         <meshStandardMaterial color={WOOD} roughness={0.55} />
       </mesh>
-      {[
-        [-1.4, 0.55],
-        [1.4, 0.55],
-        [-1.4, -0.55],
-        [1.4, -0.55],
-      ].map(([x, z], i) => (
+      {(
+        [
+          [-1.4, 0.55],
+          [1.4, 0.55],
+          [-1.4, -0.55],
+          [1.4, -0.55],
+        ] as Array<[number, number]>
+      ).map(([x, z], i) => (
         <mesh key={i} position={[x, 0.36, z]} castShadow>
           <boxGeometry args={[0.09, 0.72, 0.09]} />
           <meshStandardMaterial color={WOOD_DARK} roughness={0.7} />
@@ -240,12 +242,14 @@ function LawnMower() {
         <boxGeometry args={[0.36, 0.22, 0.3]} />
         <meshStandardMaterial color={CHARCOAL} />
       </mesh>
-      {[
-        [-0.38, 0.28],
-        [0.38, 0.28],
-        [-0.38, -0.28],
-        [0.38, -0.28],
-      ].map(([x, z], i) => (
+      {(
+        [
+          [-0.38, 0.28],
+          [0.38, 0.28],
+          [-0.38, -0.28],
+          [0.38, -0.28],
+        ] as Array<[number, number]>
+      ).map(([x, z], i) => (
         <mesh key={i} position={[x, 0.13, z]} rotation-z={Math.PI / 2} castShadow>
           <cylinderGeometry args={[0.13, 0.13, 0.1, 16]} />
           <meshStandardMaterial color="#20241f" roughness={0.9} />
