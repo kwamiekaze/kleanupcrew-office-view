@@ -1,5 +1,11 @@
 # KleanupCrew Office View
 
+## Current implementation
+
+The local iterations include the supplied logo, “Clean. Clear. Care.” branding, expanded 3D controls, improved props, corrected shadows, and a direct quote dialog with Other, photo previews and camera capture. Delivery is disabled until the business inbox and server secrets are configured. See [quote delivery setup](docs/quote-delivery.md) before enabling submissions. `node --test tests/quotes.test.ts` exercises the delivery boundary using mocks; it sends no email.
+
+## Original project brief
+
 Build a polished, responsive one-page website for KleanupCrew.com, a local property-care and cleanup service marketplace. This is the initial foundation only, so create the complete working front end in one pass and do not add Supabase, authentication, payments, or a backend yet.
 
 Visual concept: closely inspired by the interaction model and cinematic composition of https://living-operator.lexn8.chatgpt.site/ but do not copy its branding or assets. Create a full-viewport interactive 3D office/workroom using React + TypeScript + Vite, @react-three/fiber, @react-three/drei, and lightweight CSS. The 3D scene should be an inviting modern KleanupCrew operations office with NO PERSON sitting at the desk. Include a wood desk, empty chair, desktop monitor, keyboard, desk lamp, notebook/clipboard, coffee mug, large window, storage shelves, cleaning supplies, a small lawn mower/yard-care prop, a junk-removal dolly or boxes, a chainsaw/tree-care prop stored safely, and a clearly visible analog wall clock that displays the visitor's correct local time and updates live. Build the props from simple optimized 3D primitives so the project has no fragile external GLB dependency.

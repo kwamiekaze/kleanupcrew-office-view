@@ -16,7 +16,7 @@ export default function OfficeCanvas({
   return (
     <Canvas
       shadows
-      dpr={[1, 1.6]}
+      dpr={[1, 1.5]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       camera={{ position: view.pos, fov: 42, near: 0.1, far: 60 }}
     >

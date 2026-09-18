@@ -1,8 +1,10 @@
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { ContactShadows, useTexture } from "@react-three/drei";
+import { useEffect, useMemo, useRef } from "react";
 import type { Group, InstancedMesh } from "three";
-import { Object3D } from "three";
+import { Object3D, SRGBColorSpace } from "three";
 import { WallClock } from "./WallClock";
+import { BRAND_LOGO } from "@/lib/brand";
 
 const WOOD = "#8a5a33";
 const WOOD_DARK = "#5e3c22";
@@ -42,6 +44,19 @@ function Desk() {
 }
 
 function Monitor() {
+  const source = useTexture(BRAND_LOGO);
+  const logo = useMemo(() => {
+    // Frame the original square artwork without stretching or modifying it.
+    const texture = source.clone();
+    texture.colorSpace = SRGBColorSpace;
+    texture.repeat.set(1, 0.24);
+    texture.offset.set(0, 0.38);
+    texture.anisotropy = 4;
+    texture.needsUpdate = true;
+    return texture;
+  }, [source]);
+  useEffect(() => () => logo.dispose(), [logo]);
+
   return (
     <group position={[0, 0.78, -2.75]}>
       <mesh position={[0, 0.03, 0]} castShadow>
@@ -59,13 +74,29 @@ function Monitor() {
         </mesh>
         <mesh position={[0, 0, 0.032]}>
           <planeGeometry args={[1.14, 0.62]} />
-          <meshStandardMaterial
-            color={FOREST}
-            emissive={"#3d7a4d"}
-            emissiveIntensity={0.55}
-            roughness={0.3}
-          />
+          <meshBasicMaterial color="#fdfef8" toneMapped={false} />
         </mesh>
+        {/* KleanupCrew dispatch dashboard */}
+        <mesh position={[0, 0.14, 0.041]}>
+          <planeGeometry args={[1.1, 0.264]} />
+          <meshBasicMaterial map={logo} toneMapped={false} />
+        </mesh>
+        {[-0.01, -0.12, -0.23].map((y, index) => (
+          <group key={y} position={[0, y, 0.038]}>
+            <mesh position={[-0.4, 0, 0]}>
+              <circleGeometry args={[0.026, 12]} />
+              <meshBasicMaterial color={index === 1 ? "#f0b44d" : LIME} />
+            </mesh>
+            <mesh position={[-0.14, 0, 0]}>
+              <planeGeometry args={[0.4, 0.028]} />
+              <meshBasicMaterial color="#779181" />
+            </mesh>
+            <mesh position={[0.35, 0, 0]}>
+              <planeGeometry args={[0.19, 0.055]} />
+              <meshBasicMaterial color="#4f8b5d" />
+            </mesh>
+          </group>
+        ))}
       </group>
     </group>
   );
@@ -79,13 +110,38 @@ function DeskProps() {
         <boxGeometry args={[0.72, 0.03, 0.24]} />
         <meshStandardMaterial color="#d9d2c2" roughness={0.8} />
       </mesh>
-      {/* mouse */}
-      <mesh position={[0.52, 0.03, 0.3]} castShadow>
-        <sphereGeometry args={[0.055, 14, 10]} />
-        <meshStandardMaterial color="#cfc7b6" />
-      </mesh>
+      {Array.from({ length: 7 }, (_, column) =>
+        Array.from({ length: 3 }, (_, row) => (
+          <mesh
+            key={`${column}-${row}`}
+            position={[-0.27 + column * 0.09, 0.041, 0.2 + row * 0.065]}
+          >
+            <boxGeometry args={[0.055, 0.008, 0.038]} />
+            <meshStandardMaterial color="#767d78" roughness={0.7} />
+          </mesh>
+        )),
+      )}
+      {/* low-profile wireless mouse on a desk mat */}
+      <group position={[0.55, 0, 0.3]}>
+        <mesh position={[0, 0.005, 0]} receiveShadow>
+          <boxGeometry args={[0.32, 0.01, 0.36]} />
+          <meshStandardMaterial color="#384b40" roughness={0.95} />
+        </mesh>
+        <mesh position={[0, 0.022, 0]} scale={[0.075, 0.018, 0.12]} castShadow>
+          <sphereGeometry args={[1, 24, 16]} />
+          <meshStandardMaterial color="#343b37" roughness={0.65} />
+        </mesh>
+        <mesh position={[0, 0.026, 0]} scale={[0.073, 0.042, 0.117]} castShadow>
+          <sphereGeometry args={[1, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#ecece5" roughness={0.42} />
+        </mesh>
+        <mesh position={[0, 0.063, -0.033]} rotation-z={Math.PI / 2}>
+          <cylinderGeometry args={[0.012, 0.012, 0.014, 16]} />
+          <meshStandardMaterial color="#525b55" roughness={0.7} />
+        </mesh>
+      </group>
       {/* clipboard / notebook */}
-      <group position={[-0.95, 0.02, 0.2]} rotation-y={0.32}>
+      <group position={[-0.95, 0.02, 0.2]} rotation-y={Math.PI + 0.32}>
         <mesh castShadow>
           <boxGeometry args={[0.42, 0.03, 0.56]} />
           <meshStandardMaterial color={WOOD_DARK} roughness={0.8} />
@@ -100,7 +156,7 @@ function DeskProps() {
         </mesh>
       </group>
       {/* coffee mug */}
-      <group position={[0.85, 0.08, 0.12]}>
+      <group position={[0.85, 0.09, 0.12]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.085, 0.075, 0.17, 20]} />
           <meshStandardMaterial color={CREAM} roughness={0.5} />
@@ -109,31 +165,49 @@ function DeskProps() {
           <cylinderGeometry args={[0.07, 0.07, 0.02, 20]} />
           <meshStandardMaterial color="#4a2f1d" roughness={0.3} />
         </mesh>
-        <mesh position={[0.1, 0, 0]} rotation-x={Math.PI / 2}>
-          <torusGeometry args={[0.045, 0.014, 8, 18]} />
-          <meshStandardMaterial color={CREAM} />
+        <mesh position={[0, 0.085, 0]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.077, 0.008, 10, 32]} />
+          <meshStandardMaterial color={CREAM} roughness={0.3} />
+        </mesh>
+        <mesh position={[0.09, 0.004, 0]} scale={[1, 1.18, 1]} castShadow>
+          <torusGeometry args={[0.049, 0.012, 12, 32]} />
+          <meshStandardMaterial color={CREAM} roughness={0.3} />
         </mesh>
       </group>
       {/* desk lamp */}
       <group position={[-1.25, 0, -0.32]}>
         <mesh castShadow>
-          <cylinderGeometry args={[0.13, 0.15, 0.04, 20]} />
-          <meshStandardMaterial color={FOREST} />
+          <cylinderGeometry args={[0.19, 0.21, 0.045, 40]} />
+          <meshStandardMaterial color={FOREST} metalness={0.45} roughness={0.28} />
         </mesh>
-        <mesh position={[0, 0.26, 0]} rotation-z={-0.24}>
-          <cylinderGeometry args={[0.02, 0.02, 0.52, 10]} />
-          <meshStandardMaterial color={FOREST} />
+        <mesh position={[0, 0.28, 0]}>
+          <cylinderGeometry args={[0.018, 0.024, 0.55, 16]} />
+          <meshStandardMaterial color="#bfa16a" metalness={0.75} roughness={0.25} />
         </mesh>
-        <mesh position={[0.14, 0.52, 0]} rotation-z={-0.8} castShadow>
-          <coneGeometry args={[0.15, 0.22, 18, 1, true]} />
-          <meshStandardMaterial color={LIME} side={2} roughness={0.6} />
+        <mesh position={[0.1, 0.53, 0]} rotation-z={Math.PI / 2}>
+          <cylinderGeometry args={[0.018, 0.018, 0.2, 16]} />
+          <meshStandardMaterial color="#bfa16a" metalness={0.75} roughness={0.25} />
         </mesh>
-        <pointLight
-          position={[0.18, 0.45, 0]}
-          intensity={2.2}
-          distance={3.2}
-          color="#ffe6b5"
-        />
+        <group position={[0.2, 0.51, 0]} rotation-z={-0.18}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.075, 0.22, 0.2, 40, 1, true]} />
+            <meshStandardMaterial color={FOREST} metalness={0.35} side={2} roughness={0.28} />
+          </mesh>
+          <mesh position={[0, -0.1, 0]} rotation-x={Math.PI / 2}>
+            <torusGeometry args={[0.216, 0.009, 10, 40]} />
+            <meshStandardMaterial color="#cbb078" metalness={0.7} roughness={0.25} />
+          </mesh>
+          <mesh position={[0, -0.082, 0]} rotation-x={Math.PI / 2}>
+            <circleGeometry args={[0.205, 32]} />
+            <meshStandardMaterial
+              color="#fff0cd"
+              emissive="#ffd995"
+              emissiveIntensity={0.8}
+              side={2}
+            />
+          </mesh>
+          <pointLight position={[0, -0.15, 0]} intensity={0.8} distance={2} color="#ffe3ae" />
+        </group>
       </group>
     </group>
   );
@@ -143,10 +217,10 @@ function Chair({ reducedMotion }: { reducedMotion: boolean }) {
   const ref = useRef<Group>(null);
   useFrame(({ clock }) => {
     if (reducedMotion || !ref.current) return;
-    ref.current.rotation.y = Math.sin(clock.elapsedTime * 0.25) * 0.06;
+    ref.current.rotation.y = Math.PI + Math.sin(clock.elapsedTime * 0.25) * 0.04;
   });
   return (
-    <group ref={ref} position={[0, 0, -1.25]}>
+    <group ref={ref} position={[0, 0, -1.25]} rotation-y={Math.PI}>
       <mesh position={[0, 0.06, 0]} castShadow>
         <cylinderGeometry args={[0.36, 0.42, 0.06, 5]} />
         <meshStandardMaterial color={CHARCOAL} />
@@ -319,45 +393,111 @@ function JunkZone() {
 
 function TreeCareWall() {
   return (
-    <group position={[-5.6, 0, -2.0]} rotation-y={Math.PI / 2}>
-      {/* wall rack */}
-      <mesh position={[0, 1.45, 0]} castShadow>
-        <boxGeometry args={[1.7, 0.08, 0.22]} />
-        <meshStandardMaterial color={WOOD_DARK} />
+    <group position={[-5.72, 0, -1.85]} rotation-y={Math.PI / 2}>
+      {/* slatted professional tool board */}
+      <mesh position={[0, 1.62, -0.04]} castShadow receiveShadow>
+        <boxGeometry args={[2.55, 2.35, 0.12]} />
+        <meshStandardMaterial color="#31563a" roughness={0.86} />
       </mesh>
-      {/* chainsaw, stored on rack, bar guarded */}
-      <group position={[0, 1.62, 0.02]}>
+      {[-0.82, -0.42, -0.02, 0.38, 0.78].map((y) => (
+        <mesh key={y} position={[0, 1.62 + y, 0.035]}>
+          <boxGeometry args={[2.42, 0.035, 0.04]} />
+          <meshStandardMaterial color="#75906f" roughness={0.75} />
+        </mesh>
+      ))}
+
+      {/* full-size chainsaw with visible bar, chain and wrap handle */}
+      <group position={[-0.15, 1.88, 0.19]} rotation-z={-0.05}>
         <mesh castShadow>
-          <boxGeometry args={[0.52, 0.26, 0.2]} />
-          <meshStandardMaterial color="#d8641f" roughness={0.45} />
+          <boxGeometry args={[0.65, 0.38, 0.25]} />
+          <meshStandardMaterial color="#e76b24" roughness={0.38} />
         </mesh>
-        <mesh position={[0.1, 0.18, 0]}>
-          <boxGeometry args={[0.34, 0.1, 0.16]} />
-          <meshStandardMaterial color={CHARCOAL} />
+        <mesh position={[-0.16, 0.01, 0.135]}>
+          <circleGeometry args={[0.105, 18]} />
+          <meshStandardMaterial color="#202622" roughness={0.7} />
         </mesh>
-        <mesh position={[0.62, -0.02, 0]} castShadow>
-          <boxGeometry args={[0.76, 0.1, 0.05]} />
-          <meshStandardMaterial color="#9aa3a0" metalness={0.6} roughness={0.35} />
+        <mesh position={[0.15, 0.27, 0]} rotation-z={-0.22}>
+          <torusGeometry args={[0.24, 0.035, 8, 22, Math.PI * 1.45]} />
+          <meshStandardMaterial color={CHARCOAL} roughness={0.62} />
         </mesh>
-        {/* orange bar guard */}
-        <mesh position={[0.62, -0.02, 0]}>
-          <boxGeometry args={[0.8, 0.14, 0.09]} />
-          <meshStandardMaterial color={LIME} transparent opacity={0.55} />
+        <mesh position={[0.72, -0.015, 0]} castShadow>
+          <boxGeometry args={[0.82, 0.13, 0.07]} />
+          <meshStandardMaterial color="#bcc3be" metalness={0.72} roughness={0.3} />
+        </mesh>
+        {Array.from({ length: 10 }, (_, index) => (
+          <mesh key={index} position={[0.38 + index * 0.075, 0.068, 0.043]}>
+            <boxGeometry args={[0.035, 0.025, 0.025]} />
+            <meshStandardMaterial color="#343b37" metalness={0.65} />
+          </mesh>
+        ))}
+        <mesh position={[0.68, -0.015, 0.048]}>
+          <boxGeometry args={[0.88, 0.035, 0.025]} />
+          <meshStandardMaterial color="#3b433e" metalness={0.7} />
         </mesh>
       </group>
-      {/* pole pruner + rake leaning */}
-      <mesh position={[-0.7, 0.9, 0.16]} rotation-z={0.1} castShadow>
-        <cylinderGeometry args={[0.03, 0.03, 1.8, 10]} />
-        <meshStandardMaterial color={WOOD} />
+
+      {/* compact top-handle pruning saw */}
+      <group position={[-0.28, 1.28, 0.18]} rotation-z={0.08}>
+        <mesh castShadow>
+          <boxGeometry args={[0.48, 0.28, 0.2]} />
+          <meshStandardMaterial color={LIME} roughness={0.42} />
+        </mesh>
+        <mesh position={[-0.02, 0.22, 0]} rotation-z={-0.15}>
+          <torusGeometry args={[0.17, 0.03, 7, 18, Math.PI * 1.35]} />
+          <meshStandardMaterial color={CHARCOAL} />
+        </mesh>
+        <mesh position={[0.48, 0, 0]}>
+          <boxGeometry args={[0.52, 0.1, 0.055]} />
+          <meshStandardMaterial color="#c2c8c4" metalness={0.68} roughness={0.28} />
+        </mesh>
+      </group>
+
+      {/* pole saw and hand pruning saw */}
+      <mesh position={[-1.0, 1.18, 0.18]} rotation-z={0.07} castShadow>
+        <cylinderGeometry args={[0.038, 0.038, 2.18, 12]} />
+        <meshStandardMaterial color="#d6dbd8" metalness={0.58} roughness={0.34} />
       </mesh>
-      <mesh position={[-0.9, 0.9, 0.16]} rotation-z={0.16} castShadow>
-        <cylinderGeometry args={[0.028, 0.028, 1.8, 10]} />
-        <meshStandardMaterial color="#6f7a75" metalness={0.4} />
+      <group position={[-0.92, 2.28, 0.19]} rotation-z={-0.1}>
+        <mesh position={[0, 0.13, 0]}>
+          <boxGeometry args={[0.16, 0.32, 0.11]} />
+          <meshStandardMaterial color="#e76b24" />
+        </mesh>
+        <mesh position={[0, 0.39, 0]} rotation-z={-0.18}>
+          <boxGeometry args={[0.09, 0.35, 0.045]} />
+          <meshStandardMaterial color="#c5cbc7" metalness={0.65} />
+        </mesh>
+      </group>
+      <group position={[0.86, 1.27, 0.18]} rotation-z={-0.42}>
+        <mesh position={[0, -0.2, 0]}>
+          <boxGeometry args={[0.12, 0.42, 0.09]} />
+          <meshStandardMaterial color="#e76b24" />
+        </mesh>
+        <mesh position={[0, 0.17, 0]}>
+          <boxGeometry args={[0.075, 0.38, 0.035]} />
+          <meshStandardMaterial color="#d3d7d4" metalness={0.72} />
+        </mesh>
+      </group>
+
+      {/* arborist helmet with ear protection, rope and gloves */}
+      <group position={[0.88, 2.28, 0.2]}>
+        <mesh castShadow>
+          <sphereGeometry args={[0.22, 20, 14, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#f3b33e" roughness={0.38} />
+        </mesh>
+        {[-0.23, 0.23].map((x) => (
+          <mesh key={x} position={[x, -0.05, 0]}>
+            <cylinderGeometry args={[0.075, 0.075, 0.07, 14]} />
+            <meshStandardMaterial color={CHARCOAL} />
+          </mesh>
+        ))}
+      </group>
+      <mesh position={[0.93, 0.62, 0.19]} rotation-x={Math.PI / 2}>
+        <torusGeometry args={[0.3, 0.045, 10, 28]} />
+        <meshStandardMaterial color="#e5a54a" roughness={0.8} />
       </mesh>
-      {/* helmet + gloves on shelf */}
-      <mesh position={[0.78, 1.58, 0]} castShadow>
-        <sphereGeometry args={[0.16, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color={LIME} />
+      <mesh position={[0.15, 0.58, 0.18]} rotation-z={Math.PI / 2} castShadow>
+        <boxGeometry args={[0.55, 0.08, 0.16]} />
+        <meshStandardMaterial color="#d9c79e" roughness={0.95} />
       </mesh>
     </group>
   );
@@ -367,12 +507,19 @@ function Room() {
   return (
     <group>
       {/* floor */}
-      <mesh rotation-x={-Math.PI / 2} receiveShadow>
+      <mesh rotation-x={-Math.PI / 2}>
         <planeGeometry args={[14, 14]} />
-        <meshStandardMaterial color="#a4784d" roughness={0.85} />
+        <meshStandardMaterial color="#9b6d43" roughness={0.72} />
       </mesh>
+      {/* subtle timber seams */}
+      {Array.from({ length: 18 }, (_, index) => (
+        <mesh key={index} rotation-x={-Math.PI / 2} position={[-6.4 + index * 0.76, 0.004, 0]}>
+          <planeGeometry args={[0.012, 10.4]} />
+          <meshBasicMaterial color="#6f492d" transparent opacity={0.34} />
+        </mesh>
+      ))}
       {/* rug */}
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0.012, -0.6]} receiveShadow>
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.012, -0.6]}>
         <planeGeometry args={[5.2, 4]} />
         <meshStandardMaterial color="#d9cfb4" roughness={1} />
       </mesh>
@@ -420,15 +567,32 @@ function Room() {
         </mesh>
         <mesh position={[0, -0.1, -1.4]} rotation-x={-Math.PI / 2}>
           <planeGeometry args={[9, 6]} />
-          <meshBasicMaterial color="#79a martial" />
+          <meshBasicMaterial color="#709b65" />
         </mesh>
+        {/* distant landscaping visible through the glass */}
+        <mesh position={[0, 0.85, -1.48]}>
+          <circleGeometry args={[2.8, 40, 0, Math.PI]} />
+          <meshBasicMaterial color="#82aa72" />
+        </mesh>
+        {[-2.2, -1.35, 1.45, 2.25].map((x, index) => (
+          <group key={x} position={[x, 1.05 + (index % 2) * 0.12, -1.35]}>
+            <mesh position={[0, -0.35, 0]}>
+              <boxGeometry args={[0.1, 0.72, 0.08]} />
+              <meshBasicMaterial color="#6f4d31" />
+            </mesh>
+            <mesh>
+              <sphereGeometry args={[0.48, 14, 10]} />
+              <meshBasicMaterial color={index % 2 ? "#527f4e" : "#5f8e57"} />
+            </mesh>
+          </group>
+        ))}
       </group>
       {/* side walls */}
       <mesh position={[-6, 1.8, 0]} rotation-y={Math.PI / 2} receiveShadow>
         <planeGeometry args={[10.4, 3.6]} />
         <meshStandardMaterial color={WALL} roughness={1} />
       </mesh>
-      <mesh position={[6, 1.8, 0]} rotation-y={-Math.PI / 2} receiveShadow>
+      <mesh position={[6, 1.8, 0]} rotation-y={-Math.PI / 2}>
         <planeGeometry args={[10.4, 3.6]} />
         <meshStandardMaterial color={WALL} roughness={1} />
       </mesh>
@@ -442,6 +606,121 @@ function Room() {
         <boxGeometry args={[12, 0.14, 0.06]} />
         <meshStandardMaterial color={CREAM} />
       </mesh>
+      {/* ceiling fixtures */}
+      {[-2.4, 2.4].map((x) => (
+        <group key={x} position={[x, 3.38, -0.8]}>
+          <mesh>
+            <cylinderGeometry args={[0.025, 0.025, 0.38, 10]} />
+            <meshStandardMaterial color={CHARCOAL} metalness={0.45} />
+          </mesh>
+          <mesh position={[0, -0.26, 0]}>
+            <coneGeometry args={[0.28, 0.34, 24, 1, true]} />
+            <meshStandardMaterial color={FOREST} side={2} roughness={0.48} />
+          </mesh>
+          <pointLight position={[0, -0.32, 0]} intensity={0.85} distance={4} color="#fff0cb" />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function RoomDetails() {
+  return (
+    <group>
+      {/* Brass drawer pulls and inset drawer seams. */}
+      {[0.27, 0.45, 0.63].map((y) => (
+        <group key={y} position={[1, y, -1.99]}>
+          <mesh position={[0, -0.075, 0]}>
+            <boxGeometry args={[0.64, 0.008, 0.014]} />
+            <meshStandardMaterial color="#392b20" />
+          </mesh>
+          <mesh>
+            <boxGeometry args={[0.22, 0.023, 0.03]} />
+            <meshStandardMaterial color="#bd9e62" metalness={0.7} roughness={0.3} />
+          </mesh>
+        </group>
+      ))}
+      {/* Window casing with a deep sill. */}
+      {[-1.75, 1.75].map((x) => (
+        <mesh key={x} position={[x, 1.95, -5.04]} castShadow>
+          <boxGeometry args={[0.13, 2.35, 0.18]} />
+          <meshStandardMaterial color={CREAM} roughness={0.6} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.85, -4.94]} castShadow>
+        <boxGeometry args={[3.65, 0.1, 0.4]} />
+        <meshStandardMaterial color={WOOD} roughness={0.5} />
+      </mesh>
+      {/* Botanical prints balance the clock on the back wall. */}
+      {[2.7, 3.8].map((x, index) => (
+        <group key={x} position={[x, 2.2, -5.04]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.82, 1.12, 0.065]} />
+            <meshStandardMaterial color={WOOD_DARK} roughness={0.58} />
+          </mesh>
+          <mesh position={[0, 0, 0.036]}>
+            <planeGeometry args={[0.7, 1]} />
+            <meshStandardMaterial color="#ece4cc" />
+          </mesh>
+          <mesh position={[0, -0.03, 0.044]} rotation-z={index ? -0.15 : 0.15}>
+            <planeGeometry args={[0.014, 0.68]} />
+            <meshBasicMaterial color={FOREST} />
+          </mesh>
+          {[-1, 1].map((side) =>
+            [0, 1, 2].map((leaf) => (
+              <mesh
+                key={`${side}-${leaf}`}
+                position={[side * 0.1, -0.22 + leaf * 0.19, 0.048]}
+                rotation-z={side * -0.65}
+                scale={[0.07, 0.14, 1]}
+              >
+                <circleGeometry args={[1, 16]} />
+                <meshBasicMaterial color={index ? "#7d925d" : FOREST} />
+              </mesh>
+            )),
+          )}
+        </group>
+      ))}
+      {/* Rug border and staggered plank joints add material definition. */}
+      {[-2.5, 2.5].map((x) => (
+        <mesh key={x} position={[x, 0.014, -0.6]} rotation-x={-Math.PI / 2}>
+          <planeGeometry args={[0.035, 3.8]} />
+          <meshStandardMaterial color="#8c9876" roughness={1} />
+        </mesh>
+      ))}
+      {Array.from({ length: 17 }, (_, i) => (
+        <mesh
+          key={i}
+          position={[-6.02 + i * 0.76, 0.005, i % 2 ? 2.8 : -3.4]}
+          rotation-x={-Math.PI / 2}
+        >
+          <planeGeometry args={[0.75, 0.012]} />
+          <meshBasicMaterial color="#755134" transparent opacity={0.45} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function CornerPlant() {
+  return (
+    <group position={[4.65, 0, -4.35]}>
+      <mesh position={[0, 0.28, 0]} castShadow>
+        <cylinderGeometry args={[0.28, 0.22, 0.56, 20]} />
+        <meshStandardMaterial color="#c77d4e" roughness={0.76} />
+      </mesh>
+      {[-0.3, -0.1, 0.12, 0.3].map((x, index) => (
+        <group key={x} position={[x * 0.35, 0.58, 0]} rotation-z={x}>
+          <mesh position={[0, 0.35, 0]}>
+            <cylinderGeometry args={[0.018, 0.025, 0.7, 8]} />
+            <meshStandardMaterial color="#426d42" />
+          </mesh>
+          <mesh position={[x * 0.38, 0.66 + index * 0.04, 0]} rotation-z={x * 1.5} castShadow>
+            <sphereGeometry args={[0.22, 14, 9]} />
+            <meshStandardMaterial color={index % 2 ? "#5b8c51" : "#6a9b57"} roughness={0.78} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }
@@ -500,10 +779,24 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
         shadow-camera-right={9}
         shadow-camera-top={9}
         shadow-camera-bottom={-9}
+        shadow-normalBias={0.03}
+        shadow-bias={-0.00015}
       />
       <pointLight position={[0, 3.2, 0]} intensity={0.6} color="#fff0d2" />
 
       <Room />
+      <RoomDetails />
+      {/* Ground contact only: no long projections from wall-mounted tools or lights. */}
+      <ContactShadows
+        position={[0, 0.018, -0.4]}
+        scale={14}
+        opacity={0.23}
+        blur={2.8}
+        far={0.85}
+        resolution={512}
+        frames={1}
+        color="#493522"
+      />
       <Desk />
       <Monitor />
       <DeskProps />
@@ -512,6 +805,7 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <LawnMower />
       <JunkZone />
       <TreeCareWall />
+      <CornerPlant />
       <WallClock position={[-3.2, 2.6, -5.05]} />
       <DustMotes reducedMotion={reducedMotion} />
     </>

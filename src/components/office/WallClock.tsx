@@ -21,14 +21,14 @@ export function WallClock(props: { position: [number, number, number] }) {
   return (
     <group {...props}>
       {/* case */}
-      <mesh castShadow>
+      <mesh rotation-x={Math.PI / 2} castShadow>
         <cylinderGeometry args={[0.42, 0.42, 0.08, 40]} />
-        <meshStandardMaterial color="#25302b" roughness={0.6} />
+        <meshStandardMaterial color="#26322c" roughness={0.52} metalness={0.12} />
       </mesh>
       {/* face */}
       <mesh position={[0, 0, 0.05]} rotation-x={Math.PI / 2}>
         <cylinderGeometry args={[0.37, 0.37, 0.02, 40]} />
-        <meshStandardMaterial color="#f6efdf" roughness={0.9} />
+        <meshStandardMaterial color="#fbf7ec" roughness={0.78} />
       </mesh>
       {/* hour ticks */}
       {Array.from({ length: 12 }).map((_, i) => (
@@ -46,20 +46,20 @@ export function WallClock(props: { position: [number, number, number] }) {
         </mesh>
       ))}
       <group ref={hour} position={[0, 0, 0.08]}>
-        <mesh position={[0, 0.09, 0]}>
-          <boxGeometry args={[0.032, 0.19, 0.012]} />
+        <mesh position={[0, 0.085, 0]}>
+          <boxGeometry args={[0.036, 0.17, 0.012]} />
           <meshStandardMaterial color="#232b28" />
         </mesh>
       </group>
       <group ref={minute} position={[0, 0, 0.095]}>
-        <mesh position={[0, 0.13, 0]}>
-          <boxGeometry args={[0.022, 0.27, 0.012]} />
+        <mesh position={[0, 0.12, 0]}>
+          <boxGeometry args={[0.024, 0.24, 0.012]} />
           <meshStandardMaterial color="#232b28" />
         </mesh>
       </group>
       <group ref={second} position={[0, 0, 0.11]}>
-        <mesh position={[0, 0.12, 0]}>
-          <boxGeometry args={[0.01, 0.3, 0.008]} />
+        <mesh position={[0, 0.13, 0]}>
+          <boxGeometry args={[0.009, 0.26, 0.008]} />
           <meshStandardMaterial color="#8fd14f" emissive="#3c6b1f" />
         </mesh>
       </group>

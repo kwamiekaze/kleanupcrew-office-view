@@ -1,10 +1,6 @@
-export type ViewId =
-  | "welcome"
-  | "cleaning"
-  | "lawn"
-  | "junk"
-  | "tree"
-  | "quote";
+import { BRAND_SLOGAN } from "./brand.ts";
+
+export type ViewId = "welcome" | "cleaning" | "lawn" | "junk" | "tree" | "quote";
 
 export interface OfficeView {
   id: ViewId;
@@ -24,7 +20,7 @@ export const VIEWS: OfficeView[] = [
     id: "welcome",
     index: "01",
     label: "Welcome",
-    title: "Clean it. Clear it. Care for it.",
+    title: BRAND_SLOGAN,
     line: "KleanupCrew connects you with local, insured crews who clean it, clear it, maintain it and improve the property.",
     cta: "Make this property look good again",
     pos: [0, 3.1, 7.6],
@@ -91,10 +87,16 @@ export const SERVICE_OPTIONS = [
   "Lawn mowing & yard care",
   "Tree trimming or removal",
   "Make this property look good again",
+  "Other",
 ];
 
-export const TRUST_CHIPS = [
-  "Insured providers",
-  "Upfront estimates",
-  "Local crews",
-];
+export const SERVICE_FOR_VIEW: Record<ViewId, string> = {
+  welcome: SERVICE_OPTIONS[0]!,
+  cleaning: "Home or office cleaning",
+  lawn: "Lawn mowing & yard care",
+  junk: "Junk removal or cleanout",
+  tree: "Tree trimming or removal",
+  quote: "Make this property look good again",
+};
+
+export const TRUST_CHIPS = ["Insured providers", "Upfront estimates", "Local crews"];
