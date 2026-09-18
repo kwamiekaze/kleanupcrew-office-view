@@ -294,7 +294,7 @@ function JunkZone() {
       {/* boxes */}
       <mesh position={[0.5, 0.26, 0]} rotation-y={0.2} castShadow receiveShadow>
         <boxGeometry args={[0.66, 0.52, 0.6]} />
-        <meshStandardMaterial color="#c49a६6".replace("६", "6")} roughness={0.9} />
+        <meshStandardMaterial color="#c49a66" roughness={0.9} />
       </mesh>
       <mesh position={[0.56, 0.72, 0.06]} rotation-y={-0.32} castShadow>
         <boxGeometry args={[0.5, 0.4, 0.48]} />
