@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { Vector3 } from "three";
+import { PerspectiveCamera, Vector3 } from "three";
 import type { OfficeView } from "@/lib/kleanup-content";
 
 export interface RigInput {
@@ -52,7 +52,9 @@ export function CameraRig({
     // orbit never exposes the unmodeled exterior side of the walls.
     const orbitProgress = Math.min(1, Math.abs(i.dragX) / (Math.PI / 2));
     const safeOrbitDistance = dist > 5 ? dist + (4.35 - dist) * orbitProgress : dist;
-    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.4));
+    // A small dolly plus a wider field-of-view range makes pinch zoom feel
+    // immediate on phones without pushing the camera through the room walls.
+    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.1));
     const horizontalRadius = Math.cos(pitch) * radius;
     desiredPos.current.set(
       target.x + Math.sin(yaw) * horizontalRadius,
@@ -66,6 +68,11 @@ export function CameraRig({
     pos.current.lerp(desiredPos.current, k);
     look.current.lerp(desiredLook.current, k);
     camera.position.copy(pos.current);
+    if (camera instanceof PerspectiveCamera) {
+      const targetFov = Math.max(22, Math.min(70, 42 + i.zoom * 28));
+      camera.fov += (targetFov - camera.fov) * k;
+      camera.updateProjectionMatrix();
+    }
     camera.lookAt(look.current);
   });
 

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, LocateFixed, ZoomIn, ZoomOut } from "lucide-react";
 import type { RigInput } from "@/components/office/CameraRig";
 import { QuoteDrawer } from "@/components/kleanup/QuoteDrawer";
 import { useAmbientAudio } from "@/lib/use-ambient-audio";
@@ -57,6 +56,7 @@ function Home() {
 
   const input = useRef<RigInput>({ dragX: 0, dragY: 0, zoom: 0 });
   const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ distance: number; zoom: number } | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -72,11 +72,19 @@ function Home() {
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 2) {
+      const [first, second] = [...pointers.current.values()];
+      pinch.current = {
+        distance: Math.hypot(first!.x - second!.x, first!.y - second!.y),
+        zoom: input.current.zoom,
+      };
+    }
     e.currentTarget.setPointerCapture(e.pointerId);
   }, []);
 
   const endPointer = useCallback((e: React.PointerEvent) => {
     pointers.current.delete(e.pointerId);
+    pinch.current = null;
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
@@ -86,15 +94,22 @@ function Home() {
     const previous = pointers.current.get(e.pointerId);
     if (!previous) return;
 
-    const before = [...pointers.current.values()];
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const i = input.current;
 
-    if (pointers.current.size >= 2 && before.length >= 2) {
-      const after = [...pointers.current.values()];
-      const beforeDistance = Math.hypot(before[0]!.x - before[1]!.x, before[0]!.y - before[1]!.y);
-      const afterDistance = Math.hypot(after[0]!.x - after[1]!.x, after[0]!.y - after[1]!.y);
-      i.zoom = clamp(i.zoom - (afterDistance - beforeDistance) / 180, -1, 1);
+    if (pointers.current.size >= 2) {
+      const [first, second] = [...pointers.current.values()];
+      const distance = Math.hypot(first!.x - second!.x, first!.y - second!.y);
+      const start = pinch.current;
+      if (!start) {
+        pinch.current = { distance, zoom: i.zoom };
+        return;
+      }
+
+      // Measure from the start of the gesture so even a short phone pinch
+      // creates a clear, stable zoom without depending on event frequency.
+      const scale = distance / Math.max(start.distance, 1);
+      i.zoom = clamp(start.zoom - Math.log(scale) * 2.5, -1, 1);
       return;
     }
 
@@ -114,19 +129,6 @@ function Home() {
       return;
     }
     i.zoom = clamp(i.zoom + e.deltaY / 700, -1, 1);
-  }, []);
-
-  const adjustCamera = useCallback((action: "left" | "right" | "in" | "out" | "reset") => {
-    const i = input.current;
-    if (action === "left") i.dragX = wrapAngle(i.dragX + Math.PI / 3);
-    if (action === "right") i.dragX = wrapAngle(i.dragX - Math.PI / 3);
-    if (action === "in") i.zoom = clamp(i.zoom - 0.3, -1, 1);
-    if (action === "out") i.zoom = clamp(i.zoom + 0.3, -1, 1);
-    if (action === "reset") {
-      i.dragX = 0;
-      i.dragY = 0;
-      i.zoom = 0;
-    }
   }, []);
 
   const select = useCallback((id: ViewId) => {
@@ -153,53 +155,6 @@ function Home() {
           <OfficeCanvas view={view} input={input} reducedMotion={reducedMotion} />
         </Suspense>
       </div>
-
-      {/* Direct touch controls complement drag and pinch gestures on phones. */}
-      <nav
-        aria-label="3D view controls"
-        className="kc-camera-controls absolute left-1/2 top-24 z-20 flex -translate-x-1/2 gap-1.5 md:hidden"
-      >
-        <button
-          type="button"
-          className="kc-camera-btn kc-focus"
-          onClick={() => adjustCamera("left")}
-          aria-label="Rotate view left"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          type="button"
-          className="kc-camera-btn kc-focus"
-          onClick={() => adjustCamera("right")}
-          aria-label="Rotate view right"
-        >
-          <ChevronRight size={20} />
-        </button>
-        <button
-          type="button"
-          className="kc-camera-btn kc-focus"
-          onClick={() => adjustCamera("in")}
-          aria-label="Zoom in"
-        >
-          <ZoomIn size={18} />
-        </button>
-        <button
-          type="button"
-          className="kc-camera-btn kc-focus"
-          onClick={() => adjustCamera("out")}
-          aria-label="Zoom out"
-        >
-          <ZoomOut size={18} />
-        </button>
-        <button
-          type="button"
-          className="kc-camera-btn kc-focus"
-          onClick={() => adjustCamera("reset")}
-          aria-label="Reset 3D view"
-        >
-          <LocateFixed size={18} />
-        </button>
-      </nav>
 
       {/* loading screen */}
       <div

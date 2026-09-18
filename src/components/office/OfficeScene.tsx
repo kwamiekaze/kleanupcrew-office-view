@@ -290,17 +290,13 @@ function Shelves() {
           <meshStandardMaterial color={i % 2 ? CREAM : "#cfe3b6"} />
         </mesh>
       ))}
-      {/* bucket + mop */}
+      {/* cleaning bucket */}
       <group position={[-0.62, 0.78, 0]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.17, 0.13, 0.22, 18]} />
           <meshStandardMaterial color={LIME} roughness={0.5} />
         </mesh>
       </group>
-      <mesh position={[0.92, 2.2, 0.12]} rotation-z={0.12} castShadow>
-        <cylinderGeometry args={[0.025, 0.025, 1.3, 10]} />
-        <meshStandardMaterial color={WOOD} />
-      </mesh>
     </group>
   );
 }
