@@ -661,61 +661,55 @@ function SunnyWindowView() {
         </mesh>
       ))}
 
-      {/* neighboring home and garage */}
-      <group position={[0.18, 1.55, -1.52]}>
-        <mesh>
-          <boxGeometry args={[1.38, 0.92, 0.08]} />
-          <meshBasicMaterial color="#f4ead6" />
-        </mesh>
-        <mesh position={[0, 0.65, 0.01]}>
-          <circleGeometry args={[0.96, 3, Math.PI / 2]} />
-          <meshBasicMaterial color="#42535c" />
-        </mesh>
-        <mesh position={[0.04, -0.18, 0.055]}>
-          <boxGeometry args={[0.28, 0.56, 0.035]} />
-          <meshBasicMaterial color="#7b9b8b" />
-        </mesh>
-        {[-0.42, 0.43].map((x) => (
-          <group key={x} position={[x, 0.12, 0.055]}>
-            <mesh>
-              <boxGeometry args={[0.3, 0.3, 0.035]} />
-              <meshBasicMaterial color="#d6f1f7" />
-            </mesh>
-            <mesh position={[0, 0, 0.022]}>
-              <boxGeometry args={[0.025, 0.3, 0.02]} />
-              <meshBasicMaterial color="#f9f4e7" />
-            </mesh>
-            <mesh position={[0, 0, 0.022]}>
-              <boxGeometry args={[0.3, 0.025, 0.02]} />
-              <meshBasicMaterial color="#f9f4e7" />
-            </mesh>
-          </group>
-        ))}
-        <mesh position={[1.02, -0.13, 0]}>
-          <boxGeometry args={[0.68, 0.66, 0.07]} />
-          <meshBasicMaterial color="#ebe3d3" />
-        </mesh>
-        <mesh position={[1.02, 0.28, 0.01]} rotation-z={Math.PI / 4}>
-          <boxGeometry args={[0.52, 0.52, 0.06]} />
-          <meshBasicMaterial color="#465660" />
-        </mesh>
-        <mesh position={[1.02, -0.17, 0.045]}>
-          <boxGeometry args={[0.5, 0.43, 0.025]} />
-          <meshBasicMaterial color="#d3d9d4" />
-        </mesh>
-        {[0.88, 1.02, 1.16].map((y) => (
-          <mesh key={y} position={[1.02, y - 1.25, 0.062]}>
-            <boxGeometry args={[0.46, 0.018, 0.012]} />
-            <meshBasicMaterial color="#a7b0ab" />
+      {/* natural midground grove with no neighboring buildings */}
+      {(
+        [
+          { x: -1.18, y: 1.48, scale: 0.72, color: "#4b8d50" },
+          { x: -0.72, y: 1.57, scale: 0.86, color: "#397a45" },
+          { x: -0.18, y: 1.52, scale: 0.76, color: "#58994f" },
+          { x: 0.38, y: 1.58, scale: 0.9, color: "#3d8048" },
+          { x: 0.95, y: 1.51, scale: 0.78, color: "#55954e" },
+        ] as const
+      ).map(({ x, y, scale, color }) => (
+        <group key={x} position={[x, y, -1.55]} scale={scale}>
+          <mesh position={[0, -0.43, 0]}>
+            <boxGeometry args={[0.09, 0.7, 0.04]} />
+            <meshBasicMaterial color="#77523a" />
           </mesh>
-        ))}
-      </group>
+          <mesh scale={[1.05, 0.92, 1]}>
+            <circleGeometry args={[0.44, 20]} />
+            <meshBasicMaterial color={color} />
+          </mesh>
+          <mesh position={[-0.24, -0.08, 0.01]}>
+            <circleGeometry args={[0.29, 18]} />
+            <meshBasicMaterial color="#63a658" />
+          </mesh>
+          <mesh position={[0.25, -0.07, 0.012]}>
+            <circleGeometry args={[0.31, 18]} />
+            <meshBasicMaterial color="#4f934e" />
+          </mesh>
+        </group>
+      ))}
 
-      {/* sunlit path, foreground trees and flower beds */}
-      <mesh position={[0.22, 0.68, -1.48]} rotation-z={-0.04}>
-        <planeGeometry args={[0.38, 0.75]} />
-        <meshBasicMaterial color="#e8d3a4" />
-      </mesh>
+      {/* clipped lawn stripes, garden stones, foreground trees and flower beds */}
+      {[0.77, 0.9, 1.03].map((y) => (
+        <mesh key={y} position={[0, y, -1.5]}>
+          <planeGeometry args={[3.45, 0.025]} />
+          <meshBasicMaterial color="#a9d582" transparent opacity={0.55} />
+        </mesh>
+      ))}
+      {(
+        [
+          { x: 0.09, y: 0.58, radius: 0.105 },
+          { x: 0.04, y: 0.71, radius: 0.09 },
+          { x: 0.12, y: 0.82, radius: 0.075 },
+        ] as const
+      ).map(({ x, y, radius }) => (
+        <mesh key={y} position={[x, y, -1.47]} scale={[1.55, 0.56, 1]}>
+          <circleGeometry args={[radius, 16]} />
+          <meshBasicMaterial color="#d9d0b7" />
+        </mesh>
+      ))}
       {[-1.5, 1.55].map((x, index) => (
         <group key={x} position={[x, 1.42, -1.46]}>
           <mesh position={[0, -0.45, 0]}>
