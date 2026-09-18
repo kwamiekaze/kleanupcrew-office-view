@@ -14,6 +14,66 @@ const FOREST = "#274d34";
 const LIME = "#8fd14f";
 const CHARCOAL = "#2b302e";
 
+function SprayBottle({
+  position,
+  color,
+  scale = 1,
+}: {
+  position: [number, number, number];
+  color: string;
+  scale?: number;
+}) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, 0.13, 0]} castShadow>
+        <cylinderGeometry args={[0.066, 0.086, 0.26, 18]} />
+        <meshStandardMaterial color={color} roughness={0.36} />
+      </mesh>
+      <mesh position={[0, 0.285, 0]} castShadow>
+        <cylinderGeometry args={[0.032, 0.045, 0.07, 14]} />
+        <meshStandardMaterial color={CREAM} roughness={0.4} />
+      </mesh>
+      <mesh position={[0.035, 0.34, 0]} rotation-z={-0.28} castShadow>
+        <boxGeometry args={[0.13, 0.045, 0.055]} />
+        <meshStandardMaterial color={CREAM} roughness={0.42} />
+      </mesh>
+      <mesh position={[-0.006, 0.13, 0.087]}>
+        <planeGeometry args={[0.095, 0.1]} />
+        <meshStandardMaterial color="#f4f0e4" roughness={0.72} />
+      </mesh>
+      <mesh position={[-0.006, 0.145, 0.089]}>
+        <circleGeometry args={[0.018, 12]} />
+        <meshBasicMaterial color={LIME} />
+      </mesh>
+    </group>
+  );
+}
+
+function DetailedWheel({
+  position,
+  radius = 0.16,
+}: {
+  position: [number, number, number];
+  radius?: number;
+}) {
+  return (
+    <group position={position} rotation-y={Math.PI / 2}>
+      <mesh castShadow>
+        <torusGeometry args={[radius * 0.72, radius * 0.28, 10, 22]} />
+        <meshStandardMaterial color="#202421" roughness={0.92} />
+      </mesh>
+      <mesh rotation-x={Math.PI / 2}>
+        <cylinderGeometry args={[radius * 0.44, radius * 0.44, 0.075, 18]} />
+        <meshStandardMaterial color={LIME} roughness={0.42} />
+      </mesh>
+      <mesh position={[0, 0, 0.045]}>
+        <circleGeometry args={[radius * 0.17, 14]} />
+        <meshStandardMaterial color={CHARCOAL} metalness={0.42} />
+      </mesh>
+    </group>
+  );
+}
+
 function Desk() {
   return (
     <group position={[0, 0, -2.4]}>
@@ -250,23 +310,19 @@ function Chair({ reducedMotion }: { reducedMotion: boolean }) {
 function CleaningEquipment() {
   return (
     <group>
-      {/* Freestanding broom with a shaped head and visible bristles. */}
+      {/* Freestanding broom with a curved collar and individual bristle bundles. */}
       <group position={[1.48, 0, 0.22]} rotation-z={-0.06}>
         <mesh position={[0, 0.82, 0]} castShadow>
-          <cylinderGeometry args={[0.022, 0.025, 1.42, 12]} />
+          <cylinderGeometry args={[0.022, 0.025, 1.42, 14]} />
           <meshStandardMaterial color="#b67a3d" roughness={0.72} />
         </mesh>
-        <mesh position={[0, 0.15, 0]} castShadow>
-          <boxGeometry args={[0.38, 0.08, 0.14]} />
+        <mesh position={[0, 0.16, 0]} scale={[1.5, 0.42, 0.62]} castShadow>
+          <sphereGeometry args={[0.16, 20, 12]} />
           <meshStandardMaterial color={WOOD_DARK} roughness={0.68} />
         </mesh>
-        <mesh position={[0, 0.065, 0]} castShadow>
-          <boxGeometry args={[0.34, 0.13, 0.11]} />
-          <meshStandardMaterial color="#d7b46b" roughness={0.95} />
-        </mesh>
-        {[-0.13, -0.065, 0, 0.065, 0.13].map((x) => (
-          <mesh key={x} position={[x, 0.035, 0.059]}>
-            <boxGeometry args={[0.012, 0.12, 0.012]} />
+        {[-0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15].map((x) => (
+          <mesh key={x} position={[x, 0.06, 0.04]} rotation-z={x * 0.6}>
+            <cylinderGeometry args={[0.008, 0.011, 0.18, 7]} />
             <meshStandardMaterial color="#9f7d43" roughness={1} />
           </mesh>
         ))}
@@ -278,12 +334,12 @@ function CleaningEquipment() {
           <cylinderGeometry args={[0.018, 0.022, 0.96, 10]} />
           <meshStandardMaterial color="#47534d" roughness={0.7} />
         </mesh>
-        <mesh position={[0, 1.07, -0.03]} castShadow>
-          <boxGeometry args={[0.12, 0.07, 0.06]} />
+        <mesh position={[0, 1.07, -0.03]} rotation-z={Math.PI / 2} castShadow>
+          <capsuleGeometry args={[0.035, 0.08, 5, 10]} />
           <meshStandardMaterial color={LIME} roughness={0.55} />
         </mesh>
-        <mesh position={[0, 0.09, 0.02]} rotation-x={-0.1} castShadow>
-          <boxGeometry args={[0.34, 0.08, 0.3]} />
+        <mesh position={[0, 0.105, 0.02]} scale={[1.35, 0.4, 0.92]} castShadow>
+          <sphereGeometry args={[0.15, 20, 12]} />
           <meshStandardMaterial color={LIME} roughness={0.58} />
         </mesh>
         <mesh position={[0, 0.155, -0.11]} castShadow>
@@ -292,26 +348,30 @@ function CleaningEquipment() {
         </mesh>
       </group>
 
-      {/* Compact upright vacuum with base, wheels, body and handle. */}
+      {/* Compact upright vacuum with rounded motor housing, hose, wheels and handle. */}
       <group position={[-1.48, 0, 0.28]}>
-        <mesh position={[0, 0.13, 0.02]} castShadow receiveShadow>
-          <boxGeometry args={[0.5, 0.2, 0.4]} />
+        <mesh position={[0, 0.13, 0.02]} scale={[1.25, 0.45, 0.95]} castShadow receiveShadow>
+          <sphereGeometry args={[0.22, 22, 14]} />
           <meshStandardMaterial color={FOREST} roughness={0.48} />
         </mesh>
-        <mesh position={[0, 0.47, 0]} castShadow>
-          <cylinderGeometry args={[0.16, 0.23, 0.56, 18]} />
+        <mesh position={[0, 0.47, 0]} scale={[0.92, 1.35, 0.74]} castShadow>
+          <sphereGeometry args={[0.22, 22, 16]} />
           <meshStandardMaterial color="#315f43" roughness={0.46} />
         </mesh>
         <mesh position={[0, 0.5, 0.155]} castShadow>
-          <boxGeometry args={[0.16, 0.2, 0.025]} />
+          <circleGeometry args={[0.085, 18]} />
           <meshStandardMaterial color={LIME} roughness={0.42} />
+        </mesh>
+        <mesh position={[0.17, 0.57, -0.02]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.17, 0.025, 9, 24, Math.PI * 1.45]} />
+          <meshStandardMaterial color="#202723" roughness={0.72} />
         </mesh>
         <mesh position={[0, 1.02, 0]} castShadow>
           <cylinderGeometry args={[0.025, 0.03, 0.7, 12]} />
           <meshStandardMaterial color={CHARCOAL} roughness={0.5} />
         </mesh>
-        <mesh position={[0, 1.37, 0.02]} castShadow>
-          <boxGeometry args={[0.3, 0.08, 0.08]} />
+        <mesh position={[0, 1.37, 0.02]} rotation-z={Math.PI / 2} castShadow>
+          <capsuleGeometry args={[0.034, 0.24, 6, 12]} />
           <meshStandardMaterial color={CHARCOAL} roughness={0.5} />
         </mesh>
         {[-0.2, 0.2].map((x) => (
@@ -326,16 +386,21 @@ function CleaningEquipment() {
 }
 
 function Shelves() {
-  const bottles: Array<[number, number, string]> = [
-    [-0.3, 1.34, LIME],
-    [-0.05, 1.34, "#5fa8d3"],
-    [0.22, 1.34, CREAM],
-    [-0.2, 2.02, "#e0a34a"],
-    [0.1, 2.02, LIME],
+  const bottles: Array<[number, number, string, number]> = [
+    [-0.44, 1.38, FOREST, 0.92],
+    [-0.15, 1.38, "#62a8c8", 0.86],
+    [0.16, 1.38, CREAM, 0.9],
+    [-0.42, 2.04, "#e0a34a", 0.95],
+    [-0.09, 2.04, LIME, 0.9],
+    [0.24, 2.04, FOREST, 0.88],
   ];
   return (
     <group position={[5.45, 0, -1.0]} rotation-y={-Math.PI / 2}>
-      {/* uprights */}
+      {/* substantial wood shelving with a warm recessed back */}
+      <mesh position={[0, 1.6, -0.27]} receiveShadow>
+        <boxGeometry args={[2.05, 2.45, 0.04]} />
+        <meshStandardMaterial color="#6b4528" roughness={0.88} />
+      </mesh>
       {[-1.0, 1.0].map((x) => (
         <mesh key={x} position={[x, 1.3, 0]} castShadow>
           <boxGeometry args={[0.08, 2.6, 0.5]} />
@@ -348,33 +413,87 @@ function Shelves() {
           <meshStandardMaterial color={WOOD} roughness={0.6} />
         </mesh>
       ))}
-      {/* supply bottles */}
-      {bottles.map(([x, y, c], i) => (
-        <group key={i} position={[x, y + 0.14, 0]}>
-          <mesh castShadow>
-            <cylinderGeometry args={[0.07, 0.08, 0.26, 14]} />
-            <meshStandardMaterial color={c} roughness={0.35} />
-          </mesh>
-          <mesh position={[0, 0.17, 0]}>
-            <cylinderGeometry args={[0.03, 0.03, 0.09, 10]} />
-            <meshStandardMaterial color={CHARCOAL} />
-          </mesh>
-        </group>
+      {/* branded-color spray bottles with no fragile external text/font dependency */}
+      {bottles.map(([x, y, color, scale]) => (
+        <SprayBottle key={`${x}-${y}`} position={[x, y, 0.06]} color={color} scale={scale} />
       ))}
-      {/* folded towels */}
+
+      {/* detergent jug with integrated handle */}
+      <group position={[0.58, 2.14, 0.03]}>
+        <mesh scale={[0.9, 1.1, 0.72]} castShadow>
+          <sphereGeometry args={[0.18, 20, 16]} />
+          <meshStandardMaterial color={CREAM} roughness={0.4} />
+        </mesh>
+        <mesh position={[0.1, 0.1, 0]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.07, 0.022, 9, 20]} />
+          <meshStandardMaterial color={FOREST} roughness={0.45} />
+        </mesh>
+        <mesh position={[-0.04, 0, 0.14]}>
+          <planeGeometry args={[0.13, 0.11]} />
+          <meshBasicMaterial color={FOREST} />
+        </mesh>
+      </group>
+
+      {/* folded towels with visible rolled edges */}
       {[0, 1, 2].map((i) => (
-        <mesh key={i} position={[0.6, 0.76 + i * 0.09, 0]} castShadow>
-          <boxGeometry args={[0.42, 0.08, 0.32]} />
+        <mesh
+          key={i}
+          position={[0.55, 0.77 + i * 0.1, 0.03]}
+          rotation-z={Math.PI / 2}
+          scale={[0.78, 1.45, 0.76]}
+          castShadow
+        >
+          <capsuleGeometry args={[0.075, 0.25, 6, 12]} />
           <meshStandardMaterial color={i % 2 ? CREAM : "#cfe3b6"} />
         </mesh>
       ))}
-      {/* cleaning bucket */}
+
+      {/* cleaning bucket, handle and stocked caddy */}
       <group position={[-0.62, 0.78, 0]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.17, 0.13, 0.22, 18]} />
-          <meshStandardMaterial color={LIME} roughness={0.5} />
+          <meshStandardMaterial color={FOREST} roughness={0.5} />
+        </mesh>
+        <mesh position={[0, 0.1, 0]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.19, 0.014, 8, 28, Math.PI]} />
+          <meshStandardMaterial color={CHARCOAL} metalness={0.35} />
+        </mesh>
+        <mesh position={[0, 0, 0.135]}>
+          <planeGeometry args={[0.13, 0.08]} />
+          <meshBasicMaterial color={LIME} />
         </mesh>
       </group>
+      <group position={[-0.05, 0.79, 0.04]}>
+        <mesh scale={[1.45, 0.62, 0.9]} castShadow>
+          <sphereGeometry args={[0.16, 18, 12]} />
+          <meshStandardMaterial color={CREAM} roughness={0.72} />
+        </mesh>
+        {[-0.06, 0.07].map((x, index) => (
+          <mesh key={x} position={[x, 0.14, 0]}>
+            <capsuleGeometry args={[0.025, 0.15, 5, 10]} />
+            <meshStandardMaterial color={index ? FOREST : LIME} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* paper rolls and stacked sponges */}
+      {[0, 1].map((index) => (
+        <mesh
+          key={index}
+          position={[0.75, 1.4 + index * 0.18, 0.02]}
+          rotation-x={Math.PI / 2}
+          castShadow
+        >
+          <cylinderGeometry args={[0.085, 0.085, 0.16, 18]} />
+          <meshStandardMaterial color="#f5f1e7" roughness={0.9} />
+        </mesh>
+      ))}
+      {[0, 1, 2].map((index) => (
+        <mesh key={index} position={[0.48, 1.36 + index * 0.075, 0.08]} castShadow>
+          <boxGeometry args={[0.22, 0.055, 0.12]} />
+          <meshStandardMaterial color={index % 2 ? "#f0c954" : LIME} roughness={0.82} />
+        </mesh>
+      ))}
       <CleaningEquipment />
     </group>
   );
@@ -382,45 +501,63 @@ function Shelves() {
 
 function LawnMower() {
   return (
-    <group position={[-3.9, 0, 0.4]} rotation-y={0.5}>
-      {/* cordless leaf blower */}
-      <group position={[-1.05, 0.28, -0.08]} rotation-z={Math.PI / 2}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.18, 0.22, 0.48, 18]} />
-          <meshStandardMaterial color={LIME} roughness={0.48} />
+    <group position={[-4.38, 0, -3.72]} rotation-y={0.12}>
+      {/* Back-corner wall rack keeps the lawn equipment grouped against the wall. */}
+      <mesh position={[0, 1.55, -0.82]} castShadow receiveShadow>
+        <boxGeometry args={[2.45, 1.55, 0.09]} />
+        <meshStandardMaterial color="#244832" roughness={0.82} />
+      </mesh>
+      {[-0.52, -0.18, 0.16, 0.5].map((y) => (
+        <mesh key={y} position={[0, 1.55 + y, -0.765]}>
+          <boxGeometry args={[2.3, 0.035, 0.025]} />
+          <meshStandardMaterial color="#6d8d70" roughness={0.68} />
         </mesh>
-        <mesh position={[0, 0.42, 0]} castShadow>
-          <coneGeometry args={[0.13, 0.58, 18]} />
+      ))}
+
+      {/* cordless leaf blower with a rounded motor shell and tapered barrel */}
+      <group position={[-0.38, 1.82, -0.64]} rotation-z={Math.PI / 2}>
+        <mesh scale={[1.05, 0.9, 0.84]} castShadow>
+          <sphereGeometry args={[0.22, 22, 16]} />
+          <meshStandardMaterial color={LIME} roughness={0.42} />
+        </mesh>
+        <mesh position={[0, 0.43, 0]} castShadow>
+          <coneGeometry args={[0.14, 0.62, 20]} />
           <meshStandardMaterial color="#2f3a34" roughness={0.62} />
         </mesh>
-        <mesh position={[0, -0.06, 0.19]} rotation-x={Math.PI / 2}>
+        <mesh position={[0, -0.08, 0.2]} rotation-x={Math.PI / 2}>
           <torusGeometry args={[0.13, 0.03, 10, 22, Math.PI * 1.45]} />
           <meshStandardMaterial color={CHARCOAL} roughness={0.65} />
         </mesh>
+        <mesh position={[0, 0, 0.19]} rotation-x={Math.PI / 2}>
+          <circleGeometry args={[0.085, 18]} />
+          <meshStandardMaterial color={FOREST} />
+        </mesh>
       </group>
 
-      <mesh position={[0, 0.3, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.86, 0.3, 0.66]} />
+      {/* rounded mower deck and sculpted electric motor cowling */}
+      <mesh position={[0, 0.28, 0]} scale={[1.28, 0.42, 1]} castShadow receiveShadow>
+        <sphereGeometry args={[0.42, 28, 18]} />
         <meshStandardMaterial color={FOREST} roughness={0.5} />
       </mesh>
-      <mesh position={[0, 0.54, -0.04]} castShadow>
-        <boxGeometry args={[0.36, 0.22, 0.3]} />
-        <meshStandardMaterial color={CHARCOAL} />
+      <mesh position={[0, 0.52, -0.03]} scale={[1.1, 0.72, 0.92]} castShadow>
+        <sphereGeometry args={[0.26, 24, 16]} />
+        <meshStandardMaterial color={LIME} roughness={0.38} />
+      </mesh>
+      <mesh position={[0, 0.53, 0.205]}>
+        <circleGeometry args={[0.105, 18]} />
+        <meshStandardMaterial color={FOREST} roughness={0.42} />
       </mesh>
       {(
         [
-          [-0.38, 0.28],
-          [0.38, 0.28],
-          [-0.38, -0.28],
-          [0.38, -0.28],
+          [-0.43, 0.29],
+          [0.43, 0.29],
+          [-0.43, -0.29],
+          [0.43, -0.29],
         ] as Array<[number, number]>
-      ).map(([x, z], i) => (
-        <mesh key={i} position={[x, 0.13, z]} rotation-z={Math.PI / 2} castShadow>
-          <cylinderGeometry args={[0.13, 0.13, 0.1, 16]} />
-          <meshStandardMaterial color="#20241f" roughness={0.9} />
-        </mesh>
+      ).map(([x, z]) => (
+        <DetailedWheel key={`${x}-${z}`} position={[x, 0.16, z]} radius={0.17} />
       ))}
-      {/* handle */}
+      {/* twin-tube folding handle with padded cross grip */}
       {[-0.3, 0.3].map((x) => (
         <mesh key={x} position={[x, 0.64, 0.42]} rotation-x={0.75} castShadow>
           <cylinderGeometry args={[0.025, 0.025, 1.0, 10]} />
@@ -428,23 +565,23 @@ function LawnMower() {
         </mesh>
       ))}
       <mesh position={[0, 0.96, 0.72]} rotation-z={Math.PI / 2}>
-        <cylinderGeometry args={[0.028, 0.028, 0.62, 10]} />
-        <meshStandardMaterial color={LIME} />
+        <capsuleGeometry args={[0.032, 0.56, 6, 12]} />
+        <meshStandardMaterial color={CHARCOAL} />
       </mesh>
-      {/* grass bag hint */}
+      {/* soft grass catcher */}
       <mesh position={[0, 0.38, -0.5]} castShadow>
-        <boxGeometry args={[0.5, 0.34, 0.26]} />
+        <sphereGeometry args={[0.28, 18, 12]} />
         <meshStandardMaterial color="#6d7a52" roughness={0.95} />
       </mesh>
 
       {/* string trimmer with guard, cutting head and auxiliary handle */}
-      <group position={[1.02, 0, 0.05]} rotation-z={-0.3}>
+      <group position={[-1.02, 0, -0.26]} rotation-z={0.12}>
         <mesh position={[0, 0.76, 0]} castShadow>
           <cylinderGeometry args={[0.022, 0.027, 1.38, 12]} />
           <meshStandardMaterial color="#aeb8b2" metalness={0.55} roughness={0.34} />
         </mesh>
         <mesh position={[0, 1.47, 0]} castShadow>
-          <boxGeometry args={[0.22, 0.32, 0.18]} />
+          <capsuleGeometry args={[0.09, 0.2, 7, 14]} />
           <meshStandardMaterial color={LIME} roughness={0.44} />
         </mesh>
         <mesh position={[0, 1.63, 0]} castShadow>
@@ -464,6 +601,34 @@ function LawnMower() {
           <meshStandardMaterial color="#4f5b54" roughness={0.72} />
         </mesh>
       </group>
+
+      {/* rake and spade complete the lawn-care corner. */}
+      <group position={[0.88, 0, -0.7]} rotation-z={-0.04}>
+        <mesh position={[0, 0.78, 0]}>
+          <cylinderGeometry args={[0.02, 0.025, 1.45, 12]} />
+          <meshStandardMaterial color="#c39154" roughness={0.78} />
+        </mesh>
+        {[-0.22, -0.15, -0.08, 0, 0.08, 0.15, 0.22].map((x) => (
+          <mesh key={x} position={[x, 1.47, 0]} rotation-z={-x * 0.55}>
+            <cylinderGeometry args={[0.009, 0.009, 0.38, 7]} />
+            <meshStandardMaterial color={FOREST} />
+          </mesh>
+        ))}
+      </group>
+      <group position={[1.12, 0, -0.64]}>
+        <mesh position={[0, 0.8, 0]}>
+          <cylinderGeometry args={[0.022, 0.027, 1.35, 12]} />
+          <meshStandardMaterial color="#c39154" roughness={0.78} />
+        </mesh>
+        <mesh position={[0, 0.13, 0]} scale={[0.7, 1, 0.25]}>
+          <sphereGeometry args={[0.2, 18, 12]} />
+          <meshStandardMaterial color={CHARCOAL} roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 1.5, 0]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.11, 0.024, 8, 20, Math.PI]} />
+          <meshStandardMaterial color={FOREST} />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -471,41 +636,110 @@ function LawnMower() {
 function JunkZone() {
   return (
     <group position={[3.4, 0, 2.2]} rotation-y={-0.35}>
-      {/* dolly */}
+      {/* tubular appliance dolly with cross braces, grip, toe plate and detailed wheels */}
       <group position={[-0.7, 0, 0]} rotation-y={0.4}>
-        <mesh position={[0, 0.75, 0]} rotation-x={-0.12} castShadow>
-          <boxGeometry args={[0.5, 1.5, 0.06]} />
-          <meshStandardMaterial color="#b3392f" roughness={0.5} />
+        {[-0.22, 0.22].map((x) => (
+          <mesh key={x} position={[x, 0.78, 0]} rotation-z={x * -0.08} castShadow>
+            <cylinderGeometry args={[0.035, 0.035, 1.42, 12]} />
+            <meshStandardMaterial color="#c83b30" metalness={0.32} roughness={0.4} />
+          </mesh>
+        ))}
+        {[0.48, 0.83, 1.14].map((y) => (
+          <mesh key={y} position={[0, y, 0]} rotation-z={Math.PI / 2} castShadow>
+            <cylinderGeometry args={[0.026, 0.026, 0.46, 10]} />
+            <meshStandardMaterial color="#a92f28" metalness={0.28} roughness={0.45} />
+          </mesh>
+        ))}
+        <mesh position={[0, 1.49, 0]} rotation-z={Math.PI / 2} castShadow>
+          <capsuleGeometry args={[0.034, 0.38, 6, 12]} />
+          <meshStandardMaterial color={CHARCOAL} roughness={0.64} />
         </mesh>
         <mesh position={[0, 0.06, 0.16]} castShadow>
-          <boxGeometry args={[0.52, 0.06, 0.34]} />
+          <boxGeometry args={[0.54, 0.055, 0.4]} />
           <meshStandardMaterial color="#8f2f27" />
         </mesh>
         {[-0.3, 0.3].map((x) => (
-          <mesh key={x} position={[x, 0.16, -0.1]} rotation-z={Math.PI / 2} castShadow>
-            <cylinderGeometry args={[0.16, 0.16, 0.07, 16]} />
-            <meshStandardMaterial color="#1f2320" />
-          </mesh>
+          <DetailedWheel key={x} position={[x, 0.18, -0.08]} radius={0.17} />
         ))}
       </group>
-      {/* boxes */}
+
+      {/* taped cartons with seams and branded green handling marks */}
       <mesh position={[0.5, 0.26, 0]} rotation-y={0.2} castShadow receiveShadow>
         <boxGeometry args={[0.66, 0.52, 0.6]} />
         <meshStandardMaterial color="#c49a66" roughness={0.9} />
+      </mesh>
+      <mesh position={[0.5, 0.535, 0]} rotation-y={0.2}>
+        <boxGeometry args={[0.1, 0.018, 0.58]} />
+        <meshStandardMaterial color="#e0c394" roughness={0.9} />
+      </mesh>
+      <mesh position={[0.5, 0.27, 0.305]} rotation-y={0.2}>
+        <planeGeometry args={[0.2, 0.15]} />
+        <meshBasicMaterial color={FOREST} />
       </mesh>
       <mesh position={[0.56, 0.72, 0.06]} rotation-y={-0.32} castShadow>
         <boxGeometry args={[0.5, 0.4, 0.48]} />
         <meshStandardMaterial color="#b98f5e" roughness={0.9} />
       </mesh>
+      <mesh position={[0.56, 0.925, 0.06]} rotation-y={-0.32}>
+        <boxGeometry args={[0.08, 0.018, 0.46]} />
+        <meshStandardMaterial color="#dec397" roughness={0.9} />
+      </mesh>
       <mesh position={[1.15, 0.2, 0.3]} rotation-y={0.8} castShadow>
         <boxGeometry args={[0.44, 0.4, 0.42]} />
         <meshStandardMaterial color="#cfa878" roughness={0.9} />
       </mesh>
-      {/* bagged debris */}
-      <mesh position={[1.25, 0.28, -0.42]} castShadow>
-        <sphereGeometry args={[0.28, 16, 12]} />
-        <meshStandardMaterial color="#3a3f3c" roughness={0.95} />
-      </mesh>
+
+      {/* cinched debris bags with gathered tops */}
+      {(
+        [
+          [1.22, 0.3, -0.44, 0.3],
+          [0.78, 0.26, -0.58, 0.25],
+        ] as Array<[number, number, number, number]>
+      ).map(([x, y, z, scale]) => (
+        <group key={x} position={[x, y, z]}>
+          <mesh scale={[1, 1.25, 0.84]} castShadow>
+            <sphereGeometry args={[scale, 20, 14]} />
+            <meshStandardMaterial color="#303633" roughness={0.82} />
+          </mesh>
+          <mesh position={[0, scale * 1.17, 0]} rotation-z={Math.PI / 4}>
+            <coneGeometry args={[scale * 0.16, scale * 0.28, 8]} />
+            <meshStandardMaterial color="#202522" roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* wheeled green cleanup bin and flattened cardboard */}
+      <group position={[1.65, 0, -0.52]} rotation-y={-0.1}>
+        <mesh position={[0, 0.48, 0]} castShadow>
+          <boxGeometry args={[0.58, 0.82, 0.52]} />
+          <meshStandardMaterial color={FOREST} roughness={0.56} />
+        </mesh>
+        <mesh position={[0, 0.92, -0.02]} rotation-x={-0.08} castShadow>
+          <boxGeometry args={[0.66, 0.09, 0.58]} />
+          <meshStandardMaterial color="#315f43" roughness={0.52} />
+        </mesh>
+        <mesh position={[0, 0.52, 0.265]}>
+          <circleGeometry args={[0.1, 18]} />
+          <meshBasicMaterial color={LIME} />
+        </mesh>
+        {[-0.22, 0.22].map((x) => (
+          <mesh key={x} position={[x, 0.09, -0.24]} rotation-z={Math.PI / 2}>
+            <cylinderGeometry args={[0.085, 0.085, 0.08, 16]} />
+            <meshStandardMaterial color="#202421" roughness={0.9} />
+          </mesh>
+        ))}
+      </group>
+      {[0, 1, 2].map((index) => (
+        <mesh
+          key={index}
+          position={[1.95 + index * 0.045, 0.36, 0.35]}
+          rotation-z={-0.08}
+          castShadow
+        >
+          <boxGeometry args={[0.035, 0.66, 0.44]} />
+          <meshStandardMaterial color="#ba8d59" roughness={0.94} />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -527,8 +761,8 @@ function TreeCareWall() {
 
       {/* full-size chainsaw with visible bar, chain and wrap handle */}
       <group position={[-0.15, 1.88, 0.19]} rotation-z={-0.05}>
-        <mesh castShadow>
-          <boxGeometry args={[0.65, 0.38, 0.25]} />
+        <mesh scale={[1.45, 0.85, 0.72]} castShadow>
+          <sphereGeometry args={[0.25, 24, 16]} />
           <meshStandardMaterial color="#e76b24" roughness={0.38} />
         </mesh>
         <mesh position={[-0.16, 0.01, 0.135]}>
@@ -539,8 +773,8 @@ function TreeCareWall() {
           <torusGeometry args={[0.24, 0.035, 8, 22, Math.PI * 1.45]} />
           <meshStandardMaterial color={CHARCOAL} roughness={0.62} />
         </mesh>
-        <mesh position={[0.72, -0.015, 0]} castShadow>
-          <boxGeometry args={[0.82, 0.13, 0.07]} />
+        <mesh position={[0.72, -0.015, 0]} rotation-z={Math.PI / 2} castShadow>
+          <capsuleGeometry args={[0.06, 0.72, 7, 18]} />
           <meshStandardMaterial color="#bcc3be" metalness={0.72} roughness={0.3} />
         </mesh>
         {Array.from({ length: 10 }, (_, index) => (
@@ -549,24 +783,28 @@ function TreeCareWall() {
             <meshStandardMaterial color="#343b37" metalness={0.65} />
           </mesh>
         ))}
-        <mesh position={[0.68, -0.015, 0.048]}>
-          <boxGeometry args={[0.88, 0.035, 0.025]} />
+        <mesh position={[0.68, -0.015, 0.048]} rotation-z={Math.PI / 2}>
+          <capsuleGeometry args={[0.074, 0.74, 7, 18]} />
           <meshStandardMaterial color="#3b433e" metalness={0.7} />
+        </mesh>
+        <mesh position={[0.68, -0.015, 0.052]} rotation-z={Math.PI / 2}>
+          <capsuleGeometry args={[0.052, 0.72, 7, 18]} />
+          <meshStandardMaterial color="#c8cfcb" metalness={0.72} roughness={0.26} />
         </mesh>
       </group>
 
       {/* compact top-handle pruning saw */}
       <group position={[-0.28, 1.28, 0.18]} rotation-z={0.08}>
-        <mesh castShadow>
-          <boxGeometry args={[0.48, 0.28, 0.2]} />
+        <mesh scale={[1.25, 0.72, 0.65]} castShadow>
+          <sphereGeometry args={[0.22, 22, 15]} />
           <meshStandardMaterial color={LIME} roughness={0.42} />
         </mesh>
         <mesh position={[-0.02, 0.22, 0]} rotation-z={-0.15}>
           <torusGeometry args={[0.17, 0.03, 7, 18, Math.PI * 1.35]} />
           <meshStandardMaterial color={CHARCOAL} />
         </mesh>
-        <mesh position={[0.48, 0, 0]}>
-          <boxGeometry args={[0.52, 0.1, 0.055]} />
+        <mesh position={[0.48, 0, 0]} rotation-z={Math.PI / 2}>
+          <capsuleGeometry args={[0.045, 0.45, 6, 16]} />
           <meshStandardMaterial color="#c2c8c4" metalness={0.68} roughness={0.28} />
         </mesh>
       </group>
@@ -618,6 +856,56 @@ function TreeCareWall() {
         <boxGeometry args={[0.55, 0.08, 0.16]} />
         <meshStandardMaterial color="#d9c79e" roughness={0.95} />
       </mesh>
+
+      {/* long-handled loppers */}
+      <group position={[-0.4, 0.72, 0.2]}>
+        {[-0.12, 0.12].map((x) => (
+          <group key={x} rotation-z={x * 0.48}>
+            <mesh position={[x, 0.2, 0]}>
+              <cylinderGeometry args={[0.026, 0.032, 0.72, 12]} />
+              <meshStandardMaterial color="#d6a15d" roughness={0.7} />
+            </mesh>
+            <mesh position={[x, -0.18, 0]}>
+              <capsuleGeometry args={[0.034, 0.16, 5, 10]} />
+              <meshStandardMaterial color={FOREST} roughness={0.7} />
+            </mesh>
+          </group>
+        ))}
+        <mesh position={[0, 0.6, 0]} rotation-z={0.38}>
+          <torusGeometry args={[0.16, 0.035, 9, 18, Math.PI * 0.95]} />
+          <meshStandardMaterial color={CHARCOAL} metalness={0.48} roughness={0.38} />
+        </mesh>
+      </group>
+
+      {/* fan rake with dimensional tines */}
+      <group position={[0.36, 0.64, 0.2]}>
+        <mesh position={[0, 0.22, 0]}>
+          <cylinderGeometry args={[0.022, 0.026, 0.75, 12]} />
+          <meshStandardMaterial color="#cf9a54" roughness={0.76} />
+        </mesh>
+        {[-0.22, -0.15, -0.08, 0, 0.08, 0.15, 0.22].map((x) => (
+          <mesh key={x} position={[x * 0.7, 0.66, 0]} rotation-z={-x * 1.35}>
+            <cylinderGeometry args={[0.009, 0.009, 0.46, 7]} />
+            <meshStandardMaterial color="#263e30" roughness={0.7} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* compact shovel with a D-grip and rounded blade */}
+      <group position={[0.92, 1.12, 0.2]}>
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.022, 0.026, 0.9, 12]} />
+          <meshStandardMaterial color="#d4a15f" roughness={0.74} />
+        </mesh>
+        <mesh position={[0, -0.55, 0]} scale={[0.72, 1, 0.24]}>
+          <sphereGeometry args={[0.18, 18, 12]} />
+          <meshStandardMaterial color={CHARCOAL} metalness={0.32} roughness={0.48} />
+        </mesh>
+        <mesh position={[0, 0.55, 0]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.11, 0.025, 8, 20, Math.PI]} />
+          <meshStandardMaterial color={LIME} roughness={0.55} />
+        </mesh>
+      </group>
     </group>
   );
 }

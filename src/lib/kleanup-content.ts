@@ -43,8 +43,8 @@ export const VIEWS: OfficeView[] = [
     title: "Lawn & yard maintenance",
     line: "Mowing, edging, trimming, leaf and yard cleanup, hedge shaping and brush clearing on a one-off or recurring schedule.",
     cta: "Set up lawn service",
-    pos: [-0.15, 2.65, 5.25],
-    target: [-3.95, 0.72, 0.35],
+    pos: [-0.65, 2.65, 2.65],
+    target: [-4.35, 0.95, -3.7],
   },
   {
     id: "junk",
@@ -53,8 +53,8 @@ export const VIEWS: OfficeView[] = [
     title: "Junk removal & cleanouts",
     line: "Bulk-item pickup, property, garage and estate cleanouts, plus non-hazardous renovation debris hauled away in one visit.",
     cta: "Get a haul-away price",
-    pos: [0.2, 2.45, 5.8],
-    target: [3.55, 0.72, 2.15],
+    pos: [0.1, 2.55, 6.55],
+    target: [3.85, 0.82, 1.95],
   },
   {
     id: "tree",
