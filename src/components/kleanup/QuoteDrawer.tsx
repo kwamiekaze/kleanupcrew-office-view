@@ -8,7 +8,7 @@ export function QuoteDrawer({
 }: {
   open: boolean;
   onClose: () => void;
-  service?: string;
+  service?: string | undefined;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const firstRef = useRef<HTMLInputElement>(null);
