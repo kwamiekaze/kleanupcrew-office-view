@@ -38,20 +38,18 @@ export function SplashScreen({ onDismiss }: { onDismiss: () => void }) {
       onClick={dismiss}
       className={`kc-splash${leaving ? " kc-splash-leaving" : ""}`}
     >
-      <div className="kc-splash-stage">
-        <video
-          ref={videoRef}
-          className="kc-splash-video"
-          src={splashVideo.url}
-          autoPlay
-          muted
-          playsInline
-          onEnded={dismiss}
-          preload="auto"
-          disablePictureInPicture
-          controls={false}
-        />
-      </div>
+      <video
+        ref={videoRef}
+        className="kc-splash-video"
+        src={splashVideo.url}
+        autoPlay
+        muted
+        playsInline
+        onEnded={dismiss}
+        preload="auto"
+        disablePictureInPicture
+        controls={false}
+      />
       <p className="kc-splash-cta">Tap to continue</p>
     </div>
   );
