@@ -21,7 +21,7 @@ export function CameraRig({
   input: React.RefObject<RigInput>;
   reducedMotion: boolean;
 }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const pos = useRef(new Vector3(...view.pos));
   const look = useRef(new Vector3(...view.target));
   const desiredPos = useRef(new Vector3());
@@ -48,7 +48,11 @@ export function CameraRig({
     const pitch = Math.max(-0.35, Math.min(1.05, basePitch + i.dragY * 0.7));
 
     // Full horizontal orbit with a safe vertical arc and restrained dolly.
-    const radius = Math.max(1.25, dist * (1 + i.zoom * 0.32));
+    // Wide rotations pull the Welcome camera inside the room so a 360-degree
+    // orbit never exposes the unmodeled exterior side of the walls.
+    const orbitProgress = Math.min(1, Math.abs(i.dragX) / (Math.PI / 2));
+    const safeOrbitDistance = dist > 5 ? dist + (4.35 - dist) * orbitProgress : dist;
+    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.4));
     const horizontalRadius = Math.cos(pitch) * radius;
     desiredPos.current.set(
       target.x + Math.sin(yaw) * horizontalRadius,
@@ -57,7 +61,8 @@ export function CameraRig({
     );
     desiredLook.current.copy(target);
 
-    const k = reducedMotion ? 1 : 1 - Math.exp(-4.2 * dt);
+    const response = size.width < 768 ? 8 : 5.2;
+    const k = reducedMotion ? 1 : 1 - Math.exp(-response * dt);
     pos.current.lerp(desiredPos.current, k);
     look.current.lerp(desiredLook.current, k);
     camera.position.copy(pos.current);

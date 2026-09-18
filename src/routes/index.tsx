@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, LocateFixed, ZoomIn, ZoomOut } from "lucide-react";
 import type { RigInput } from "@/components/office/CameraRig";
 import { QuoteDrawer } from "@/components/kleanup/QuoteDrawer";
 import { useAmbientAudio } from "@/lib/use-ambient-audio";
@@ -38,6 +39,10 @@ function wrapAngle(angle: number) {
   return Math.atan2(Math.sin(angle), Math.cos(angle));
 }
 
+function clamp(value: number, minimum: number, maximum: number) {
+  return Math.max(minimum, Math.min(maximum, value));
+}
+
 function Home() {
   const [activeId, setActiveId] = useState<ViewId>("welcome");
   const [quoteOpen, setQuoteOpen] = useState(false);
@@ -51,8 +56,7 @@ function Home() {
   const view = useMemo(() => VIEWS.find((v) => v.id === activeId) ?? VIEWS[0]!, [activeId]);
 
   const input = useRef<RigInput>({ dragX: 0, dragY: 0, zoom: 0 });
-  const dragging = useRef(false);
-  const last = useRef({ x: 0, y: 0 });
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -67,30 +71,62 @@ function Home() {
   }, []);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
-    dragging.current = true;
-    last.current = { x: e.clientX, y: e.clientY };
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     e.currentTarget.setPointerCapture(e.pointerId);
   }, []);
-  const endDrag = useCallback(() => {
-    dragging.current = false;
+
+  const endPointer = useCallback((e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
   }, []);
+
   const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragging.current) return;
-    const dx = e.clientX - last.current.x;
-    const dy = e.clientY - last.current.y;
-    last.current = { x: e.clientX, y: e.clientY };
+    const previous = pointers.current.get(e.pointerId);
+    if (!previous) return;
+
+    const before = [...pointers.current.values()];
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const i = input.current;
-    i.dragX = wrapAngle(i.dragX - dx * 0.01);
-    i.dragY = Math.max(-1, Math.min(1, i.dragY + dy * 0.006));
+
+    if (pointers.current.size >= 2 && before.length >= 2) {
+      const after = [...pointers.current.values()];
+      const beforeDistance = Math.hypot(before[0]!.x - before[1]!.x, before[0]!.y - before[1]!.y);
+      const afterDistance = Math.hypot(after[0]!.x - after[1]!.x, after[0]!.y - after[1]!.y);
+      i.zoom = clamp(i.zoom - (afterDistance - beforeDistance) / 180, -1, 1);
+      return;
+    }
+
+    const dx = e.clientX - previous.x;
+    const dy = e.clientY - previous.y;
+    const touch = e.pointerType === "touch";
+    // Short phone swipes cover useful angles without overshooting the room.
+    i.dragX = wrapAngle(i.dragX - dx * (touch ? 0.014 : 0.01));
+    i.dragY = clamp(i.dragY + dy * (touch ? 0.009 : 0.006), -1, 1);
   }, []);
+
   const onWheel = useCallback((e: React.WheelEvent) => {
     const i = input.current;
     const horizontalDelta = Math.abs(e.deltaX) > 1 ? e.deltaX : e.shiftKey ? e.deltaY : 0;
     if (horizontalDelta !== 0) {
-      i.dragX = wrapAngle(i.dragX + horizontalDelta * 0.004);
+      i.dragX = wrapAngle(i.dragX + horizontalDelta * 0.006);
       return;
     }
-    i.zoom = Math.max(-1, Math.min(1, i.zoom + e.deltaY / 900));
+    i.zoom = clamp(i.zoom + e.deltaY / 700, -1, 1);
+  }, []);
+
+  const adjustCamera = useCallback((action: "left" | "right" | "in" | "out" | "reset") => {
+    const i = input.current;
+    if (action === "left") i.dragX = wrapAngle(i.dragX + Math.PI / 3);
+    if (action === "right") i.dragX = wrapAngle(i.dragX - Math.PI / 3);
+    if (action === "in") i.zoom = clamp(i.zoom - 0.3, -1, 1);
+    if (action === "out") i.zoom = clamp(i.zoom + 0.3, -1, 1);
+    if (action === "reset") {
+      i.dragX = 0;
+      i.dragY = 0;
+      i.zoom = 0;
+    }
   }, []);
 
   const select = useCallback((id: ViewId) => {
@@ -106,8 +142,9 @@ function Home() {
       <div
         className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
         onPointerDown={onPointerDown}
-        onPointerUp={endDrag}
-        onPointerLeave={endDrag}
+        onPointerUp={endPointer}
+        onPointerCancel={endPointer}
+        onLostPointerCapture={endPointer}
         onPointerMove={onPointerMove}
         onWheel={onWheel}
         aria-hidden="true"
@@ -116,6 +153,53 @@ function Home() {
           <OfficeCanvas view={view} input={input} reducedMotion={reducedMotion} />
         </Suspense>
       </div>
+
+      {/* Direct touch controls complement drag and pinch gestures on phones. */}
+      <nav
+        aria-label="3D view controls"
+        className="kc-camera-controls absolute left-1/2 top-24 z-20 flex -translate-x-1/2 gap-1.5 md:hidden"
+      >
+        <button
+          type="button"
+          className="kc-camera-btn kc-focus"
+          onClick={() => adjustCamera("left")}
+          aria-label="Rotate view left"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          type="button"
+          className="kc-camera-btn kc-focus"
+          onClick={() => adjustCamera("right")}
+          aria-label="Rotate view right"
+        >
+          <ChevronRight size={20} />
+        </button>
+        <button
+          type="button"
+          className="kc-camera-btn kc-focus"
+          onClick={() => adjustCamera("in")}
+          aria-label="Zoom in"
+        >
+          <ZoomIn size={18} />
+        </button>
+        <button
+          type="button"
+          className="kc-camera-btn kc-focus"
+          onClick={() => adjustCamera("out")}
+          aria-label="Zoom out"
+        >
+          <ZoomOut size={18} />
+        </button>
+        <button
+          type="button"
+          className="kc-camera-btn kc-focus"
+          onClick={() => adjustCamera("reset")}
+          aria-label="Reset 3D view"
+        >
+          <LocateFixed size={18} />
+        </button>
+      </nav>
 
       {/* loading screen */}
       <div

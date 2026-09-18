@@ -259,6 +259,34 @@
     opacity: 0.45;
     cursor: not-allowed;
   }
+
+  .kc-camera-controls {
+    border: 1px solid color-mix(in oklab, var(--cream) 18%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in oklab, var(--forest-deep) 76%, transparent);
+    padding: 0.38rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 35px -18px oklch(0.14 0.03 155 / 0.7);
+  }
+
+  .kc-camera-btn {
+    display: flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    border: 1px solid color-mix(in oklab, var(--cream) 16%, transparent);
+    border-radius: 0.7rem;
+    background: color-mix(in oklab, var(--cream) 8%, transparent);
+    color: var(--cream);
+  }
+
+  .kc-camera-btn:active {
+    background: color-mix(in oklab, var(--lime) 78%, transparent);
+    color: var(--charcoal);
+  }
+
   .kc-field > span {
     font-size: 0.68rem;
     text-transform: uppercase;
