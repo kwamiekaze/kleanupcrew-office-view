@@ -247,12 +247,17 @@ function DeskProps() {
           />
         </mesh>
         <mesh castShadow>
-          <cylinderGeometry args={[0.085, 0.075, 0.17, 20]} />
-          <meshStandardMaterial color={CREAM} roughness={0.5} />
+          <cylinderGeometry args={[0.085, 0.075, 0.17, 32, 1, true]} />
+          <meshStandardMaterial color={CREAM} roughness={0.5} side={2} />
         </mesh>
-        <mesh position={[0, 0.07, 0]}>
-          <cylinderGeometry args={[0.07, 0.07, 0.02, 20]} />
-          <meshStandardMaterial color="#4a2f1d" roughness={0.3} />
+        {/* The mug is half-full: the coffee surface sits at its vertical midpoint. */}
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.073, 0.073, 0.006, 40]} />
+          <meshBasicMaterial color="#2a1008" />
+        </mesh>
+        <mesh position={[0, -0.084, 0]} rotation-x={-Math.PI / 2}>
+          <circleGeometry args={[0.075, 32]} />
+          <meshStandardMaterial color={CREAM} roughness={0.5} side={2} />
         </mesh>
         <mesh position={[0, 0.085, 0]} rotation-x={Math.PI / 2}>
           <torusGeometry args={[0.077, 0.008, 10, 32]} />
@@ -550,7 +555,7 @@ function Shelves() {
 
 function LawnMower() {
   return (
-    <group position={[-5.72, 0, 0.65]} rotation-y={Math.PI / 2}>
+    <group position={[-5.72, 0, 1.85]} rotation-y={Math.PI / 2}>
       {/* Lawn-care zone sits on the left wall, with a clear gap before Tree & Yard. */}
       <mesh position={[0, 1.55, -0.02]} castShadow receiveShadow>
         <boxGeometry args={[1.75, 1.55, 0.09]} />

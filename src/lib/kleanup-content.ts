@@ -40,7 +40,8 @@ export const VIEWS: OfficeView[] = [
     line: "Mowing, edging, trimming, leaf and yard cleanup, hedge shaping and brush clearing on a one-off or recurring schedule.",
     cta: "Set up lawn service",
     pos: [0.25, 2.55, 4.9],
-    target: [-5.25, 1.05, 0.65],
+    target: [-5.25, 1.05, 1.85],
+    horizontalFov: 45,
   },
   {
     id: "tree",
@@ -51,6 +52,7 @@ export const VIEWS: OfficeView[] = [
     cta: "Request a site visit",
     pos: [0.9, 2.75, 1.5],
     target: [-5.5, 1.45, -1.85],
+    horizontalFov: 42,
   },
   {
     id: "cleaning",
@@ -60,7 +62,8 @@ export const VIEWS: OfficeView[] = [
     line: "Standard, deep, recurring and move-in/move-out cleans, rental turnovers, carpet, upholstery, window, gutter and pressure washing.",
     cta: "Book a cleaning estimate",
     pos: [-2.0, 2.7, 7.8],
-    target: [5.15, 1.18, -0.78],
+    target: [5.15, 1.18, -2.0],
+    horizontalFov: 34,
   },
   {
     id: "junk",

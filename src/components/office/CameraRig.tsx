@@ -29,7 +29,6 @@ export function CameraRig({
   const desiredPos = useRef(new Vector3());
   const desiredLook = useRef(new Vector3(...view.target));
   const introStart = useRef<number | null>(null);
-  const introFinished = useRef(false);
 
   const isMobile = size.width < 768;
 
@@ -43,7 +42,6 @@ export function CameraRig({
   useEffect(() => {
     if (!introStarted) {
       introStart.current = null;
-      introFinished.current = false;
     }
   }, [introStarted]);
 
@@ -59,25 +57,29 @@ export function CameraRig({
     const dist = offset.length();
     const baseYaw = Math.atan2(offset.x, offset.z);
     const basePitch = Math.asin(offset.y / Math.max(dist, 0.001));
-    let introProgress = 1;
-    if (view.id === "welcome" && !introFinished.current && !reducedMotion) {
-      if (!introStarted) {
-        introProgress = 0;
-      } else {
+    let automaticOrbit = 0;
+    let automaticLift = 0;
+    let automaticDistance = 1;
+    if (!reducedMotion) {
+      const panAmplitude = view.id === "welcome" ? 0.5 : view.id === "quote" ? 0.08 : 0.04;
+      if (!introStarted && view.id === "welcome") {
+        // Prepare the left edge of the orbit behind the opening screen so the
+        // visible motion begins smoothly as soon as the visitor enters.
+        automaticOrbit = -panAmplitude;
+      } else if (introStarted) {
         introStart.current ??= clock.elapsedTime;
         const elapsed = clock.elapsedTime - introStart.current;
-        introProgress = Math.min(elapsed / 6.5, 1);
-        if (introProgress >= 1) introFinished.current = true;
+        // Eight seconds each way produces an unhurried, continuous pan. The
+        // cosine curve reverses direction gently with no seam at either end.
+        automaticOrbit = -Math.cos((elapsed * Math.PI) / 8) * panAmplitude;
+      }
+      if (view.id === "welcome") {
+        automaticLift = 0.14;
+        automaticDistance = 1.04;
       }
     }
 
-    // After the opening screen is dismissed, ease through a slow desk orbit
-    // before settling into the standard Welcome composition.
-    const easedIntro = introProgress * introProgress * (3 - 2 * introProgress);
-    const introOrbit = (1 - easedIntro) * -0.52;
-    const introLift = (1 - easedIntro) * 0.22;
-    const introDistance = 1 + (1 - easedIntro) * 0.06;
-    const yaw = baseYaw + i.dragX + introOrbit;
+    const yaw = baseYaw + i.dragX + automaticOrbit;
     const pitch = Math.max(-0.35, Math.min(1.05, basePitch + i.dragY * 0.7));
 
     // Full horizontal orbit with a safe vertical arc and restrained dolly.
@@ -87,11 +89,11 @@ export function CameraRig({
     const safeOrbitDistance = dist > 5 ? dist + (4.35 - dist) * orbitProgress : dist;
     // A small dolly plus a wider field-of-view range makes pinch zoom feel
     // immediate on phones without pushing the camera through the room walls.
-    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.1) * introDistance);
+    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.1) * automaticDistance);
     const horizontalRadius = Math.cos(pitch) * radius;
     desiredPos.current.set(
       target.x + Math.sin(yaw) * horizontalRadius,
-      target.y + Math.sin(pitch) * radius + introLift,
+      target.y + Math.sin(pitch) * radius + automaticLift,
       target.z + Math.cos(yaw) * horizontalRadius,
     );
     desiredLook.current.copy(target);
