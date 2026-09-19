@@ -8,20 +8,27 @@ export default function OfficeCanvas({
   view,
   input,
   reducedMotion,
+  introStarted,
 }: {
   view: OfficeView;
   input: RefObject<RigInput>;
   reducedMotion: boolean;
+  introStarted: boolean;
 }) {
   return (
     <Canvas
-      shadows
+      shadows="variance"
       dpr={[1, 1.5]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       camera={{ position: view.pos, fov: 42, near: 0.1, far: 60 }}
     >
       <OfficeScene reducedMotion={reducedMotion} />
-      <CameraRig view={view} input={input} reducedMotion={reducedMotion} />
+      <CameraRig
+        view={view}
+        input={input}
+        reducedMotion={reducedMotion}
+        introStarted={introStarted}
+      />
     </Canvas>
   );
 }

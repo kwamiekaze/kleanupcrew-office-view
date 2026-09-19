@@ -1,8 +1,8 @@
 import { useFrame } from "@react-three/fiber";
 import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
-import type { Group, InstancedMesh } from "three";
-import { Object3D, SRGBColorSpace } from "three";
+import type { Group } from "three";
+import { SRGBColorSpace } from "three";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
 
@@ -119,11 +119,23 @@ function Monitor() {
 
   return (
     <group position={[0, 0.78, -2.75]}>
+      {/* Soft contact patch anchors the monitor without a harsh floating shadow. */}
+      <mesh position={[0, 0.006, 0.015]} rotation-x={-Math.PI / 2} renderOrder={1}>
+        <circleGeometry args={[0.3, 48]} />
+        <meshBasicMaterial
+          color="#34251c"
+          transparent
+          opacity={0.12}
+          depthWrite={false}
+          polygonOffset
+          polygonOffsetFactor={-1}
+        />
+      </mesh>
       <mesh position={[0, 0.03, 0]} castShadow>
         <boxGeometry args={[0.5, 0.04, 0.26]} />
         <meshStandardMaterial color={CHARCOAL} />
       </mesh>
-      <mesh position={[0, 0.22, 0]}>
+      <mesh position={[0, 0.22, 0]} castShadow>
         <cylinderGeometry args={[0.04, 0.05, 0.38, 12]} />
         <meshStandardMaterial color={CHARCOAL} />
       </mesh>
@@ -217,6 +229,23 @@ function DeskProps() {
       </group>
       {/* coffee mug */}
       <group position={[0.85, 0.09, 0.12]}>
+        {/* A restrained oval contact shadow keeps the mug grounded on the desk. */}
+        <mesh
+          position={[0.018, -0.084, 0.012]}
+          rotation-x={-Math.PI / 2}
+          scale={[1.25, 0.62, 1]}
+          renderOrder={1}
+        >
+          <circleGeometry args={[0.1, 40]} />
+          <meshBasicMaterial
+            color="#3c2b20"
+            transparent
+            opacity={0.13}
+            depthWrite={false}
+            polygonOffset
+            polygonOffsetFactor={-1}
+          />
+        </mesh>
         <mesh castShadow>
           <cylinderGeometry args={[0.085, 0.075, 0.17, 20]} />
           <meshStandardMaterial color={CREAM} roughness={0.5} />
@@ -410,19 +439,25 @@ function Shelves() {
   ];
   return (
     <group position={[5.45, 0, -1.0]} rotation-y={-Math.PI / 2}>
-      {/* substantial wood shelving with a warm recessed back */}
-      <mesh position={[0, 1.6, -0.3]} receiveShadow>
+      {/* Stable inset back: no self-shadowing or coplanar cabinet-edge shimmer. */}
+      <mesh position={[0, 1.6, -0.32]}>
         <boxGeometry args={[2.05, 2.45, 0.04]} />
-        <meshStandardMaterial color="#6b4528" roughness={0.88} />
+        <meshStandardMaterial
+          color="#6b4528"
+          roughness={0.88}
+          polygonOffset
+          polygonOffsetFactor={1}
+          polygonOffsetUnits={1}
+        />
       </mesh>
       {[-1.0, 1.0].map((x) => (
-        <mesh key={x} position={[x, 1.3, 0]} castShadow>
+        <mesh key={x} position={[x, 1.3, 0]}>
           <boxGeometry args={[0.08, 2.6, 0.5]} />
-          <meshStandardMaterial color={WOOD_DARK} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.72} />
         </mesh>
       ))}
       {[0.66, 1.3, 1.96, 2.56].map((y) => (
-        <mesh key={y} position={[0, y, 0]} castShadow receiveShadow>
+        <mesh key={y} position={[0, y, 0]} receiveShadow>
           <boxGeometry args={[2.1, 0.06, 0.5]} />
           <meshStandardMaterial color={WOOD} roughness={0.6} />
         </mesh>
@@ -1273,43 +1308,6 @@ function CornerPlant() {
   );
 }
 
-function DustMotes({ reducedMotion }: { reducedMotion: boolean }) {
-  const ref = useRef<InstancedMesh>(null);
-  const dummy = useMemo(() => new Object3D(), []);
-  const seeds = useMemo(
-    () =>
-      Array.from({ length: 42 }, () => ({
-        x: (Math.random() - 0.5) * 5,
-        y: 0.6 + Math.random() * 2.4,
-        z: -4.4 + Math.random() * 3.4,
-        s: 0.4 + Math.random(),
-      })),
-    [],
-  );
-
-  useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const t = reducedMotion ? 0 : clock.elapsedTime;
-    seeds.forEach((p, i) => {
-      dummy.position.set(
-        p.x + Math.sin(t * 0.18 * p.s + i) * 0.22,
-        p.y + Math.sin(t * 0.12 * p.s + i * 2) * 0.18,
-        p.z + Math.cos(t * 0.15 * p.s + i) * 0.18,
-      );
-      dummy.updateMatrix();
-      ref.current!.setMatrixAt(i, dummy.matrix);
-    });
-    ref.current.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <instancedMesh ref={ref} args={[undefined, undefined, seeds.length]}>
-      <sphereGeometry args={[0.015, 6, 6]} />
-      <meshBasicMaterial color="#fff6dd" transparent opacity={0.55} />
-    </instancedMesh>
-  );
-}
-
 export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <>
@@ -1327,8 +1325,10 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
         shadow-camera-right={9}
         shadow-camera-top={9}
         shadow-camera-bottom={-9}
-        shadow-normalBias={0.03}
-        shadow-bias={-0.00015}
+        shadow-normalBias={0.04}
+        shadow-bias={0.00008}
+        shadow-radius={3}
+        shadow-blurSamples={10}
       />
       <pointLight position={[0, 3.2, 0]} intensity={0.6} color="#fff0d2" />
 
@@ -1355,7 +1355,6 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <TreeCareWall />
       <CornerPlant />
       <WallClock position={[-3.2, 2.6, -5.05]} />
-      <DustMotes reducedMotion={reducedMotion} />
     </>
   );
 }

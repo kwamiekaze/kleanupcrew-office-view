@@ -171,7 +171,12 @@ function Home() {
         aria-hidden="true"
       >
         <Suspense fallback={null}>
-          <OfficeCanvas view={view} input={input} reducedMotion={reducedMotion} />
+          <OfficeCanvas
+            view={view}
+            input={input}
+            reducedMotion={reducedMotion}
+            introStarted={splashDone}
+          />
         </Suspense>
       </div>
 

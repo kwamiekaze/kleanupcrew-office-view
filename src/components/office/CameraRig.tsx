@@ -16,16 +16,20 @@ export function CameraRig({
   view,
   input,
   reducedMotion,
+  introStarted,
 }: {
   view: OfficeView;
   input: React.RefObject<RigInput>;
   reducedMotion: boolean;
+  introStarted: boolean;
 }) {
   const { camera, size } = useThree();
   const pos = useRef(new Vector3(...view.pos));
   const look = useRef(new Vector3(...view.target));
   const desiredPos = useRef(new Vector3());
   const desiredLook = useRef(new Vector3(...view.target));
+  const introStart = useRef<number | null>(null);
+  const introFinished = useRef(false);
 
   const isMobile = size.width < 768;
 
@@ -36,7 +40,14 @@ export function CameraRig({
     }
   }, [view, reducedMotion, isMobile]);
 
-  useFrame((_, rawDelta) => {
+  useEffect(() => {
+    if (!introStarted) {
+      introStart.current = null;
+      introFinished.current = false;
+    }
+  }, [introStarted]);
+
+  useFrame(({ clock }, rawDelta) => {
     const dt = Math.min(rawDelta, 0.05);
     const i = input.current ?? { dragX: 0, dragY: 0, zoom: 0 };
 
@@ -48,7 +59,25 @@ export function CameraRig({
     const dist = offset.length();
     const baseYaw = Math.atan2(offset.x, offset.z);
     const basePitch = Math.asin(offset.y / Math.max(dist, 0.001));
-    const yaw = baseYaw + i.dragX;
+    let introProgress = 1;
+    if (view.id === "welcome" && !introFinished.current && !reducedMotion) {
+      if (!introStarted) {
+        introProgress = 0;
+      } else {
+        introStart.current ??= clock.elapsedTime;
+        const elapsed = clock.elapsedTime - introStart.current;
+        introProgress = Math.min(elapsed / 6.5, 1);
+        if (introProgress >= 1) introFinished.current = true;
+      }
+    }
+
+    // After the opening screen is dismissed, ease through a slow desk orbit
+    // before settling into the standard Welcome composition.
+    const easedIntro = introProgress * introProgress * (3 - 2 * introProgress);
+    const introOrbit = (1 - easedIntro) * -0.52;
+    const introLift = (1 - easedIntro) * 0.22;
+    const introDistance = 1 + (1 - easedIntro) * 0.06;
+    const yaw = baseYaw + i.dragX + introOrbit;
     const pitch = Math.max(-0.35, Math.min(1.05, basePitch + i.dragY * 0.7));
 
     // Full horizontal orbit with a safe vertical arc and restrained dolly.
@@ -58,11 +87,11 @@ export function CameraRig({
     const safeOrbitDistance = dist > 5 ? dist + (4.35 - dist) * orbitProgress : dist;
     // A small dolly plus a wider field-of-view range makes pinch zoom feel
     // immediate on phones without pushing the camera through the room walls.
-    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.1));
+    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.1) * introDistance);
     const horizontalRadius = Math.cos(pitch) * radius;
     desiredPos.current.set(
       target.x + Math.sin(yaw) * horizontalRadius,
-      target.y + Math.sin(pitch) * radius,
+      target.y + Math.sin(pitch) * radius + introLift,
       target.z + Math.cos(yaw) * horizontalRadius,
     );
     desiredLook.current.copy(target);
