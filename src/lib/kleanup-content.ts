@@ -31,6 +31,8 @@ export const VIEWS: OfficeView[] = [
     cta: "Make this property look good again",
     pos: [0, 3.1, 7.6],
     target: [0, 1.5, -1.2],
+    mobilePos: [0, 3.1, 7.35],
+    mobileTarget: [0, 1.16, -1.2],
   },
   {
     id: "lawn",
