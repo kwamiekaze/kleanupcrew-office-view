@@ -1,0 +1,14 @@
+{
+  "name": "KleanupCrew",
+  "short_name": "KleanupCrew",
+  "description": "Inside. Outside. Handled.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5EC",
+  "theme_color": "#14532D",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
