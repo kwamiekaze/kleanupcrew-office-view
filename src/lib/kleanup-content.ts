@@ -13,6 +13,12 @@ export interface OfficeView {
   pos: [number, number, number];
   /** look-at target */
   target: [number, number, number];
+  /** optional responsive camera overrides */
+  mobilePos?: [number, number, number];
+  mobileTarget?: [number, number, number];
+  fov?: number;
+  mobileFov?: number;
+  horizontalFov?: number;
 }
 
 export const VIEWS: OfficeView[] = [
@@ -27,18 +33,8 @@ export const VIEWS: OfficeView[] = [
     target: [0, 1.5, -1.2],
   },
   {
-    id: "cleaning",
-    index: "02",
-    label: "Home Cleaning",
-    title: "Residential & commercial cleaning",
-    line: "Standard, deep, recurring and move-in/move-out cleans, rental turnovers, carpet, upholstery, window, gutter and pressure washing.",
-    cta: "Book a cleaning estimate",
-    pos: [-2.0, 2.7, 7.8],
-    target: [5.15, 1.18, -0.78],
-  },
-  {
     id: "lawn",
-    index: "03",
+    index: "02",
     label: "Lawn Care",
     title: "Lawn & yard maintenance",
     line: "Mowing, edging, trimming, leaf and yard cleanup, hedge shaping and brush clearing on a one-off or recurring schedule.",
@@ -47,24 +43,35 @@ export const VIEWS: OfficeView[] = [
     target: [-5.25, 1.05, 0.65],
   },
   {
-    id: "junk",
-    index: "04",
-    label: "Junk Removal",
-    title: "Junk removal & cleanouts",
-    line: "Bulk-item pickup, property, garage and estate cleanouts, plus non-hazardous renovation debris hauled away in one visit.",
-    cta: "Get a haul-away price",
-    pos: [-2.2, 2.8, 9.1],
-    target: [5.05, 0.82, 3.2],
-  },
-  {
     id: "tree",
-    index: "05",
+    index: "03",
     label: "Tree & Yard",
     title: "Tree & heavy yard work",
     line: "Trimming, pruning, removal and stump grinding handled by qualified, equipped providers in your area.",
     cta: "Request a site visit",
     pos: [0.9, 2.75, 1.5],
     target: [-5.5, 1.45, -1.85],
+  },
+  {
+    id: "cleaning",
+    index: "04",
+    label: "Home Cleaning",
+    title: "Residential & commercial cleaning",
+    line: "Standard, deep, recurring and move-in/move-out cleans, rental turnovers, carpet, upholstery, window, gutter and pressure washing.",
+    cta: "Book a cleaning estimate",
+    pos: [-2.0, 2.7, 7.8],
+    target: [5.15, 1.18, -0.78],
+  },
+  {
+    id: "junk",
+    index: "05",
+    label: "Junk Removal",
+    title: "Junk removal & cleanouts",
+    line: "Bulk-item pickup, property, garage and estate cleanouts, plus non-hazardous renovation debris hauled away in one visit.",
+    cta: "Get a haul-away price",
+    pos: [-3.0, 2.8, 3.2],
+    target: [5.35, 0.82, 3.2],
+    horizontalFov: 24,
   },
   {
     id: "quote",

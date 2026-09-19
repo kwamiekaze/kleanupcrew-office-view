@@ -27,19 +27,23 @@ export function CameraRig({
   const desiredPos = useRef(new Vector3());
   const desiredLook = useRef(new Vector3(...view.target));
 
+  const isMobile = size.width < 768;
+
   useEffect(() => {
     if (reducedMotion) {
-      pos.current.set(...view.pos);
-      look.current.set(...view.target);
+      pos.current.set(...(isMobile && view.mobilePos ? view.mobilePos : view.pos));
+      look.current.set(...(isMobile && view.mobileTarget ? view.mobileTarget : view.target));
     }
-  }, [view, reducedMotion]);
+  }, [view, reducedMotion, isMobile]);
 
   useFrame((_, rawDelta) => {
     const dt = Math.min(rawDelta, 0.05);
     const i = input.current ?? { dragX: 0, dragY: 0, zoom: 0 };
 
-    const base = new Vector3(...view.pos);
-    const target = new Vector3(...view.target);
+    const base = new Vector3(...(isMobile && view.mobilePos ? view.mobilePos : view.pos));
+    const target = new Vector3(
+      ...(isMobile && view.mobileTarget ? view.mobileTarget : view.target),
+    );
     const offset = base.clone().sub(target);
     const dist = offset.length();
     const baseYaw = Math.atan2(offset.x, offset.z);
@@ -63,13 +67,20 @@ export function CameraRig({
     );
     desiredLook.current.copy(target);
 
-    const response = size.width < 768 ? 8 : 5.2;
+    const response = isMobile ? 8 : 5.2;
     const k = reducedMotion ? 1 : 1 - Math.exp(-response * dt);
     pos.current.lerp(desiredPos.current, k);
     look.current.lerp(desiredLook.current, k);
     camera.position.copy(pos.current);
     if (camera instanceof PerspectiveCamera) {
-      const targetFov = Math.max(22, Math.min(70, 42 + i.zoom * 28));
+      const aspect = Math.max(size.width / Math.max(size.height, 1), 0.1);
+      const responsiveFov = view.horizontalFov
+        ? (2 * Math.atan(Math.tan((view.horizontalFov * Math.PI) / 360) / aspect) * 180) / Math.PI
+        : isMobile
+          ? (view.mobileFov ?? view.fov ?? 42)
+          : (view.fov ?? 42);
+      const minimumFov = view.horizontalFov ? 10 : 18;
+      const targetFov = Math.max(minimumFov, Math.min(70, responsiveFov + i.zoom * 28));
       camera.fov += (targetFov - camera.fov) * k;
       camera.updateProjectionMatrix();
     }
