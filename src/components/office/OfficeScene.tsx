@@ -1701,7 +1701,7 @@ function SunnyWindowView() {
         />
       ))}
       {/* Flower beds. Neighbouring beds overlap, so each one is stepped back
-          further than a single bed is deep - otherwise a bed's blossoms land on
+          further than a single bed is deep. Otherwise a bed's blossoms land on
           exactly the same plane as the next bed's foliage and the two flicker
           against each other wherever they cross. */}
       {[-1.05, -0.82, 0.78, 1.02].map((x, index) => (
@@ -2034,8 +2034,8 @@ function CornerPlant() {
 
 /**
  * Sunlight direction, in world space, travelling from the sun outside the
- * window down into the room. It leans in from the upper right - the corner the
- * painted sun sits in - so the beam sweeps across the desk and out onto the rug
+ * window down into the room. It leans in from the upper right, the corner the
+ * painted sun sits in, so the beam sweeps across the desk and out onto the rug
  * towards the front left.
  */
 const SUN_DIRECTION = new Vector3(-0.27, -0.405, 0.873).normalize();
@@ -2044,8 +2044,8 @@ const SUN_LIGHT_POSITION = SUN_DIRECTION.clone().multiplyScalar(-18).toArray();
 /**
  * Every solid surface in the room casts and receives the sunlight, so the desk,
  * the things on it, the plants and the equipment all throw real shadows. Flat
- * decorative pieces - the view through the window, the painted floor seams, the
- * light shafts - use basic materials and are skipped, so they neither block the
+ * decorative pieces such as the view through the window and the painted floor
+ * seams use basic materials and are skipped, so they neither block the
  * sun nor pick up shading.
  *
  * Nothing that shapes a shadow moves, so the shadow map is drawn during the
@@ -2090,7 +2090,7 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <ambientLight intensity={0.62} />
       {/*
        * Key light. It sits on the far side of the glass along SUN_DIRECTION, so
-       * the only way into the room is the window opening - the wall segments
+       * the only way into the room is the window opening. The wall segments
        * around it cast shadows, which is what shapes the sunlit patch and the
        * glazing-bar cross on the floor and desk.
        */}

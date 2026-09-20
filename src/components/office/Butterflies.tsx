@@ -7,7 +7,7 @@ import { DoubleSide, Shape, ShapeGeometry } from "three";
  * Butterflies crossing the garden outside the window. They fly the full width
  * of the view, left to right and right to left, with the window left empty for
  * a while between passes. That gap is measured from the moment the last one
- * leaves - not from when it set off - and its length is drawn fresh every time,
+ * leaves, not from when it set off, and its length is drawn fresh every time,
  * so the timing never settles into a loop the eye can predict.
  *
  * They live on their own plane just in front of the painted garden and behind

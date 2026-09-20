@@ -27,7 +27,7 @@ export const VIEWS: OfficeView[] = [
     index: "01",
     label: "Welcome",
     title: BRAND_SLOGAN,
-    line: "KleanupCrew connects you with local, insured crews who clean it, clear it, maintain it and improve the property.",
+    line: "We clean it, clear it, cut it back and haul it away. One company, our own people, and one number to call for anything a property needs.",
     cta: "Make this property look good again",
     // Aimed a little higher than the room's centre, so the view tips down and
     // the whole sun clears the top of the window frame.
@@ -41,7 +41,7 @@ export const VIEWS: OfficeView[] = [
     index: "02",
     label: "Lawn Care",
     title: "Lawn & yard maintenance",
-    line: "Mowing, edging, trimming, leaf and yard cleanup, hedge shaping and brush clearing on a one-off or recurring schedule.",
+    line: "We mow, edge, trim, clear the leaves, shape the hedges and cut back the brush, on a single visit or a schedule you set.",
     cta: "Set up lawn service",
     // Square on to the lawn board, close enough to read every tool and low
     // enough to keep the mower's wheels on screen.
@@ -54,7 +54,7 @@ export const VIEWS: OfficeView[] = [
     index: "03",
     label: "Tree & Yard",
     title: "Tree & heavy yard work",
-    line: "Trimming, pruning, removal and stump grinding handled by qualified, equipped providers in your area.",
+    line: "We trim, prune, take trees down, grind the stumps out, and pressure wash the hard surfaces around the property.",
     cta: "Request a site visit",
     // Centres the tool board with the loppers, rake and spade at its foot.
     pos: [0.9, 2.75, 1.5],
@@ -66,7 +66,7 @@ export const VIEWS: OfficeView[] = [
     index: "04",
     label: "Home Cleaning",
     title: "Residential & commercial cleaning",
-    line: "Standard, deep, recurring and move-in/move-out cleans, rental turnovers, carpet, upholstery, window, gutter and pressure washing.",
+    line: "Standard, deep, recurring and move-out cleans, rental turnovers, carpet, upholstery, windows and gutters. We do all of it ourselves.",
     cta: "Book a cleaning estimate",
     // Was set back across the whole room; now it stands in front of the supply
     // shelf so the bottles, rolls, bucket and caddy are all legible.
@@ -79,7 +79,7 @@ export const VIEWS: OfficeView[] = [
     index: "05",
     label: "Junk Removal",
     title: "Junk removal & cleanouts",
-    line: "Bulk-item pickup, property, garage and estate cleanouts, plus non-hazardous renovation debris hauled away in one visit.",
+    line: "Bulk items, garage and estate cleanouts, and non-hazardous renovation debris. We do the loading and haul it away in one visit.",
     cta: "Get a haul-away price",
     // Wider and tipped down, so the hand truck, cartons, bags, bin and offcuts
     // all sit in frame with floor beneath them instead of bare wall above.
@@ -92,7 +92,7 @@ export const VIEWS: OfficeView[] = [
     index: "06",
     label: "Get a Quote",
     title: "Property prep & curb appeal",
-    line: "Tell us about the property once — we match the right crews for prep packages, curb appeal and recurring property care.",
+    line: "Tell us about the property once and we price the whole job, from a single tidy up to year round care.",
     cta: "Start a free quote",
     pos: [0, 1.95, 1.3],
     target: [0, 1.25, -2.3],
@@ -120,7 +120,7 @@ export const SERVICE_FOR_VIEW: Record<ViewId, string> = {
   quote: "Make this property look good again",
 };
 
-export const TRUST_CHIPS = ["Insured providers", "Upfront estimates", "Local crews"];
+export const TRUST_CHIPS = ["Fully insured", "Upfront pricing", "We do the work"];
 
 export interface ServiceGroup {
   heading: string;
@@ -135,11 +135,96 @@ export interface ServiceDetail {
 }
 
 /** Full service breakdowns, shown behind the More info button on each section. */
-export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
+/** Full service breakdowns, shown behind the More info button on each section. */
+export const SERVICE_DETAILS: Record<ViewId, ServiceDetail> = {
+  welcome: {
+    title: "Inside. Outside. Handled.",
+    intro:
+      "We are one company that handles the whole property. The same people you speak to are the people who turn up, do the work and clean up afterwards. Nothing is handed off to anyone else.",
+    groups: [
+      {
+        heading: "Who we are",
+        items: [
+          {
+            name: "We do the work ourselves",
+            detail:
+              "Our own staff, our own trucks and our own equipment. You are not being passed along to someone we found, and you will not meet a different company on the day.",
+          },
+          {
+            name: "One point of contact",
+            detail:
+              "One number, one price and one person answering for the whole job, even when it covers cleaning inside and clearing outside on the same visit.",
+          },
+          {
+            name: "Fully insured",
+            detail:
+              "We carry general liability and workers compensation cover, and we are happy to send a certificate before we start.",
+          },
+          {
+            name: "Based here, working here",
+            detail:
+              "We live and work in the same area we serve, which is why we care what the street looks like after we leave.",
+          },
+        ],
+      },
+      {
+        heading: "What we handle",
+        items: [
+          {
+            name: "Inside the property",
+            detail:
+              "Standard and deep cleaning, move outs, rental turnovers, carpets, upholstery, tile and grout, windows and offices.",
+          },
+          {
+            name: "Outside the property",
+            detail:
+              "Mowing, edging, trimming, seasonal cleanups, beds and mulch, hedges, tree trimming and removal, stump grinding and pressure washing.",
+          },
+          {
+            name: "Hauling it away",
+            detail:
+              "Single bulky items, full garage and estate cleanouts, renovation debris and storm damage, loaded by us and taken away.",
+          },
+          {
+            name: "Getting a property ready",
+            detail:
+              "Pre sale and pre listing prep, tenant turnarounds and seasonal refreshes, where several of the above happen together on one schedule.",
+          },
+        ],
+      },
+      {
+        heading: "How we work",
+        items: [
+          {
+            name: "You tell us what you need",
+            detail:
+              "Call, message or send photos. For anything we cannot price from a description, we come and look at it first, and that visit costs you nothing.",
+          },
+          {
+            name: "You get a price before we start",
+            detail:
+              "Written, itemized and fixed. If we find something we could not see at the quote stage, we stop and talk to you rather than adding it to the bill.",
+          },
+          {
+            name: "We show up when we said we would",
+            detail:
+              "If we are running late you hear it from us first, not after the window has passed.",
+          },
+          {
+            name: "We leave it clean",
+            detail:
+              "Drives blown down, debris picked up, trash taken with us. The job is not done until the property looks finished.",
+          },
+        ],
+      },
+    ],
+    note: "Every price is agreed in writing before any work begins, and it does not move afterwards.",
+  },
+
   lawn: {
     title: "Lawn & yard maintenance",
     intro:
-      "Everything that keeps a property looking cared for week to week, from the routine cut to the seasonal work that decides how the turf comes back next spring. Book a one-off visit or put the property on a recurring schedule.",
+      "Everything that keeps a property looking cared for week to week, from the routine cut to the seasonal work that decides how the turf comes back next spring. Book a single visit or put the property on a schedule.",
     groups: [
       {
         heading: "Routine mowing",
@@ -147,22 +232,22 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Mowing",
             detail:
-              "Cut at the right height for the grass type and the time of year, with the pattern alternated each visit so the turf is not pushed the same way every week. Clippings mulched back in or bagged and removed, whichever the property needs.",
+              "We cut at the right height for your grass type and the time of year, and alternate the pattern each visit so the turf is not pushed the same way every week. Clippings mulched back in or bagged and removed, whichever the lawn needs.",
           },
           {
             name: "Edging and line trimming",
             detail:
-              "A cut edge along drives, walkways, patios, bed lines and fences, and string trimming anywhere a mower deck cannot reach — around posts, meters, trees and foundation lines.",
+              "A cut edge along drives, walkways, patios, bed lines and fences, and string trimming anywhere a mower deck cannot reach, including around posts, meters, trees and foundation lines.",
           },
           {
-            name: "Blow-down",
+            name: "Blow down",
             detail:
-              "Every hard surface cleared at the end of the visit, so drives, walks and porches are left clean rather than covered in clippings.",
+              "We clear every hard surface before we leave, so drives, walks and porches are clean rather than covered in clippings.",
           },
           {
-            name: "Recurring schedules",
+            name: "Schedules",
             detail:
-              "Weekly, every other week, or monthly through the growing season, with the cadence adjusted as growth slows in late summer and autumn.",
+              "Weekly, every other week, or monthly through the growing season. We adjust the cadence as growth slows in late summer and fall rather than charging you for cuts the lawn did not need.",
           },
         ],
       },
@@ -172,22 +257,22 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Spring cleanup",
             detail:
-              "Winter debris cleared, dead growth cut back, perennials tidied, bed lines re-cut and the first proper cut of the season taken.",
+              "Winter debris cleared, dead growth cut back, perennials tidied, bed lines re cut and the first proper cut of the season taken.",
           },
           {
             name: "Leaf removal",
             detail:
-              "Repeat passes through the fall rather than one late visit, so leaves never sit long enough to smother the turf. Leaves hauled off or mulched in place.",
+              "We make repeat passes through the fall rather than one late visit, so leaves never sit long enough to smother the turf. Hauled off or mulched in place.",
           },
           {
             name: "Storm and debris cleanup",
             detail:
-              "Downed limbs, blown-in debris and scattered yard waste collected and removed after weather.",
+              "Downed limbs, blown in debris and scattered yard waste collected and removed after weather.",
           },
           {
             name: "Winter prep",
             detail:
-              "Final cut, beds cut back and mulched, hoses and fittings drained, and the yard left in a state that does not need attention until spring.",
+              "Final cut, beds cut back and mulched, hoses and fittings drained, and the yard left in a state that needs nothing until spring.",
           },
         ],
       },
@@ -197,17 +282,17 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Core aeration",
             detail:
-              "Plugs pulled to relieve compaction and open the soil so water, air and feed reach the root zone instead of running off.",
+              "We pull plugs to relieve compaction and open the soil, so water, air and feed reach the root zone instead of running off.",
           },
           {
             name: "Overseeding",
             detail:
-              "Thin and bare areas seeded straight after aeration, with a starter feed, so the new grass goes into open soil rather than thatch.",
+              "Thin and bare areas seeded straight after aeration with a starter feed, so the new grass goes into open soil rather than thatch.",
           },
           {
-            name: "Fertilisation and weed control",
+            name: "Fertilization and weed control",
             detail:
-              "Scheduled feeding matched to the grass type, plus broadleaf and grassy weed treatment. Applied by licensed applicators wherever the state requires a licence.",
+              "Scheduled feeding matched to your grass type, plus broadleaf and grassy weed treatment, applied under the licenses the state requires.",
           },
           {
             name: "Grub and surface insect treatment",
@@ -217,7 +302,7 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Sod and repair",
             detail:
-              "Worn paths, pet damage and bare patches cut out and replaced with sod or repaired with seed and topdressing.",
+              "Worn paths, pet damage and bare patches cut out and replaced with sod, or repaired with seed and topdressing.",
           },
         ],
       },
@@ -227,33 +312,33 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Mulch and pine straw",
             detail:
-              "Beds weeded, edged and topped up to depth in hardwood mulch, pine bark or pine straw — enough to hold moisture and suppress weeds without burying the crowns.",
+              "Beds weeded, edged and topped up to depth in hardwood mulch, pine bark or pine straw, deep enough to hold moisture and suppress weeds without burying the crowns.",
           },
           {
             name: "Bed weeding and cultivation",
             detail:
-              "Hand weeding, light cultivation and pre-emergent where it will do some good, rather than spraying over the top of everything.",
+              "Hand weeding, light cultivation and pre emergent where it will actually help, rather than spraying over the top of everything.",
           },
           {
             name: "Shrub and hedge trimming",
             detail:
-              "Shaped to the plant's own growth habit and pruned at the right point in its cycle, so it thickens up rather than getting hollow and woody.",
+              "Shaped to the plant's own growth habit and pruned at the right point in its cycle, so it thickens up instead of going hollow and woody.",
           },
           {
-            name: "Brush and fence-line clearing",
+            name: "Brush and fence line clearing",
             detail:
-              "Overgrown fence lines, ditch banks, vacant strips and lot corners cut back and cleared, with the arisings hauled away.",
+              "Overgrown fence lines, ditch banks, vacant strips and lot corners cut back and cleared, and we take the cuttings with us.",
           },
         ],
       },
     ],
-    note: "Every crew we match you with is insured, and you see the price before any work starts.",
+    note: "We are fully insured, and you see the price before we start.",
   },
 
   tree: {
     title: "Tree, heavy yard work & pressure washing",
     intro:
-      "The work that needs equipment, height and experience — trimming and removals, clearing ground back to usable, and washing the hard surfaces around the property until they look new again.",
+      "The work that needs equipment, height and experience. We trim and remove trees, clear ground back to usable, and wash the hard surfaces around the property until they look new again.",
     groups: [
       {
         heading: "Tree trimming and pruning",
@@ -261,7 +346,7 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Crown thinning and raising",
             detail:
-              "Selective cuts to let light and wind through the canopy and to lift the lower limbs clear of the lawn, the drive and the roofline, without topping the tree.",
+              "Selective cuts that let light and wind through the canopy and lift the lower limbs clear of the lawn, the drive and the roofline. We do not top trees.",
           },
           {
             name: "Deadwood removal",
@@ -276,12 +361,12 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Storm damage pruning",
             detail:
-              "Torn and split limbs cut back to a proper collar so the wound closes, rather than left ragged to rot.",
+              "Torn and split limbs cut back to a proper collar so the wound closes, instead of being left ragged to rot.",
           },
           {
             name: "Structural pruning for young trees",
             detail:
-              "Early shaping that sets a single strong leader and good branch spacing, which is far cheaper than correcting it in fifteen years.",
+              "Early shaping that sets a single strong leader and good branch spacing, which costs far less now than correcting it in fifteen years.",
           },
         ],
       },
@@ -296,17 +381,17 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Hazard and emergency removal",
             detail:
-              "Leaning, split, uprooted or storm-damaged trees dealt with as a priority, including trees already on a structure.",
+              "Leaning, split, uprooted or storm damaged trees dealt with as a priority, including trees already sitting on a structure.",
           },
           {
             name: "Stump grinding",
             detail:
-              "Ground out below grade so the area can be seeded or sodded, with grindings hauled off or backfilled and topped with soil.",
+              "Ground out below grade so the area can be seeded or sodded. We haul the grindings off, or backfill and top with soil if you prefer.",
           },
           {
-            name: "Haul-away and chipping",
+            name: "Haul away and chipping",
             detail:
-              "Brush chipped and wood cut to length — hauled away, or stacked on site if you want the firewood.",
+              "Brush chipped and wood cut to length, then taken away, or stacked on site if you want the firewood.",
           },
         ],
       },
@@ -319,14 +404,14 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
               "Overgrown areas cut back to ground and cleared, including briar, privet, vine and volunteer saplings.",
           },
           {
-            name: "Lot and fence-line clearing",
+            name: "Lot and fence line clearing",
             detail:
               "Vacant lots, easements, property lines and fence rows cleared and left mowable.",
           },
           {
-            name: "Grading and drainage touch-ups",
+            name: "Grading and drainage touch ups",
             detail:
-              "Low spots filled, swales re-cut, downspouts extended and washed-out areas restored so water leaves the property instead of sitting against it.",
+              "Low spots filled, swales re cut, downspouts extended and washed out areas restored, so water leaves the property instead of sitting against it.",
           },
           {
             name: "Ground repair after removals",
@@ -341,22 +426,22 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Driveways, walkways and patios",
             detail:
-              "Surface-cleaned at the right pressure for the material, lifting years of dirt, algae and staining out of concrete, pavers and stone without etching them.",
+              "Surface cleaned at the right pressure for the material, lifting years of dirt, algae and staining out of concrete, pavers and stone without etching them.",
           },
           {
             name: "House and siding soft wash",
             detail:
-              "Low-pressure soft wash with the correct detergent for vinyl, brick, stucco, fibre cement or painted siding, so mould and mildew are killed rather than just blasted off.",
+              "Low pressure soft wash with the correct detergent for vinyl, brick, stucco, fiber cement or painted siding, so mold and mildew are killed rather than just blasted off.",
           },
           {
             name: "Decks, fences and porches",
             detail:
-              "Timber cleaned at a pressure that will not furr the grain, and brightened ready for a stain or seal.",
+              "Timber cleaned at a pressure that will not raise the grain, and brightened ready for a stain or seal.",
           },
           {
             name: "Roof soft wash",
             detail:
-              "Black streaking and moss treated with a no-pressure wash that will not lift shingles or void the roof warranty.",
+              "Black streaking and moss treated with a no pressure wash that will not lift shingles or void your roof warranty.",
           },
           {
             name: "Concrete stain treatment",
@@ -366,18 +451,18 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Gutter face brightening",
             detail:
-              "The tiger-striping down gutter faces cleaned off, usually scheduled alongside a gutter clean-out.",
+              "The black striping down gutter faces cleaned off, usually scheduled alongside a gutter clean out.",
           },
         ],
       },
     ],
-    note: "Tree work is matched to qualified, insured providers, and we tell you up front when a removal needs a permit.",
+    note: "We are insured for tree work, and we tell you up front if a removal needs a permit.",
   },
 
   cleaning: {
     title: "Residential & commercial cleaning",
     intro:
-      "From a standing weekly clean to a full turnover between tenants. Every job is quoted against a written scope, so you know exactly what is being cleaned before anyone starts.",
+      "From a standing weekly clean to a full turnover between tenants. Every job is quoted against a written scope, so you know exactly what we are cleaning before we start.",
     groups: [
       {
         heading: "Standard and recurring cleaning",
@@ -385,7 +470,7 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Standard clean",
             detail:
-              "Kitchens, bathrooms, bedrooms and living areas: surfaces, sinks, showers, toilets, mirrors, exterior of appliances and cabinetry, floors vacuumed and mopped, trash out and beds made.",
+              "Kitchens, bathrooms, bedrooms and living areas: surfaces, sinks, showers, toilets, mirrors, the outside of appliances and cabinetry, floors vacuumed and mopped, trash out and beds made.",
           },
           {
             name: "Recurring plans",
@@ -393,9 +478,9 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
               "Weekly, every other week or monthly, with a rotating detail list so the deeper items come round on a schedule instead of never being touched.",
           },
           {
-            name: "One-off and occasion cleans",
+            name: "Single visits",
             detail:
-              "Before guests arrive, after a party, ahead of a listing photo shoot, or whenever the house simply needs a reset.",
+              "Before guests arrive, after a party, ahead of listing photos, or whenever the house simply needs a reset.",
           },
         ],
       },
@@ -408,19 +493,19 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
               "Everything in a standard clean plus baseboards, door frames, switch plates, vents, light fixtures, window sills and tracks, inside the oven, fridge and microwave, and grout scrubbed rather than wiped.",
           },
           {
-            name: "Move-in and move-out clean",
+            name: "Move in and move out clean",
             detail:
-              "An empty-property clean taken to handover standard: inside every cabinet and drawer, inside all appliances, closets, garages, and all the places furniture was hiding.",
+              "An empty property taken to handover standard: inside every cabinet and drawer, inside all appliances, closets, garages, and all the places the furniture was hiding.",
           },
           {
-            name: "Rental and short-let turnover",
+            name: "Rental and short let turnover",
             detail:
-              "Same-day turns between guests, with linens stripped and remade, consumables restocked and a photo report if you need one for your listing platform.",
+              "Same day turns between guests, with linens stripped and remade, consumables restocked and a photo report if you need one for your listing platform.",
           },
           {
-            name: "Post-construction and post-renovation",
+            name: "Post construction and post renovation",
             detail:
-              "Fine dust removed in stages — it settles more than once — plus sticker and adhesive removal, paint spot cleaning and final glass.",
+              "Fine dust removed in stages, because it settles more than once, plus sticker and adhesive removal, paint spot cleaning and final glass.",
           },
         ],
       },
@@ -430,22 +515,22 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Carpet cleaning",
             detail:
-              "Hot water extraction with pre-treatment for traffic lanes and spot treatment for stains, plus deodorising where pets have been.",
+              "Hot water extraction with pre treatment for traffic lanes and spot treatment for stains, plus deodorizing where pets have been.",
           },
           {
             name: "Upholstery and mattress cleaning",
             detail:
-              "Sofas, chairs, dining seats and mattresses cleaned with a method matched to the fabric code, so nothing shrinks or water-marks.",
+              "Sofas, chairs, dining seats and mattresses cleaned with a method matched to the fabric code, so nothing shrinks or water marks.",
           },
           {
             name: "Tile, grout and hard floors",
             detail:
-              "Grout lines scrubbed and rinsed, and sealed on request. Hardwood, LVP and laminate cleaned with the right amount of moisture for the finish.",
+              "Grout lines scrubbed and rinsed, and sealed on request. Hardwood, luxury vinyl and laminate cleaned with the right amount of moisture for the finish.",
           },
           {
             name: "Area rug cleaning",
             detail:
-              "Cleaned in place or collected for off-site treatment where the rug needs it.",
+              "Cleaned in place, or collected and treated off site where the rug needs it.",
           },
         ],
       },
@@ -455,17 +540,17 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Offices and suites",
             detail:
-              "Desks, meeting rooms, kitchens and break areas, on a nightly, weekly or set-schedule contract.",
+              "Desks, meeting rooms, kitchens and break areas, on a nightly, weekly or set schedule contract.",
           },
           {
             name: "Restrooms and common areas",
             detail:
-              "Sanitised to a checklist, with consumables restocked and a signed record left behind.",
+              "Sanitized to a checklist, with consumables restocked and a signed record left behind.",
           },
           {
-            name: "Retail and customer-facing space",
+            name: "Retail and customer facing space",
             detail:
-              "Entrances, glass, floors and fitting rooms cleaned outside trading hours.",
+              "Entrances, glass, floors and fitting rooms cleaned outside your trading hours.",
           },
         ],
       },
@@ -475,7 +560,7 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Window cleaning",
             detail:
-              "Interior and exterior glass, frames, sills and tracks. Reachable exterior glass included; anything needing height equipment is quoted separately.",
+              "Interior and exterior glass, frames, sills and tracks. Reachable exterior glass is included; anything needing height equipment we quote separately.",
           },
           {
             name: "Gutter cleaning",
@@ -485,18 +570,18 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Entryways and walkways",
             detail:
-              "Porches, stoops and entry paths washed down. Larger hard-surface washing is scheduled with the pressure washing crews under Tree & Yard.",
+              "Porches, stoops and entry paths washed down. Larger hard surface washing we schedule under Tree & Yard, where the pressure washing equipment lives.",
           },
         ],
       },
     ],
-    note: "Bring your own scope or use ours — either way you approve it in writing before the first visit.",
+    note: "Bring us your own checklist or use ours. Either way you approve it in writing before our first visit.",
   },
 
   junk: {
     title: "Junk removal & cleanouts",
     intro:
-      "One item or a whole property. Crews do the loading, the price is agreed before anything moves, and as much as possible is donated or recycled rather than landfilled.",
+      "One item or a whole property. We do the loading, the price is agreed before anything moves, and we donate or recycle as much of it as we can rather than sending it all to landfill.",
     groups: [
       {
         heading: "Single items and bulk pickup",
@@ -504,12 +589,12 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Furniture",
             detail:
-              "Sofas, beds, wardrobes, desks, tables and office furniture taken from wherever they stand — including upstairs, basements and tight stairwells.",
+              "Sofas, beds, wardrobes, desks, tables and office furniture taken from wherever they stand, including upstairs, basements and tight stairwells.",
           },
           {
             name: "Appliances",
             detail:
-              "Fridges, freezers, washers, dryers, ranges and water heaters removed, with refrigerant-bearing units routed to handlers licensed to recover it.",
+              "Fridges, freezers, washers, dryers, ranges and water heaters removed, with refrigerant bearing units routed to handlers licensed to recover it.",
           },
           {
             name: "Mattresses and box springs",
@@ -517,44 +602,44 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
               "Taken away and sent for material recovery wherever a recycler serves the area.",
           },
           {
-            name: "Electronics and e-waste",
+            name: "Electronics",
             detail:
-              "TVs, monitors, computers, printers and cabling routed to certified electronics recyclers rather than the kerb.",
+              "TVs, monitors, computers, printers and cabling routed to certified electronics recyclers rather than the curb.",
           },
           {
             name: "Large outdoor items",
             detail:
-              "Hot tubs, sheds, play sets, trampolines, above-ground pools and fencing dismantled on site and hauled away.",
+              "Hot tubs, sheds, play sets, trampolines, above ground pools and fencing dismantled on site and hauled away.",
           },
         ],
       },
       {
-        heading: "Whole-property cleanouts",
+        heading: "Whole property cleanouts",
         items: [
           {
             name: "Garage, attic and basement",
             detail:
-              "Cleared back to usable space, with anything you want kept set aside and stacked where you ask.",
+              "Cleared back to usable space. Anything you want kept, we set aside and stack where you ask.",
           },
           {
             name: "Estate cleanouts",
             detail:
-              "Worked room by room at a pace that lets the family sort keepsakes first, with donation receipts provided for anything given away.",
+              "Worked room by room at a pace that lets the family sort keepsakes first, with donation receipts for anything given away.",
           },
           {
-            name: "Foreclosure and eviction trash-outs",
+            name: "Foreclosure and eviction trash outs",
             detail:
-              "Properties emptied to broom-clean for agents, lenders and landlords, with before-and-after photos for the file.",
+              "Properties emptied to broom clean for agents, lenders and landlords, with before and after photos for the file.",
           },
           {
             name: "Storage unit cleanouts",
             detail:
-              "Units emptied and swept, coordinated directly with the facility if you cannot be there.",
+              "Units emptied and swept. We coordinate directly with the facility if you cannot be there.",
           },
           {
             name: "Heavily cluttered properties",
             detail:
-              "Handled discreetly, in stages, in unmarked or plain trucks where that matters, and without any commentary from the crew.",
+              "Handled discreetly and in stages, in plain trucks where that matters, and without any commentary from us.",
           },
         ],
       },
@@ -564,17 +649,17 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
           {
             name: "Renovation debris",
             detail:
-              "Non-hazardous demolition waste — drywall, lumber, flooring, cabinetry, tile, fixtures and packaging — cleared as the job goes or in one final haul.",
+              "Non hazardous demolition waste such as drywall, lumber, flooring, cabinetry, tile, fixtures and packaging, cleared as the job goes or in one final haul.",
           },
           {
-            name: "Roofing tear-off",
+            name: "Roofing tear off",
             detail:
-              "Shingle and underlayment debris loaded and removed, including nail sweeping of the drive and lawn.",
+              "Shingle and underlayment debris loaded and removed, and we sweep the drive and lawn for nails before we leave.",
           },
           {
             name: "Concrete, brick and soil",
             detail:
-              "Small loads of heavy inert material taken to the right facility. Weight limits apply, so these are priced by load.",
+              "Small loads of heavy inert material taken to the right facility. Weight limits apply, so we price these by the load.",
           },
           {
             name: "Yard waste and storm debris",
@@ -587,38 +672,142 @@ export const SERVICE_DETAILS: Partial<Record<ViewId, ServiceDetail>> = {
         heading: "How the job runs",
         items: [
           {
-            name: "Labour included",
+            name: "We do the lifting",
             detail:
-              "Crews carry everything out themselves. You point at what goes; nothing needs to be moved to the kerb first.",
+              "We carry everything out ourselves. You point at what goes; nothing needs to be moved to the curb first.",
           },
           {
             name: "Volume pricing, agreed first",
             detail:
-              "Priced by how much truck space the load takes, quoted on site before loading starts, with no charge if you decide against it.",
+              "Priced by how much truck space the load takes, quoted on site before we start loading, and there is no charge if you decide against it.",
           },
           {
-            name: "Same-day and next-day",
+            name: "Same day and next day",
             detail:
-              "Available in most areas when a crew has capacity, including weekend slots.",
+              "Available most of the time, including weekends, depending on what is already booked.",
           },
           {
             name: "Donation and recycling",
             detail:
-              "Usable furniture, appliances, building materials and household goods offered to local charities and reuse centres first, with metal, electronics and cardboard separated for recycling.",
+              "Usable furniture, appliances, building materials and household goods go to local charities and reuse centers first, and we separate metal, electronics and cardboard for recycling.",
           },
         ],
       },
       {
-        heading: "What crews cannot take",
+        heading: "What we cannot take",
         items: [
           {
             name: "Hazardous material",
             detail:
-              "Paint, solvents, pesticides, fuels, oils, asbestos, medical or chemical waste and pressurised cylinders need a licensed disposal route — tell us and we will point you at one.",
+              "Paint, solvents, pesticides, fuels, oils, asbestos, medical or chemical waste and pressurized cylinders need a licensed disposal route. Tell us and we will point you at one.",
           },
         ],
       },
     ],
-    note: "Quotes are given on site before loading, and you only pay for the space the load actually takes.",
+    note: "We price the load on site before anything moves, and you only pay for the space it actually takes.",
+  },
+
+  quote: {
+    title: "Property prep & curb appeal",
+    intro:
+      "When a property needs several things at once, you should not have to book them separately. Tell us about it once and we price the whole thing, then do it in the right order on one schedule.",
+    groups: [
+      {
+        heading: "Getting a price",
+        items: [
+          {
+            name: "Tell us once",
+            detail:
+              "Describe the property and what is bothering you. Photos help, and you can send as many as you like.",
+          },
+          {
+            name: "We come and look",
+            detail:
+              "For anything we cannot price honestly from photos, we walk the property first. That visit is free and there is nothing to sign at the end of it.",
+          },
+          {
+            name: "A written, itemized price",
+            detail:
+              "Line by line, so you can see what each part costs and drop anything you would rather leave. The total does not move once you accept it.",
+          },
+          {
+            name: "No pressure, no follow up calls",
+            detail:
+              "The quote stays valid for thirty days. If you want it, call us. We will not chase you.",
+          },
+        ],
+      },
+      {
+        heading: "Getting a property ready",
+        items: [
+          {
+            name: "Pre listing and pre sale prep",
+            detail:
+              "Everything a buyer sees in the first ten seconds: the lawn cut and edged, beds mulched, hedges shaped, drive and siding washed, windows cleaned and the inside taken to photo standard.",
+          },
+          {
+            name: "Tenant turnarounds",
+            detail:
+              "Full clean, junk left behind removed, yard reset and any damage cleaned up, timed to fit between the handover and the next move in.",
+          },
+          {
+            name: "Move in prep",
+            detail:
+              "The empty property cleaned properly before your furniture goes in, which is the only time it is easy to do.",
+          },
+          {
+            name: "Seasonal refresh",
+            detail:
+              "Spring and fall resets that cover the yard, the gutters, the windows and the hard surfaces in a single visit.",
+          },
+        ],
+      },
+      {
+        heading: "Curb appeal",
+        items: [
+          {
+            name: "The approach",
+            detail:
+              "Drive and walkway washed, edges cut in, weeds out of the cracks, and the mailbox and light posts cleaned up.",
+          },
+          {
+            name: "The front of the house",
+            detail:
+              "Siding soft washed, porch and steps cleaned, windows and glass done, cobwebs and wasp nests cleared.",
+          },
+          {
+            name: "The planting",
+            detail:
+              "Beds re cut and mulched, shrubs shaped back off the windows, dead material pulled and gaps filled.",
+          },
+          {
+            name: "The details",
+            detail:
+              "Gutter faces brightened, the fence washed, trash and recycling screened, and anything stored out front put out of sight.",
+          },
+        ],
+      },
+      {
+        heading: "Keeping it that way",
+        items: [
+          {
+            name: "Recurring care",
+            detail:
+              "Weekly, biweekly or monthly yard care, with cleaning and washing dropped in at the intervals that suit the property.",
+          },
+          {
+            name: "One schedule, one invoice",
+            detail:
+              "Everything on the property under one plan, billed together, so you are not tracking four different visits.",
+          },
+          {
+            name: "Vacant and second properties",
+            detail:
+              "Regular visits to keep a property that nobody is living in from looking like nobody is living in it.",
+          },
+        ],
+      },
+    ],
+    note: "Quotes are free, written and itemized, and the price we give you is the price you pay.",
   },
 };

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Minus } from "lucide-react";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RigInput } from "@/components/office/CameraRig";
 import { QuoteDrawer } from "@/components/kleanup/QuoteDrawer";
@@ -10,9 +11,9 @@ import { BRAND_LOGO, BRAND_SLOGAN } from "@/lib/brand";
 
 const OfficeCanvas = lazy(() => import("@/components/kleanup/OfficeCanvas"));
 
-const TITLE = `KleanupCrew — ${BRAND_SLOGAN}`;
+const TITLE = `KleanupCrew | ${BRAND_SLOGAN}`;
 const DESC =
-  "KleanupCrew connects property owners with insured local crews for cleaning, junk removal, lawn care, tree work and curb-appeal property care.";
+  "We clean, clear, mow, trim and haul away. KleanupCrew does the work itself, inside and outside the property, with one price agreed before we start.";
 const SOCIAL_IMAGE = "https://kleanupcrew.com/kleanupcrew-social.jpg";
 
 export const Route = createFileRoute("/")({
@@ -33,13 +34,13 @@ export const Route = createFileRoute("/")({
       { property: "og:image:height", content: "720" },
       {
         property: "og:image:alt",
-        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+        content: "KleanupCrew. Inside. Outside. Handled. Get a Free Quote.",
       },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: SOCIAL_IMAGE },
       {
         name: "twitter:image:alt",
-        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+        content: "KleanupCrew. Inside. Outside. Handled. Get a Free Quote.",
       },
     ],
   }),
@@ -49,7 +50,7 @@ export const Route = createFileRoute("/")({
 const NAV = [
   { label: "Services", id: "cleaning" as ViewId },
   { label: "How It Works", id: "quote" as ViewId },
-  { label: "For Providers", id: "junk" as ViewId },
+  { label: "Outdoor Work", id: "tree" as ViewId },
   { label: "About", id: "welcome" as ViewId },
 ];
 
@@ -74,7 +75,7 @@ function Home() {
   const { enabled: soundOn, setEnabled: setSoundOn } = useAmbientAudio();
 
   const view = useMemo(() => VIEWS.find((v) => v.id === activeId) ?? VIEWS[0]!, [activeId]);
-  // Only the service sections have a breakdown worth opening.
+  // Every section has a breakdown behind its More info button.
   const detail = SERVICE_DETAILS[activeId];
 
   const input = useRef<RigInput>({ dragX: 0, dragY: 0, zoom: 0 });
@@ -157,7 +158,7 @@ function Home() {
   const select = useCallback((id: ViewId) => {
     setActiveId(id);
     setDetailsOpen(false);
-    // Choosing a section is a request to see it, so bring the panel back - it
+    // Choosing a section is a request to see it, so bring the panel back. It
     // carries the section's actions, including More info.
     setPanelCollapsed(false);
     input.current.dragX = 0;
@@ -219,7 +220,7 @@ function Home() {
             type="button"
             className="kc-brand-btn kc-focus"
             onClick={() => window.location.assign("/")}
-            aria-label="KleanupCrew — reload the home page"
+            aria-label="KleanupCrew, reload the home page"
           >
             <img
               className="kc-brand-btn-logo"
@@ -324,7 +325,7 @@ function Home() {
             aria-label="Minimize quote information"
             title="Minimize"
           >
-            <span aria-hidden="true">—</span>
+            <Minus size={16} aria-hidden="true" />
           </button>
           <p className="pr-10 text-[10px] uppercase tracking-[0.22em] text-lime">
             {view.index} · {view.label}
@@ -337,22 +338,20 @@ function Home() {
             <button className="kc-btn" onClick={() => setQuoteOpen(true)}>
               {view.cta}
             </button>
-            {detail && (
-              <button
-                key={activeId}
-                type="button"
-                className="kc-btn-quiet kc-focus"
-                onClick={() => setDetailsOpen(true)}
-                aria-haspopup="dialog"
-              >
-                More info
-                <span aria-hidden="true" className="text-[11px] opacity-70">
-                  ↗
-                </span>
-              </button>
-            )}
+            <button
+              key={activeId}
+              type="button"
+              className="kc-btn-quiet kc-focus"
+              onClick={() => setDetailsOpen(true)}
+              aria-haspopup="dialog"
+            >
+              More info
+              <span aria-hidden="true" className="text-[11px] opacity-70">
+                ↗
+              </span>
+            </button>
             <span className="text-[11px] text-cream/50 md:hidden">
-              Insured providers · Upfront estimates · Local crews
+              Fully insured · Upfront pricing · We do the work
             </span>
           </div>
         </section>
@@ -388,7 +387,7 @@ function Home() {
 
       <ServiceDetails
         detail={detail}
-        open={detailsOpen && Boolean(detail)}
+        open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
         onQuote={() => setQuoteOpen(true)}
       />

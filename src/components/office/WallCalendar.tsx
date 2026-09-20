@@ -6,10 +6,10 @@ import { CanvasTexture, SRGBColorSpace } from "three";
  * KleanupCrew wall calendar. The printed face is drawn into an offscreen canvas
  * at print resolution and mapped onto the paper, so it stays sharp at the camera
  * distances the room is viewed from, and it is redrawn only when the visitor's
- * local calendar day actually changes - once at mount, then once a night.
+ * local calendar day actually changes: once at mount, then once a night.
  *
- * The sheet carries only the masthead and the month: nothing sits below the
- * grid, and the head is a single compact band. That lets the whole calendar
+ * The sheet carries only the masthead and the month. Nothing sits below the
+ * grid, and the head is a single compact band, which lets the whole calendar
  * hang smaller on the wall while the dates stay easy to read.
  */
 

@@ -13,9 +13,9 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BRAND_SLOGAN } from "../lib/brand";
 
-const SITE_TITLE = `KleanupCrew — ${BRAND_SLOGAN}`;
+const SITE_TITLE = `KleanupCrew | ${BRAND_SLOGAN}`;
 const SITE_DESCRIPTION =
-  "Local, insured crews for cleaning, junk removal, lawn care, tree work and complete property care.";
+  "Cleaning, junk removal, lawn care, tree work and complete property care, done by us from start to finish.";
 const SOCIAL_IMAGE = "https://kleanupcrew.com/kleanupcrew-social.jpg";
 
 function NotFoundComponent() {
@@ -101,7 +101,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:height", content: "720" },
       {
         property: "og:image:alt",
-        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+        content: "KleanupCrew. Inside. Outside. Handled. Get a Free Quote.",
       },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SITE_TITLE },
@@ -109,7 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: SOCIAL_IMAGE },
       {
         name: "twitter:image:alt",
-        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+        content: "KleanupCrew. Inside. Outside. Handled. Get a Free Quote.",
       },
     ],
     links: [

@@ -199,7 +199,7 @@ export function QuoteDrawer({
               <Dialog.Description className="mt-1 text-sm text-cream/70">
                 {sent
                   ? "Your request has been accepted for delivery to KleanupCrew."
-                  : "Tell us what needs attention. We’ll help with the next step."}
+                  : "Tell us what needs attention and we will come and price it."}
               </Dialog.Description>
             </div>
             <Dialog.Close

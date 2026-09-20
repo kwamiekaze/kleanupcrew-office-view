@@ -13,13 +13,11 @@ export function ServiceDetails({
   onClose,
   onQuote,
 }: {
-  detail: ServiceDetail | undefined;
+  detail: ServiceDetail;
   open: boolean;
   onClose: () => void;
   onQuote: () => void;
 }) {
-  if (!detail) return null;
-
   return (
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
