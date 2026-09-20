@@ -2135,7 +2135,7 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <CornerPlant />
       <SnakePlant position={[2.05, 0, -2.35]} scale={0.78} />
       <WallClock position={[-3.2, 2.6, -5.05]} />
-      <WallCalendar position={[-4.78, 2.08, -5.07]} />
+      <WallCalendar position={[-4.75, 2.35, -5.07]} />
       <SunShadowSetup />
     </>
   );

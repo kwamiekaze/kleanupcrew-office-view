@@ -7,15 +7,19 @@ import { CanvasTexture, SRGBColorSpace } from "three";
  * at print resolution and mapped onto the paper, so it stays sharp at the camera
  * distances the room is viewed from, and it is redrawn only when the visitor's
  * local calendar day actually changes - once at mount, then once a night.
+ *
+ * The sheet carries only the masthead and the month: nothing sits below the
+ * grid, and the head is a single compact band. That lets the whole calendar
+ * hang smaller on the wall while the dates stay easy to read.
  */
 
 const TEXTURE_WIDTH = 1024;
-const TEXTURE_HEIGHT = 1400;
+const TEXTURE_HEIGHT = 1200;
 
 /** Printed size on the wall, in metres, keeping the artwork's proportions. */
-const PAPER_WIDTH = 1.82;
+const PAPER_WIDTH = 1.22;
 const PAPER_HEIGHT = (PAPER_WIDTH * TEXTURE_HEIGHT) / TEXTURE_WIDTH;
-const PAPER_THICKNESS = 0.022;
+const PAPER_THICKNESS = 0.02;
 
 const PAPER = "#fffdf7";
 const FOREST = "#14502f";
@@ -43,6 +47,16 @@ const MONTHS = [
 ];
 
 const SLOGAN = "Inside. Outside. Handled.";
+
+/** Printed layout, in texture pixels. */
+const MARGIN = 56;
+const RULE_Y = 226;
+const BAND_Y = 250;
+const BAND_H = 108;
+const HEADER_Y = 386;
+const HEADER_H = 54;
+const GRID_Y = HEADER_Y + HEADER_H;
+const GRID_BOTTOM = 1148;
 
 function roundedRect(
   context: CanvasRenderingContext2D,
@@ -73,7 +87,7 @@ function setTracking(context: CanvasRenderingContext2D, value: string) {
   if ("letterSpacing" in typed) typed.letterSpacing = value;
 }
 
-/** A single soft leaf, used as a corner accent. */
+/** A single soft leaf, used as a masthead accent. */
 function drawLeaf(
   context: CanvasRenderingContext2D,
   x: number,
@@ -98,87 +112,6 @@ function drawLeaf(
   context.lineTo(length * 0.92, 0);
   context.stroke();
   context.restore();
-}
-
-/** The neighbourhood photo band across the head of the sheet. */
-function drawNeighbourhood(
-  context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
-  context.save();
-  roundedRect(context, x, y, width, height, 18);
-  context.clip();
-
-  const sky = context.createLinearGradient(0, y, 0, y + height * 0.7);
-  sky.addColorStop(0, "#b6dcf0");
-  sky.addColorStop(1, "#edf7fc");
-  context.fillStyle = sky;
-  context.fillRect(x, y, width, height);
-
-  // Distant tree line.
-  context.fillStyle = "#83b168";
-  for (let i = 0; i < 16; i += 1) {
-    const cx = x + (i / 15) * width;
-    const cy = y + height * 0.5;
-    context.beginPath();
-    context.ellipse(cx, cy, width * 0.07, height * 0.13, 0, 0, Math.PI * 2);
-    context.fill();
-  }
-
-  // A short row of houses set back behind the trees.
-  const houses: Array<[number, number, string, string]> = [
-    [0.05, 0.15, "#e6dccb", "#8a7a66"],
-    [0.27, 0.17, "#d6cab5", "#77685a"],
-    [0.52, 0.14, "#ece3d4", "#8f8070"],
-    [0.73, 0.17, "#dcd0bd", "#7b6c5d"],
-  ];
-  for (const [left, wide, wall, roof] of houses) {
-    const hx = x + width * left;
-    const hw = width * wide;
-    const hh = height * 0.26;
-    const hy = y + height * 0.36;
-    context.fillStyle = wall;
-    context.fillRect(hx, hy, hw, hh);
-    context.fillStyle = roof;
-    context.beginPath();
-    context.moveTo(hx - hw * 0.07, hy);
-    context.lineTo(hx + hw * 0.5, hy - hh * 0.55);
-    context.lineTo(hx + hw * 1.07, hy);
-    context.closePath();
-    context.fill();
-    context.fillStyle = "rgba(255,255,255,0.75)";
-    context.fillRect(hx + hw * 0.18, hy + hh * 0.26, hw * 0.16, hh * 0.34);
-    context.fillRect(hx + hw * 0.64, hy + hh * 0.26, hw * 0.16, hh * 0.34);
-  }
-
-  // Foreground hedges tuck the houses into the street.
-  context.fillStyle = "#5d9b46";
-  for (let i = 0; i < 13; i += 1) {
-    const cx = x + width * 0.02 + (i / 12) * width * 0.96;
-    context.beginPath();
-    context.ellipse(cx, y + height * 0.62, width * 0.055, height * 0.1, 0, 0, Math.PI * 2);
-    context.fill();
-  }
-
-  // Lawn, kerb and clipped verge.
-  const lawn = context.createLinearGradient(0, y + height * 0.66, 0, y + height);
-  lawn.addColorStop(0, "#92c96b");
-  lawn.addColorStop(1, "#6fae4d");
-  context.fillStyle = lawn;
-  context.fillRect(x, y + height * 0.68, width, height * 0.32);
-  context.fillStyle = "rgba(255,255,255,0.16)";
-  for (let i = 0; i < 4; i += 1) {
-    context.fillRect(x, y + height * (0.74 + i * 0.06), width, height * 0.014);
-  }
-
-  context.restore();
-  context.strokeStyle = "rgba(20,80,47,0.18)";
-  context.lineWidth = 2;
-  roundedRect(context, x, y, width, height, 18);
-  context.stroke();
 }
 
 /** Paint the whole sheet for the given local day. */
@@ -214,159 +147,133 @@ function drawCalendar(context: CanvasRenderingContext2D, today: Date) {
 
   context.textBaseline = "alphabetic";
 
-  // Masthead.
-  drawLeaf(context, 62, 150, 92, -0.5, "#5ea83a");
-  drawLeaf(context, 86, 196, 66, -1.15, "#8ccf5c");
-  drawLeaf(context, W - 62, 132, 86, Math.PI + 0.55, "#5ea83a");
+  // Masthead: the wordmark and the slogan, and nothing else above the month.
+  drawLeaf(context, 60, 122, 66, -0.5, "#5ea83a");
+  drawLeaf(context, W - 60, 110, 62, Math.PI + 0.55, "#5ea83a");
 
   context.textAlign = "left";
-  context.font = `bold 92px ${SANS}`;
+  context.font = `bold 78px ${SANS}`;
   const brandA = "Kleanup";
   const brandB = "Crew";
   const widthA = context.measureText(brandA).width;
   const widthB = context.measureText(brandB).width;
   const brandX = (W - (widthA + widthB)) / 2;
   context.fillStyle = FOREST;
-  context.fillText(brandA, brandX, 190);
+  context.fillText(brandA, brandX, 148);
   context.fillStyle = LIME;
-  context.fillText(brandB, brandX + widthA, 190);
+  context.fillText(brandB, brandX + widthA, 148);
 
-  // Slogan, set at the top right of the sheet.
   context.textAlign = "right";
   setTracking(context, "3px");
-  context.font = `bold 38px ${SANS}`;
+  context.font = `bold 33px ${SANS}`;
   context.fillStyle = FOREST_SOFT;
-  context.fillText(SLOGAN, W - 62, 252);
+  context.fillText(SLOGAN, W - MARGIN - 8, 198);
   setTracking(context, "0px");
 
   context.strokeStyle = GOLD;
   context.lineWidth = 3;
   context.beginPath();
-  context.moveTo(62, 282);
-  context.lineTo(W - 62, 282);
+  context.moveTo(MARGIN, RULE_Y);
+  context.lineTo(W - MARGIN, RULE_Y);
   context.stroke();
 
-  drawNeighbourhood(context, 48, 306, W - 96, 286);
-
   // Month band.
-  const bandY = 626;
-  const bandH = 112;
   context.fillStyle = FOREST;
-  roundedRect(context, 48, bandY, W - 96, bandH, 12);
+  roundedRect(context, MARGIN, BAND_Y, W - MARGIN * 2, BAND_H, 12);
   context.fill();
   context.fillStyle = GOLD;
-  context.fillRect(48, bandY + bandH - 7, W - 96, 5);
+  context.fillRect(MARGIN, BAND_Y + BAND_H - 7, W - MARGIN * 2, 5);
 
   const monthLabel = MONTHS[month] ?? "";
   const yearLabel = ` ${year}`;
   context.textAlign = "left";
-  context.font = `bold 68px ${SANS}`;
+  context.font = `bold 66px ${SANS}`;
   const monthWidth = context.measureText(monthLabel).width;
-  context.font = `300 62px ${SANS}`;
+  context.font = `300 60px ${SANS}`;
   const yearWidth = context.measureText(yearLabel).width;
   const headX = (W - (monthWidth + yearWidth)) / 2;
-  context.font = `bold 68px ${SANS}`;
+  context.font = `bold 66px ${SANS}`;
   context.fillStyle = "#ffffff";
-  context.fillText(monthLabel, headX, bandY + 78);
-  context.font = `300 62px ${SANS}`;
+  context.fillText(monthLabel, headX, BAND_Y + 76);
+  context.font = `300 60px ${SANS}`;
   context.fillStyle = "#cfe6c4";
-  context.fillText(yearLabel, headX + monthWidth, bandY + 78);
+  context.fillText(yearLabel, headX + monthWidth, BAND_Y + 76);
 
   // Grid.
-  const gridX = 48;
-  const gridW = W - 96;
+  const gridX = MARGIN;
+  const gridW = W - MARGIN * 2;
   const cellW = gridW / 7;
-  const headerY = 766;
-  const headerH = 56;
-  const gridY = headerY + headerH;
-  const gridH = 1232 - gridY;
+  const gridH = GRID_BOTTOM - GRID_Y;
   const cellH = gridH / weekRows;
 
   context.fillStyle = "#f1ece0";
-  context.fillRect(gridX, headerY, gridW, headerH);
+  context.fillRect(gridX, HEADER_Y, gridW, HEADER_H);
   context.textAlign = "center";
   setTracking(context, "2px");
-  context.font = `bold 27px ${SANS}`;
+  context.font = `bold 28px ${SANS}`;
   context.fillStyle = "#54655a";
   WEEKDAYS.forEach((label, index) => {
-    context.fillText(label, gridX + cellW * (index + 0.5), headerY + 38);
+    context.fillText(label, gridX + cellW * (index + 0.5), HEADER_Y + 37);
   });
   setTracking(context, "0px");
 
   context.fillStyle = "#ffffff";
-  context.fillRect(gridX, gridY, gridW, gridH);
+  context.fillRect(gridX, GRID_Y, gridW, gridH);
 
   context.strokeStyle = GRID_LINE;
   context.lineWidth = 2;
   for (let column = 0; column <= 7; column += 1) {
     const x = gridX + column * cellW;
     context.beginPath();
-    context.moveTo(x, headerY);
-    context.lineTo(x, gridY + gridH);
+    context.moveTo(x, HEADER_Y);
+    context.lineTo(x, GRID_Y + gridH);
     context.stroke();
   }
   for (let row = 0; row <= weekRows; row += 1) {
-    const y = gridY + row * cellH;
+    const y = GRID_Y + row * cellH;
     context.beginPath();
     context.moveTo(gridX, y);
     context.lineTo(gridX + gridW, y);
     context.stroke();
   }
   context.beginPath();
-  context.moveTo(gridX, headerY);
-  context.lineTo(gridX + gridW, headerY);
+  context.moveTo(gridX, HEADER_Y);
+  context.lineTo(gridX + gridW, HEADER_Y);
   context.stroke();
+
+  // Dates are sized from the cell, so a six-week month stays as readable as a
+  // five-week one.
+  const unit = Math.min(cellW, cellH);
+  const dateFont = Math.round(unit * 0.4);
+  const chip = unit * 0.72;
 
   for (let day = 1; day <= daysInMonth; day += 1) {
     const slot = firstWeekday + day - 1;
     const column = slot % 7;
     const row = Math.floor(slot / 7);
     const centreX = gridX + cellW * (column + 0.5);
-    const centreY = gridY + cellH * (row + 0.5);
+    const centreY = GRID_Y + cellH * (row + 0.5);
 
     if (day === dayOfMonth) {
       // Today: the only highlighted cell on the sheet.
       context.fillStyle = "#eaf5e0";
       context.fillRect(
         gridX + cellW * column + 1,
-        gridY + cellH * row + 1,
+        GRID_Y + cellH * row + 1,
         cellW - 2,
         cellH - 2,
       );
-      const chip = Math.min(cellW, cellH) * 0.74;
       context.fillStyle = FOREST;
       roundedRect(context, centreX - chip / 2, centreY - chip / 2, chip, chip, chip * 0.28);
       context.fill();
       context.fillStyle = "#ffffff";
-      context.font = `bold 42px ${SANS}`;
+      context.font = `bold ${dateFont}px ${SANS}`;
     } else {
       context.fillStyle = INK;
-      context.font = `500 40px ${SANS}`;
+      context.font = `500 ${dateFont}px ${SANS}`;
     }
-    context.fillText(String(day), centreX, centreY + 14);
+    context.fillText(String(day), centreX, centreY + dateFont * 0.35);
   }
-
-  // Footer.
-  context.textAlign = "left";
-  context.font = `italic 600 31px ${SANS}`;
-  context.fillStyle = FOREST_SOFT;
-  context.fillText("Good Work Changes", 60, 1296);
-  context.fillText("Neighborhoods", 60, 1338);
-  const heartX = 60 + context.measureText("Neighborhoods").width + 16;
-  context.fillStyle = LIME;
-  context.font = `30px ${SANS}`;
-  context.fillText("♥", heartX, 1338);
-
-  context.fillStyle = "#e8f3de";
-  roundedRect(context, 548, 1262, W - 548 - 60, 96, 20);
-  context.fill();
-  context.textAlign = "center";
-  context.fillStyle = FOREST;
-  context.font = `600 28px ${SANS}`;
-  const pillCentre = 548 + (W - 548 - 60) / 2;
-  context.fillText("Same Neighbors.", pillCentre, 1300);
-  context.fillText("A Cleaner Tomorrow.", pillCentre, 1338);
-  drawLeaf(context, W - 92, 1276, 34, 0.5, "#8ccf5c");
 }
 
 /** Today's local date, refreshed the moment the day rolls over. */
@@ -458,39 +365,39 @@ export function WallCalendar({ position }: { position: [number, number, number] 
 
       {/* Twin-loop spiral over the top edge. */}
       <mesh
-        position={[0, halfHeight - 0.024, -PAPER_THICKNESS / 2]}
+        position={[0, halfHeight - 0.018, -PAPER_THICKNESS / 2]}
         rotation-z={Math.PI / 2}
         castShadow
       >
-        <cylinderGeometry args={[0.006, 0.006, PAPER_WIDTH * 0.94, 8]} />
+        <cylinderGeometry args={[0.005, 0.005, PAPER_WIDTH * 0.94, 8]} />
         <meshStandardMaterial color="#b89a55" metalness={0.55} roughness={0.34} />
       </mesh>
       {Array.from({ length: 15 }, (_, index) => (
         <mesh
           key={index}
           position={[
-            -halfWidth + 0.08 + (index / 14) * (PAPER_WIDTH - 0.16),
-            halfHeight - 0.024,
+            -halfWidth + 0.06 + (index / 14) * (PAPER_WIDTH - 0.12),
+            halfHeight - 0.018,
             -PAPER_THICKNESS / 2,
           ]}
           rotation-y={Math.PI / 2}
           castShadow
         >
-          <torusGeometry args={[0.036, 0.0058, 6, 16]} />
+          <torusGeometry args={[0.027, 0.0046, 6, 16]} />
           <meshStandardMaterial color="#c6a961" metalness={0.6} roughness={0.3} />
         </mesh>
       ))}
 
       {/* Brass hanging tab. */}
-      <mesh position={[0, halfHeight + 0.042, -PAPER_THICKNESS / 2]} castShadow>
-        <boxGeometry args={[0.1, 0.07, 0.012]} />
+      <mesh position={[0, halfHeight + 0.032, -PAPER_THICKNESS / 2]} castShadow>
+        <boxGeometry args={[0.08, 0.055, 0.011]} />
         <meshStandardMaterial color="#c9a24a" metalness={0.62} roughness={0.34} />
       </mesh>
       <mesh
-        position={[0, halfHeight + 0.055, -PAPER_THICKNESS / 2 + 0.008]}
+        position={[0, halfHeight + 0.042, -PAPER_THICKNESS / 2 + 0.007]}
         rotation-x={Math.PI / 2}
       >
-        <cylinderGeometry args={[0.013, 0.013, 0.016, 12]} />
+        <cylinderGeometry args={[0.011, 0.011, 0.014, 12]} />
         <meshStandardMaterial color="#5d4f2c" roughness={0.5} />
       </mesh>
     </group>
