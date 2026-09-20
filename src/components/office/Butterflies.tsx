@@ -5,9 +5,10 @@ import { DoubleSide, Shape, ShapeGeometry } from "three";
 
 /**
  * Butterflies crossing the garden outside the window. They fly the full width
- * of the view, left to right and right to left, and the wait between passes is
- * drawn fresh every time - a few seconds, then longer, then shorter - so the
- * timing never settles into a loop the eye can predict.
+ * of the view, left to right and right to left, with the window left empty for
+ * a while between passes. That gap is measured from the moment the last one
+ * leaves - not from when it set off - and its length is drawn fresh every time,
+ * so the timing never settles into a loop the eye can predict.
  *
  * They live on their own plane just in front of the painted garden and behind
  * the glass, so the wall crops them to the window opening for free.
@@ -18,6 +19,10 @@ const COUNT = 3;
 /** Flight plane and the reach of a pass, in metres. */
 const PLANE_Z = -6.45;
 const TRAVEL = 5.9;
+
+/** Empty-window gap between passes, in seconds. */
+const GAP_MIN = 7;
+const GAP_RANGE = 3;
 
 const BODY = "#2c2317";
 
@@ -83,7 +88,7 @@ export function Butterflies({ reducedMotion }: { reducedMotion: boolean }) {
   const leftWings = useRef<Array<Group | null>>([]);
   const rightWings = useRef<Array<Group | null>>([]);
   const flights = useRef<Flight[]>(Array.from({ length: COUNT }, idleFlight));
-  const nextPass = useRef(0);
+  const nextPass = useRef(3);
   const lastDirection = useRef(1);
 
   const [outer, inner] = useMemo(() => {
@@ -125,6 +130,7 @@ export function Butterflies({ reducedMotion }: { reducedMotion: boolean }) {
 
     if (now >= nextPass.current) {
       const waiting = flights.current.filter((flight) => !flight.active);
+      let passEnds = now;
       if (waiting.length > 0) {
         // Usually turn around, but not always, so the pattern stays loose.
         const direction = Math.random() < 0.74 ? -lastDirection.current : lastDirection.current;
@@ -136,6 +142,7 @@ export function Butterflies({ reducedMotion }: { reducedMotion: boolean }) {
           flight.active = true;
           flight.start = now + index * (0.4 + Math.random() * 0.9);
           flight.duration = 5.6 + Math.random() * 3.6;
+          passEnds = Math.max(passEnds, flight.start + flight.duration);
           flight.direction = direction;
           flight.height = 1.55 + Math.random() * 0.85;
           flight.depth = PLANE_Z + Math.random() * 0.24;
@@ -148,8 +155,9 @@ export function Butterflies({ reducedMotion }: { reducedMotion: boolean }) {
           flight.previousHeight = flight.height;
         }
       }
-      // A fresh wait every time: sometimes a few seconds, sometimes far longer.
-      nextPass.current = now + 2.4 + Math.random() * 6.6;
+      // Counted from the moment the window is empty again, so a pass never
+      // starts while the one before it is still crossing.
+      nextPass.current = passEnds + GAP_MIN + Math.random() * GAP_RANGE;
     }
 
     for (let index = 0; index < COUNT; index += 1) {
