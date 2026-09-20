@@ -252,7 +252,7 @@ function DeskProps() {
         </mesh>
         {/* The mug is filled generously, well clear of the rim. */}
         <mesh position={[0, 0.035, 0]}>
-          <cylinderGeometry args={[0.073, 0.073, 0.006, 40]} />
+          <cylinderGeometry args={[0.081, 0.081, 0.006, 40]} />
           <meshBasicMaterial color="#2a1008" />
         </mesh>
         <mesh position={[0, -0.084, 0]} rotation-x={-Math.PI / 2}>
@@ -263,8 +263,11 @@ function DeskProps() {
           <torusGeometry args={[0.077, 0.008, 10, 32]} />
           <meshStandardMaterial color={CREAM} roughness={0.3} />
         </mesh>
-        <mesh position={[0.148, 0.004, 0]} scale={[1, 1.18, 1]} castShadow>
-          <torusGeometry args={[0.049, 0.012, 12, 32]} />
+        {/* C-shaped handle. Its two open ends are buried in the mug wall below
+            the coffee line, so it reads as joined to the cup without any part of
+            it showing inside the drink. */}
+        <mesh position={[0.0935, -0.02, 0]} rotation-z={-2.094} castShadow>
+          <torusGeometry args={[0.0467, 0.012, 14, 40, 4.19]} />
           <meshStandardMaterial color={CREAM} roughness={0.3} />
         </mesh>
       </group>
@@ -779,8 +782,12 @@ function JunkZone() {
             <sphereGeometry args={[scale, 20, 14]} />
             <meshStandardMaterial color="#303633" roughness={0.82} />
           </mesh>
-          <mesh position={[0, scale * 1.17, 0]} rotation-z={Math.PI / 4}>
-            <coneGeometry args={[scale * 0.16, scale * 0.28, 8]} />
+          <mesh position={[0, scale * 1.28, 0]}>
+            <cylinderGeometry args={[scale * 0.12, scale * 0.32, scale * 0.26, 10]} />
+            <meshStandardMaterial color="#2a302c" roughness={0.88} />
+          </mesh>
+          <mesh position={[0, scale * 1.53, 0]} rotation-z={0.16}>
+            <coneGeometry args={[scale * 0.13, scale * 0.26, 8]} />
             <meshStandardMaterial color="#202522" roughness={0.9} />
           </mesh>
         </group>
@@ -988,6 +995,96 @@ function TreeCareWall() {
   );
 }
 
+const TREE_TONES = [
+  { dark: "#35713f", base: "#478c4a", light: "#63a75a" },
+  { dark: "#2f6a3c", base: "#427f46", light: "#5c9e55" },
+  { dark: "#3b7a44", base: "#4f9350", light: "#6bad5f" },
+] as const;
+
+/**
+ * A painted broadleaf tree for the window view: a tapered trunk that forks into
+ * visible limbs, under a canopy built from overlapping leaf clusters in three
+ * tones so it reads as foliage rather than a flat green circle.
+ */
+function WindowTree({
+  position,
+  scale = 1,
+  tone = 0,
+  flip = false,
+}: {
+  position: [number, number, number];
+  scale?: number;
+  tone?: number;
+  flip?: boolean;
+}) {
+  const palette = TREE_TONES[tone % TREE_TONES.length] ?? TREE_TONES[0];
+  const side = flip ? -1 : 1;
+
+  return (
+    <group position={position} scale={scale}>
+      {/* shade pooling at the roots, so the tree sits on the grass */}
+      <mesh position={[0, -0.79, -0.002]} scale={[1.8, 0.42, 1]}>
+        <circleGeometry args={[0.12, 18]} />
+        <meshBasicMaterial color="#2f5d38" transparent opacity={0.22} />
+      </mesh>
+      {/* trunk, tapering out towards the roots */}
+      <mesh position={[0, -0.42, 0]}>
+        <cylinderGeometry args={[0.028, 0.055, 0.76, 8]} />
+        <meshBasicMaterial color="#7a5438" />
+      </mesh>
+      {/* shaded side of the trunk */}
+      <mesh position={[0.019, -0.42, 0.001]}>
+        <cylinderGeometry args={[0.009, 0.019, 0.76, 6]} />
+        <meshBasicMaterial color="#5f3f29" />
+      </mesh>
+      {/* limbs reaching up into the canopy */}
+      <mesh position={[-0.07 * side, -0.26, 0.002]} rotation-z={0.72 * side}>
+        <cylinderGeometry args={[0.009, 0.026, 0.32, 6]} />
+        <meshBasicMaterial color="#7a5438" />
+      </mesh>
+      <mesh position={[0.07 * side, -0.32, 0.002]} rotation-z={-0.64 * side}>
+        <cylinderGeometry args={[0.008, 0.023, 0.3, 6]} />
+        <meshBasicMaterial color="#6d4b31" />
+      </mesh>
+      {/* canopy: shaded underside */}
+      <mesh position={[-0.02 * side, 0.1, 0.006]}>
+        <circleGeometry args={[0.44, 24]} />
+        <meshBasicMaterial color={palette.dark} />
+      </mesh>
+      <mesh position={[-0.29 * side, -0.05, 0.007]}>
+        <circleGeometry args={[0.26, 20]} />
+        <meshBasicMaterial color={palette.dark} />
+      </mesh>
+      <mesh position={[0.3 * side, -0.03, 0.008]}>
+        <circleGeometry args={[0.28, 20]} />
+        <meshBasicMaterial color={palette.dark} />
+      </mesh>
+      {/* canopy: mid tone */}
+      <mesh position={[-0.05 * side, 0.17, 0.01]}>
+        <circleGeometry args={[0.35, 22]} />
+        <meshBasicMaterial color={palette.base} />
+      </mesh>
+      <mesh position={[0.21 * side, 0.11, 0.011]}>
+        <circleGeometry args={[0.23, 18]} />
+        <meshBasicMaterial color={palette.base} />
+      </mesh>
+      <mesh position={[-0.27 * side, 0.09, 0.012]}>
+        <circleGeometry args={[0.19, 18]} />
+        <meshBasicMaterial color={palette.base} />
+      </mesh>
+      {/* canopy: sunlit crown */}
+      <mesh position={[-0.13 * side, 0.31, 0.014]}>
+        <circleGeometry args={[0.2, 18]} />
+        <meshBasicMaterial color={palette.light} />
+      </mesh>
+      <mesh position={[0.07 * side, 0.34, 0.015]}>
+        <circleGeometry args={[0.13, 16]} />
+        <meshBasicMaterial color={palette.light} />
+      </mesh>
+    </group>
+  );
+}
+
 function SunnyWindowView() {
   return (
     <group>
@@ -999,11 +1096,13 @@ function SunnyWindowView() {
 
       {/* cheerful sun wearing shades, with a soft glow and rays */}
       <group position={[1.25, 2.68, -1.68]}>
-        {/* soft outer glow */}
-        <mesh position={[0, 0, -0.02]}>
-          <circleGeometry args={[0.46, 32]} />
-          <meshBasicMaterial color="#ffc266" transparent opacity={0.28} />
-        </mesh>
+        {/* soft layered glow */}
+        {[0.54, 0.47, 0.4].map((radius, index) => (
+          <mesh key={radius} position={[0, 0, -0.035 + index * 0.004]}>
+            <circleGeometry args={[radius, 36]} />
+            <meshBasicMaterial color="#ffd489" transparent opacity={0.1} />
+          </mesh>
+        ))}
         {/* sun rays */}
         {Array.from({ length: 8 }, (_, index) => {
           const angle = (index / 8) * Math.PI * 2;
@@ -1074,36 +1173,25 @@ function SunnyWindowView() {
       {/* natural midground grove with no neighboring buildings */}
       {(
         [
-          { x: -1.18, y: 1.48, scale: 0.72, color: "#4b8d50" },
-          { x: -0.72, y: 1.57, scale: 0.86, color: "#397a45" },
-          { x: -0.18, y: 1.52, scale: 0.76, color: "#58994f" },
-          { x: 0.38, y: 1.58, scale: 0.9, color: "#3d8048" },
-          { x: 0.95, y: 1.51, scale: 0.78, color: "#55954e" },
+          { x: -1.18, y: 1.46, scale: 0.6, tone: 0, flip: false },
+          { x: -0.72, y: 1.55, scale: 0.7, tone: 1, flip: true },
+          { x: -0.18, y: 1.5, scale: 0.64, tone: 2, flip: false },
+          { x: 0.38, y: 1.56, scale: 0.74, tone: 1, flip: false },
+          { x: 0.95, y: 1.49, scale: 0.65, tone: 0, flip: true },
         ] as const
-      ).map(({ x, y, scale, color }, index) => (
-        <group key={x} position={[x, y, -1.575 + index * 0.012]} scale={scale}>
-          <mesh position={[0, -0.43, 0]}>
-            <boxGeometry args={[0.09, 0.7, 0.04]} />
-            <meshBasicMaterial color="#77523a" />
-          </mesh>
-          <mesh scale={[1.05, 0.92, 1]}>
-            <circleGeometry args={[0.44, 20]} />
-            <meshBasicMaterial color={color} />
-          </mesh>
-          <mesh position={[-0.24, -0.08, 0.025]}>
-            <circleGeometry args={[0.29, 18]} />
-            <meshBasicMaterial color="#63a658" />
-          </mesh>
-          <mesh position={[0.25, -0.07, 0.05]}>
-            <circleGeometry args={[0.31, 18]} />
-            <meshBasicMaterial color="#4f934e" />
-          </mesh>
-        </group>
+      ).map(({ x, y, scale, tone, flip }, index) => (
+        <WindowTree
+          key={x}
+          position={[x, y, -1.585 + index * 0.014]}
+          scale={scale}
+          tone={tone}
+          flip={flip}
+        />
       ))}
 
       {/* clipped lawn stripes, garden stones, foreground trees and flower beds */}
       {[0.77, 0.9, 1.03].map((y) => (
-        <mesh key={y} position={[0, y, -1.505]}>
+        <mesh key={y} position={[0, y, -1.6]}>
           <planeGeometry args={[3.45, 0.025]} />
           <meshBasicMaterial color="#a9d582" transparent opacity={0.55} />
         </mesh>
@@ -1121,38 +1209,35 @@ function SunnyWindowView() {
         </mesh>
       ))}
       {[-1.5, 1.55].map((x, index) => (
-        <group key={x} position={[x, 1.42, -1.465 + index * 0.012]}>
-          <mesh position={[0, -0.45, 0]}>
-            <boxGeometry args={[0.12, 0.9, 0.06]} />
-            <meshBasicMaterial color="#755039" />
-          </mesh>
-          {(
-            [
-              [0, 0.12, 0.48],
-              [-0.24, -0.02, 0.34],
-              [0.25, -0.06, 0.38],
-            ] as Array<[number, number, number]>
-          ).map(([dx, dy, radius], leafIndex) => (
-            <mesh key={leafIndex} position={[dx, dy, 0.06 + leafIndex * 0.035]}>
-              <circleGeometry args={[radius, 20]} />
-              <meshBasicMaterial color={index ? "#3f8149" : "#4a8c4f"} />
-            </mesh>
-          ))}
-        </group>
+        <WindowTree
+          key={x}
+          position={[x, 1.4, -1.475 + index * 0.014]}
+          scale={0.92}
+          tone={index ? 1 : 2}
+          flip={index === 1}
+        />
       ))}
       {[-1.05, -0.82, 0.78, 1.02].map((x, index) => (
-        <group key={x} position={[x, 0.66, -1.44 + index * 0.008]}>
-          <mesh position={[0, -0.25, -0.01]}>
-            <boxGeometry args={[0.035, 0.22, 0.02]} />
-            <meshBasicMaterial color="#77523a" />
+        <group key={x} position={[x, 0.64, -1.44 + index * 0.008]}>
+          <mesh scale={[1.3, 0.7, 1]}>
+            <circleGeometry args={[0.21, 18]} />
+            <meshBasicMaterial color="#336e42" />
           </mesh>
-          <mesh scale={[1.25, 0.65, 1]}>
-            <circleGeometry args={[0.22, 16]} />
-            <meshBasicMaterial color="#397648" />
+          <mesh position={[-0.07, 0.05, 0.004]} scale={[1, 0.82, 1]}>
+            <circleGeometry args={[0.13, 16]} />
+            <meshBasicMaterial color="#3f8449" />
           </mesh>
-          <mesh position={[0, 0.09, 0.025]}>
-            <circleGeometry args={[0.035, 10]} />
+          <mesh position={[0.09, 0.04, 0.006]} scale={[1, 0.8, 1]}>
+            <circleGeometry args={[0.11, 16]} />
+            <meshBasicMaterial color="#4a9152" />
+          </mesh>
+          <mesh position={[-0.05, 0.1, 0.012]}>
+            <circleGeometry args={[0.028, 10]} />
             <meshBasicMaterial color={index % 2 ? "#fff0ad" : "#f5a1a8"} />
+          </mesh>
+          <mesh position={[0.08, 0.09, 0.012]}>
+            <circleGeometry args={[0.024, 10]} />
+            <meshBasicMaterial color={index % 2 ? "#f5a1a8" : "#fff0ad"} />
           </mesh>
         </group>
       ))}
