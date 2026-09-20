@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
-import type { Group } from "three";
+import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { SRGBColorSpace } from "three";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
@@ -131,18 +131,33 @@ function Monitor() {
           polygonOffsetFactor={-1}
         />
       </mesh>
-      <mesh position={[0, 0.03, 0]} castShadow>
-        <boxGeometry args={[0.5, 0.04, 0.26]} />
-        <meshStandardMaterial color={CHARCOAL} />
+      {/* machined elliptical foot */}
+      <mesh position={[0, 0.012, 0.01]} scale={[1.75, 1, 1]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.16, 0.168, 0.024, 40]} />
+        <meshStandardMaterial color="#c0c5c9" metalness={0.3} roughness={0.3} />
       </mesh>
-      <mesh position={[0, 0.22, 0]} castShadow>
-        <cylinderGeometry args={[0.04, 0.05, 0.38, 12]} />
-        <meshStandardMaterial color={CHARCOAL} />
+      <mesh position={[0, 0.026, 0.01]} scale={[1.7, 1, 1]}>
+        <cylinderGeometry args={[0.15, 0.15, 0.006, 40]} />
+        <meshStandardMaterial color="#d7dbde" metalness={0.28} roughness={0.26} />
+      </mesh>
+      {/* slim tapered neck with a hinge collar */}
+      <mesh position={[0, 0.25, -0.01]} rotation-x={0.04} castShadow>
+        <boxGeometry args={[0.13, 0.44, 0.032]} />
+        <meshStandardMaterial color="#c0c5c9" metalness={0.3} roughness={0.32} />
+      </mesh>
+      <mesh position={[0, 0.462, 0]} rotation-z={Math.PI / 2}>
+        <cylinderGeometry args={[0.028, 0.028, 0.15, 18]} />
+        <meshStandardMaterial color="#aab0b4" metalness={0.3} roughness={0.34} />
       </mesh>
       <group position={[0, 0.62, 0.02]} rotation-x={-0.06}>
-        <mesh castShadow>
-          <boxGeometry args={[1.22, 0.7, 0.05]} />
-          <meshStandardMaterial color={CHARCOAL} roughness={0.5} />
+        {/* thin display sandwich: dark bezel face over an aluminium housing */}
+        <mesh position={[0, 0, 0.014]} castShadow>
+          <boxGeometry args={[1.185, 0.665, 0.022]} />
+          <meshStandardMaterial color="#1b1e20" roughness={0.42} metalness={0.2} />
+        </mesh>
+        <mesh position={[0, -0.005, -0.012]} castShadow>
+          <boxGeometry args={[1.11, 0.6, 0.034]} />
+          <meshStandardMaterial color="#b8bdc1" metalness={0.3} roughness={0.34} />
         </mesh>
         <mesh position={[0, 0, 0.032]}>
           <planeGeometry args={[1.14, 0.62]} />
@@ -174,44 +189,153 @@ function Monitor() {
   );
 }
 
-function DeskProps() {
+/** Key widths per row, in units; each row is normalised to the deck width. */
+const KEY_ROWS: ReadonlyArray<ReadonlyArray<number>> = [
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.6],
+  [1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.1],
+  [1.75, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.85],
+  [2.25, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.35],
+  [1, 1, 1, 1.35, 6.3, 1.35, 1, 1, 1],
+];
+
+/** Slim aluminium keyboard with a full sculpted key field. */
+function Keyboard() {
+  const keys = useMemo(() => {
+    const deck = 0.68;
+    const gap = 0.0045;
+    const pitch = 0.0335;
+    const placed: Array<{
+      id: string;
+      x: number;
+      z: number;
+      width: number;
+      depth: number;
+    }> = [];
+
+    KEY_ROWS.forEach((row, rowIndex) => {
+      const units = row.reduce((total, unit) => total + unit, 0);
+      const unit = (deck - gap * (row.length - 1)) / units;
+      const isFunctionRow = rowIndex === 0;
+      let cursor = -deck / 2;
+
+      row.forEach((widthUnits, keyIndex) => {
+        const width = unit * widthUnits;
+        placed.push({
+          id: `${rowIndex}-${keyIndex}`,
+          x: cursor + width / 2,
+          z: -0.085 + rowIndex * pitch + (isFunctionRow ? 0.006 : 0),
+          width,
+          depth: isFunctionRow ? 0.017 : 0.027,
+        });
+        cursor += width + gap;
+      });
+    });
+
+    return placed;
+  }, []);
+
+  return (
+    <group position={[0, 0, 0.28]}>
+      {/* brushed aluminium deck with a darker underbody for a thin edge */}
+      <mesh position={[0, 0.011, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.735, 0.014, 0.245]} />
+        <meshStandardMaterial color="#d5d9dc" metalness={0.32} roughness={0.34} />
+      </mesh>
+      <mesh position={[0, 0.003, 0]}>
+        <boxGeometry args={[0.72, 0.008, 0.232]} />
+        <meshStandardMaterial color="#9ba1a5" metalness={0.25} roughness={0.45} />
+      </mesh>
+      {keys.map(({ id, x, z, width, depth }) => (
+        <mesh key={id} position={[x, 0.0225, z]} castShadow>
+          <boxGeometry args={[width, 0.009, depth]} />
+          <meshStandardMaterial color="#191c1f" roughness={0.68} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/** Seamless low-profile mouse on a stitched desk mat. */
+function DeskMouse() {
+  return (
+    <group position={[0.55, 0, 0.3]}>
+      <mesh position={[0, 0.005, 0]} receiveShadow>
+        <boxGeometry args={[0.34, 0.01, 0.38]} />
+        <meshStandardMaterial color="#313f38" roughness={0.96} />
+      </mesh>
+      <mesh position={[0, 0.0105, 0]} rotation-x={-Math.PI / 2}>
+        <planeGeometry args={[0.31, 0.35]} />
+        <meshStandardMaterial color="#38473f" roughness={0.98} />
+      </mesh>
+      {/* dark underbody, then the seamless white shell over it */}
+      <mesh position={[0, 0.018, 0]} scale={[0.069, 0.012, 0.108]} castShadow>
+        <sphereGeometry args={[1, 28, 18]} />
+        <meshStandardMaterial color="#3d4440" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 0.019, 0.006]} scale={[0.062, 0.023, 0.125]} castShadow>
+        <sphereGeometry args={[1, 34, 22, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color="#f5f5f2" roughness={0.16} metalness={0.05} />
+      </mesh>
+      <mesh position={[0, 0.0188, 0.006]} scale={[0.063, 0.005, 0.126]}>
+        <sphereGeometry args={[1, 26, 12]} />
+        <meshStandardMaterial color="#d8d9d5" roughness={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Wisps of steam drifting off a hot mug. */
+function MugSteam({ reducedMotion }: { reducedMotion: boolean }) {
+  const puffs = useRef<Array<Mesh | null>>([]);
+  const count = 10;
+
+  useFrame(({ clock }) => {
+    const time = reducedMotion ? 2.4 : clock.elapsedTime;
+    puffs.current.forEach((puff, index) => {
+      if (!puff) return;
+      const life = (time * 0.22 + index / count) % 1;
+      const sway = Math.sin(life * 3.1 + index * 2.4);
+      // the plume widens and wanders as it climbs, rather than stacking
+      puff.position.set(
+        sway * 0.055 * life + (index % 3 === 0 ? 0.012 : -0.008),
+        0.05 + life * 0.3,
+        Math.cos(life * 2.6 + index) * 0.03 * life,
+      );
+      puff.scale.setScalar(0.32 + life * 1.85);
+      const material = puff.material as MeshBasicMaterial;
+      material.opacity = Math.sin(life * Math.PI) * 0.17;
+    });
+  });
+
+  return (
+    <group>
+      {Array.from({ length: count }, (_, index) => (
+        <mesh
+          key={index}
+          ref={(node) => {
+            puffs.current[index] = node;
+          }}
+        >
+          <sphereGeometry args={[0.028, 12, 9]} />
+          <meshBasicMaterial
+            color="#ffffff"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function DeskProps({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <group position={[0, 0.78, -2.4]}>
-      {/* keyboard */}
-      <mesh position={[0, 0.02, 0.28]} castShadow>
-        <boxGeometry args={[0.72, 0.03, 0.24]} />
-        <meshStandardMaterial color="#d9d2c2" roughness={0.8} />
-      </mesh>
-      {Array.from({ length: 7 }, (_, column) =>
-        Array.from({ length: 3 }, (_, row) => (
-          <mesh
-            key={`${column}-${row}`}
-            position={[-0.27 + column * 0.09, 0.041, 0.2 + row * 0.065]}
-          >
-            <boxGeometry args={[0.055, 0.008, 0.038]} />
-            <meshStandardMaterial color="#767d78" roughness={0.7} />
-          </mesh>
-        )),
-      )}
-      {/* low-profile wireless mouse on a desk mat */}
-      <group position={[0.55, 0, 0.3]}>
-        <mesh position={[0, 0.005, 0]} receiveShadow>
-          <boxGeometry args={[0.32, 0.01, 0.36]} />
-          <meshStandardMaterial color="#384b40" roughness={0.95} />
-        </mesh>
-        <mesh position={[0, 0.022, 0]} scale={[0.075, 0.018, 0.12]} castShadow>
-          <sphereGeometry args={[1, 24, 16]} />
-          <meshStandardMaterial color="#343b37" roughness={0.65} />
-        </mesh>
-        <mesh position={[0, 0.026, 0]} scale={[0.073, 0.042, 0.117]} castShadow>
-          <sphereGeometry args={[1, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshStandardMaterial color="#ecece5" roughness={0.42} />
-        </mesh>
-        <mesh position={[0, 0.063, -0.033]} rotation-z={Math.PI / 2}>
-          <cylinderGeometry args={[0.012, 0.012, 0.014, 16]} />
-          <meshStandardMaterial color="#525b55" roughness={0.7} />
-        </mesh>
-      </group>
+      <Keyboard />
+      <DeskMouse />
       {/* clipboard / notebook */}
       <group position={[-0.95, 0.02, 0.2]} rotation-y={Math.PI + 0.32}>
         <mesh castShadow>
@@ -270,6 +394,7 @@ function DeskProps() {
           <torusGeometry args={[0.0467, 0.012, 14, 40, 4.19]} />
           <meshStandardMaterial color={CREAM} roughness={0.3} />
         </mesh>
+        <MugSteam reducedMotion={reducedMotion} />
       </group>
       {/* desk lamp */}
       <group position={[-1.25, 0, -0.32]}>
@@ -318,27 +443,76 @@ function Chair({ reducedMotion }: { reducedMotion: boolean }) {
   });
   return (
     <group ref={ref} position={[0, 0, -1.25]} rotation-y={Math.PI}>
-      <mesh position={[0, 0.06, 0]} castShadow>
-        <cylinderGeometry args={[0.36, 0.42, 0.06, 5]} />
-        <meshStandardMaterial color={CHARCOAL} />
+      {/* five-star base, each arm ending in a caster */}
+      {[0, 1, 2, 3, 4].map((index) => (
+        <group key={index} rotation-y={(index / 5) * Math.PI * 2}>
+          <mesh position={[0, 0.078, 0.2]} rotation-x={0.05} castShadow>
+            <boxGeometry args={[0.072, 0.042, 0.4]} />
+            <meshStandardMaterial color="#464c50" metalness={0.32} roughness={0.44} />
+          </mesh>
+          <mesh position={[0, 0.062, 0.375]} castShadow>
+            <boxGeometry args={[0.03, 0.05, 0.03]} />
+            <meshStandardMaterial color="#2a2f31" metalness={0.5} roughness={0.45} />
+          </mesh>
+          <mesh position={[0, 0.04, 0.378]} rotation-z={Math.PI / 2} castShadow>
+            <cylinderGeometry args={[0.04, 0.04, 0.026, 16]} />
+            <meshStandardMaterial color="#1b1e20" roughness={0.72} />
+          </mesh>
+        </group>
+      ))}
+      {/* gas lift with a polished column */}
+      <mesh position={[0, 0.2, 0]} castShadow>
+        <cylinderGeometry args={[0.055, 0.072, 0.26, 18]} />
+        <meshStandardMaterial color="#3a3f42" metalness={0.3} roughness={0.46} />
       </mesh>
-      <mesh position={[0, 0.3, 0]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.5, 12]} />
-        <meshStandardMaterial color="#3a403d" metalness={0.4} />
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <cylinderGeometry args={[0.032, 0.032, 0.24, 16]} />
+        <meshStandardMaterial color="#cdd2d6" metalness={0.35} roughness={0.24} />
       </mesh>
-      <mesh position={[0, 0.56, 0]} castShadow>
-        <boxGeometry args={[0.58, 0.1, 0.56]} />
-        <meshStandardMaterial color={FOREST} roughness={0.85} />
+      {/* seat pan and cushion */}
+      <mesh position={[0, 0.5, 0.01]} castShadow>
+        <boxGeometry args={[0.42, 0.05, 0.38]} />
+        <meshStandardMaterial color="#33393c" metalness={0.45} roughness={0.48} />
       </mesh>
-      <mesh position={[0, 0.94, -0.26]} rotation-x={-0.14} castShadow>
-        <boxGeometry args={[0.56, 0.66, 0.1]} />
-        <meshStandardMaterial color={FOREST} roughness={0.85} />
+      <mesh position={[0, 0.575, 0.015]} scale={[0.33, 0.072, 0.315]} castShadow>
+        <sphereGeometry args={[1, 30, 20]} />
+        <meshStandardMaterial color={FOREST} roughness={0.84} />
       </mesh>
-      {[-0.34, 0.34].map((x) => (
-        <mesh key={x} position={[x, 0.72, -0.02]} castShadow>
-          <boxGeometry args={[0.07, 0.06, 0.4]} />
-          <meshStandardMaterial color={CHARCOAL} />
+      <mesh position={[0, 0.575, 0.015]} scale={[0.3, 0.05, 0.285]}>
+        <sphereGeometry args={[1, 26, 16]} />
+        <meshStandardMaterial color="#2f5a3e" roughness={0.88} />
+      </mesh>
+      {/* spine linking the seat to the contoured back */}
+      <mesh position={[0, 0.66, -0.26]} rotation-x={-0.2} castShadow>
+        <boxGeometry args={[0.11, 0.36, 0.045]} />
+        <meshStandardMaterial color="#33393c" metalness={0.5} roughness={0.42} />
+      </mesh>
+      <group position={[0, 0.95, -0.24]} rotation-x={-0.16}>
+        <mesh position={[0, 0, 0.46]} castShadow>
+          <cylinderGeometry
+            args={[0.46, 0.46, 0.58, 30, 1, true, Math.PI - 0.65, 1.3]}
+          />
+          <meshStandardMaterial color={FOREST} roughness={0.82} side={2} />
         </mesh>
+        <mesh position={[0, -0.16, 0.455]}>
+          <cylinderGeometry
+            args={[0.45, 0.45, 0.2, 26, 1, true, Math.PI - 0.58, 1.16]}
+          />
+          <meshStandardMaterial color="#2f5a3e" roughness={0.86} side={2} />
+        </mesh>
+      </group>
+      {/* armrests */}
+      {[-0.3, 0.3].map((x) => (
+        <group key={x} position={[x, 0, -0.02]}>
+          <mesh position={[0, 0.61, 0]} castShadow>
+            <boxGeometry args={[0.034, 0.2, 0.05]} />
+            <meshStandardMaterial color="#33393c" metalness={0.5} roughness={0.44} />
+          </mesh>
+          <mesh position={[0, 0.728, 0.03]} castShadow>
+            <boxGeometry args={[0.068, 0.032, 0.26]} />
+            <meshStandardMaterial color="#1f2426" roughness={0.68} />
+          </mesh>
+        </group>
       ))}
     </group>
   );
@@ -1419,27 +1593,71 @@ function RoomDetails() {
   );
 }
 
-function CornerPlant() {
+const PLANT_LEAVES = [
+  { angle: 0.35, tilt: 0.62, length: 0.6, size: 0.3 },
+  { angle: 1.4, tilt: 0.86, length: 0.46, size: 0.25 },
+  { angle: 2.45, tilt: 0.5, length: 0.68, size: 0.32 },
+  { angle: 3.4, tilt: 0.92, length: 0.42, size: 0.23 },
+  { angle: 4.3, tilt: 0.66, length: 0.56, size: 0.28 },
+  { angle: 5.3, tilt: 0.44, length: 0.72, size: 0.27 },
+  { angle: 0.95, tilt: 0.16, length: 0.8, size: 0.24 },
+  { angle: 2.9, tilt: 0.24, length: 0.74, size: 0.22 },
+] as const;
+
+/** Broad-leafed house plant in a matte ceramic pot. */
+function LeafyPlant({
+  position,
+  scale = 1,
+  potColor = "#f1ede4",
+}: {
+  position: [number, number, number];
+  scale?: number;
+  potColor?: string;
+}) {
   return (
-    <group position={[4.65, 0, -4.35]}>
-      <mesh position={[0, 0.28, 0]} castShadow>
-        <cylinderGeometry args={[0.28, 0.22, 0.56, 20]} />
-        <meshStandardMaterial color="#c77d4e" roughness={0.76} />
+    <group position={position} scale={scale}>
+      <mesh position={[0, 0.29, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.29, 0.225, 0.58, 30]} />
+        <meshStandardMaterial color={potColor} roughness={0.52} />
       </mesh>
-      {[-0.3, -0.1, 0.12, 0.3].map((x, index) => (
-        <group key={x} position={[x * 0.35, 0.58, 0]} rotation-z={x}>
-          <mesh position={[0, 0.35, 0]}>
-            <cylinderGeometry args={[0.018, 0.025, 0.7, 8]} />
-            <meshStandardMaterial color="#426d42" />
-          </mesh>
-          <mesh position={[x * 0.38, 0.66 + index * 0.04, 0]} rotation-z={x * 1.5} castShadow>
-            <sphereGeometry args={[0.22, 14, 9]} />
-            <meshStandardMaterial color={index % 2 ? "#5b8c51" : "#6a9b57"} roughness={0.78} />
-          </mesh>
+      <mesh position={[0, 0.592, 0]} castShadow>
+        <cylinderGeometry args={[0.3, 0.3, 0.042, 30]} />
+        <meshStandardMaterial color={potColor} roughness={0.44} />
+      </mesh>
+      <mesh position={[0, 0.613, 0]}>
+        <cylinderGeometry args={[0.268, 0.268, 0.016, 26]} />
+        <meshStandardMaterial color="#3a2b20" roughness={1} />
+      </mesh>
+      {PLANT_LEAVES.map(({ angle, tilt, length, size }, index) => (
+        <group key={angle} position={[0, 0.615, 0]} rotation-y={angle}>
+          <group rotation-z={tilt}>
+            <mesh position={[0, length / 2, 0]} castShadow>
+              <cylinderGeometry args={[0.011, 0.017, length, 8]} />
+              <meshStandardMaterial color="#4a7b3d" roughness={0.72} />
+            </mesh>
+            <group position={[0, length, 0]} rotation-z={-tilt * 0.5}>
+              {/* blade base meets the tip of the stalk */}
+              <mesh position={[0, size * 0.92, 0]} scale={[size * 0.15, size, size * 0.7]} castShadow>
+                <sphereGeometry args={[1, 22, 16]} />
+                <meshStandardMaterial
+                  color={index % 2 ? "#3f7f45" : "#4d8f4b"}
+                  roughness={0.66}
+                />
+              </mesh>
+              <mesh position={[0, size * 0.92, 0]} scale={[size * 0.18, size * 0.9, size * 0.06]}>
+                <sphereGeometry args={[1, 10, 8]} />
+                <meshStandardMaterial color="#2f6135" roughness={0.74} />
+              </mesh>
+            </group>
+          </group>
         </group>
       ))}
     </group>
   );
+}
+
+function CornerPlant() {
+  return <LeafyPlant position={[4.65, 0, -4.35]} scale={1.15} />;
 }
 
 export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
@@ -1481,13 +1699,14 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       />
       <Desk />
       <Monitor />
-      <DeskProps />
+      <DeskProps reducedMotion={reducedMotion} />
       <Chair reducedMotion={reducedMotion} />
       <Shelves />
       <LawnMower />
       <JunkZone />
       <TreeCareWall />
       <CornerPlant />
+      <LeafyPlant position={[2.05, 0, -2.35]} scale={0.95} potColor="#e7e2d6" />
       <WallClock position={[-3.2, 2.6, -5.05]} />
     </>
   );
