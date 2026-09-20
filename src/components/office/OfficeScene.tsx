@@ -626,119 +626,189 @@ function CleaningEquipment() {
 
 function Shelves() {
   const bottles: Array<[number, number, string, number]> = [
-    [-0.44, 1.38, FOREST, 0.92],
-    [-0.15, 1.38, "#62a8c8", 0.86],
-    [0.16, 1.38, CREAM, 0.9],
-    [-0.42, 2.04, "#e0a34a", 0.95],
-    [-0.09, 2.04, LIME, 0.9],
-    [0.24, 2.04, FOREST, 0.88],
+    [-0.62, 1.36, FOREST, 0.9],
+    [-0.3, 1.36, "#62a8c8", 0.86],
+    [-0.6, 2.02, "#e0a34a", 0.92],
+    [-0.28, 2.02, LIME, 0.88],
   ];
+
   return (
     <group position={[5.45, 0, -1.0]} rotation-y={-Math.PI / 2}>
-      {/* Stable inset back: no self-shadowing or coplanar cabinet-edge shimmer. */}
-      <mesh position={[0, 1.6, -0.32]}>
-        <boxGeometry args={[2.05, 2.45, 0.04]} />
+      {/* Carcass: back panel, side panels, a capped top and a recessed plinth. */}
+      <mesh position={[0, 1.62, -0.3]} receiveShadow>
+        <boxGeometry args={[2.0, 2.52, 0.05]} />
         <meshStandardMaterial
-          color="#6b4528"
-          roughness={0.88}
+          color="#7c5331"
+          roughness={0.86}
           polygonOffset
           polygonOffsetFactor={1}
           polygonOffsetUnits={1}
         />
       </mesh>
-      {[-1.0, 1.0].map((x) => (
-        <mesh key={x} position={[x, 1.3, 0]}>
-          <boxGeometry args={[0.08, 2.6, 0.5]} />
-          <meshStandardMaterial color={WOOD_DARK} roughness={0.72} />
+      {[-0.99, 0.99].map((x) => (
+        <mesh key={x} position={[x, 1.58, -0.02]} castShadow receiveShadow>
+          <boxGeometry args={[0.07, 2.64, 0.58]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.7} />
         </mesh>
       ))}
-      {[0.66, 1.3, 1.96, 2.56].map((y) => (
-        <mesh key={y} position={[0, y, 0]} receiveShadow>
-          <boxGeometry args={[2.1, 0.06, 0.5]} />
-          <meshStandardMaterial color={WOOD} roughness={0.6} />
-        </mesh>
-      ))}
-      {/* branded-color spray bottles with no fragile external text/font dependency */}
-      {bottles.map(([x, y, color, scale]) => (
-        <SprayBottle key={`${x}-${y}`} position={[x, y, 0.06]} color={color} scale={scale} />
+      <mesh position={[0, 2.94, -0.02]} castShadow>
+        <boxGeometry args={[2.14, 0.08, 0.64]} />
+        <meshStandardMaterial color={WOOD} roughness={0.55} />
+      </mesh>
+      <mesh position={[0, 0.14, -0.06]} castShadow>
+        <boxGeometry args={[1.9, 0.22, 0.46]} />
+        <meshStandardMaterial color="#54361f" roughness={0.84} />
+      </mesh>
+      {[0.66, 1.32, 1.98, 2.58].map((y) => (
+        <group key={y}>
+          <mesh position={[0, y, -0.02]} castShadow receiveShadow>
+            <boxGeometry args={[1.92, 0.06, 0.56]} />
+            <meshStandardMaterial color={WOOD} roughness={0.6} />
+          </mesh>
+          <mesh position={[0, y - 0.004, 0.268]}>
+            <boxGeometry args={[1.92, 0.05, 0.022]} />
+            <meshStandardMaterial color="#9c6a3d" roughness={0.62} />
+          </mesh>
+        </group>
       ))}
 
-      {/* detergent jug with integrated handle */}
-      <group position={[0.58, 2.14, 0.03]}>
-        <mesh scale={[0.9, 1.1, 0.72]} castShadow>
-          <sphereGeometry args={[0.18, 20, 16]} />
-          <meshStandardMaterial color={CREAM} roughness={0.4} />
+      {/* Trigger spray bottles */}
+      {bottles.map(([x, y, color, scale]) => (
+        <SprayBottle key={`${x}-${y}`} position={[x, y, 0.04]} color={color} scale={scale} />
+      ))}
+
+      {/* Detergent jug: squared bottle, neck, cap, side grip and a label. */}
+      <group position={[0.2, 2.01, 0.02]}>
+        <mesh position={[0, 0.15, 0]} castShadow>
+          <boxGeometry args={[0.23, 0.3, 0.17]} />
+          <meshStandardMaterial color="#dfe7ea" roughness={0.34} />
         </mesh>
-        <mesh position={[0.1, 0.1, 0]} rotation-x={Math.PI / 2}>
-          <torusGeometry args={[0.07, 0.022, 9, 20]} />
+        <mesh position={[0, 0.33, 0]} castShadow>
+          <cylinderGeometry args={[0.048, 0.068, 0.07, 12]} />
+          <meshStandardMaterial color="#dfe7ea" roughness={0.34} />
+        </mesh>
+        <mesh position={[0, 0.385, 0]} castShadow>
+          <cylinderGeometry args={[0.054, 0.054, 0.05, 12]} />
           <meshStandardMaterial color={FOREST} roughness={0.45} />
         </mesh>
-        <mesh position={[-0.04, 0, 0.14]}>
-          <planeGeometry args={[0.13, 0.11]} />
-          <meshBasicMaterial color={FOREST} />
+        <mesh position={[0.145, 0.24, 0]} rotation-z={-Math.PI * 0.65} castShadow>
+          <torusGeometry args={[0.058, 0.016, 6, 12, Math.PI * 1.3]} />
+          <meshStandardMaterial color="#dfe7ea" roughness={0.38} />
+        </mesh>
+        <mesh position={[0, 0.14, 0.089]}>
+          <boxGeometry args={[0.17, 0.15, 0.006]} />
+          <meshStandardMaterial color={LIME} roughness={0.62} />
         </mesh>
       </group>
 
-      {/* folded towels with visible rolled edges */}
-      {[0, 1, 2].map((i) => (
-        <mesh
-          key={i}
-          position={[0.55, 0.77 + i * 0.1, 0.03]}
-          rotation-z={Math.PI / 2}
-          scale={[0.78, 1.45, 0.76]}
-          castShadow
-        >
-          <capsuleGeometry args={[0.075, 0.25, 6, 12]} />
-          <meshStandardMaterial color={i % 2 ? CREAM : "#cfe3b6"} />
+      {/* Scrub brush with a moulded grip */}
+      <group position={[0.74, 2.01, 0.04]} rotation-y={-0.22}>
+        <mesh position={[0, 0.06, 0]} castShadow>
+          <boxGeometry args={[0.26, 0.05, 0.12]} />
+          <meshStandardMaterial color="#c8a05a" roughness={0.68} />
         </mesh>
+        <mesh position={[0, 0.022, 0]} castShadow>
+          <boxGeometry args={[0.24, 0.045, 0.105]} />
+          <meshStandardMaterial color="#e8dcc0" roughness={1} />
+        </mesh>
+        <mesh position={[0.02, 0.115, 0]} rotation-z={0.22} castShadow>
+          <boxGeometry args={[0.11, 0.06, 0.075]} />
+          <meshStandardMaterial color="#c8a05a" roughness={0.68} />
+        </mesh>
+      </group>
+
+      {/* Upright kitchen rolls with a visible cardboard core */}
+      {[0.2, 0.46].map((x) => (
+        <group key={x} position={[x, 1.35, 0.02]}>
+          <mesh position={[0, 0.14, 0]} castShadow>
+            <cylinderGeometry args={[0.082, 0.082, 0.28, 16]} />
+            <meshStandardMaterial color="#f7f3e9" roughness={0.92} />
+          </mesh>
+          <mesh position={[0, 0.282, 0]}>
+            <cylinderGeometry args={[0.029, 0.029, 0.012, 10]} />
+            <meshStandardMaterial color="#c6b191" roughness={0.95} />
+          </mesh>
+        </group>
       ))}
 
-      {/* cleaning bucket, handle and stocked caddy */}
-      <group position={[-0.62, 0.78, 0]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.17, 0.13, 0.22, 18]} />
+      {/* Sponges: soft block with a contrasting scouring pad */}
+      {[0, 1, 2].map((index) => (
+        <group
+          key={index}
+          position={[0.79, 1.37 + index * 0.072, 0.04]}
+          rotation-y={index * 0.13}
+        >
+          <mesh castShadow>
+            <boxGeometry args={[0.21, 0.045, 0.14]} />
+            <meshStandardMaterial color="#f0c954" roughness={0.92} />
+          </mesh>
+          <mesh position={[0, 0.032, 0]}>
+            <boxGeometry args={[0.21, 0.02, 0.14]} />
+            <meshStandardMaterial color="#3f7f45" roughness={0.95} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Mop bucket with a bail handle */}
+      <group position={[-0.58, 0.69, 0.02]}>
+        <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.2, 0.15, 0.3, 18]} />
           <meshStandardMaterial color={FOREST} roughness={0.5} />
         </mesh>
-        <mesh position={[0, 0.1, 0]} rotation-x={Math.PI / 2}>
-          <torusGeometry args={[0.19, 0.014, 8, 28, Math.PI]} />
-          <meshStandardMaterial color={CHARCOAL} metalness={0.35} />
+        <mesh position={[0, 0.3, 0]}>
+          <torusGeometry args={[0.2, 0.016, 6, 18]} />
+          <meshStandardMaterial color="#315f43" roughness={0.45} />
         </mesh>
-        <mesh position={[0, 0, 0.135]}>
-          <planeGeometry args={[0.13, 0.08]} />
-          <meshBasicMaterial color={LIME} />
+        <mesh position={[0, 0.3, 0]}>
+          <torusGeometry args={[0.19, 0.012, 5, 14, Math.PI]} />
+          <meshStandardMaterial color="#9aa3a0" metalness={0.4} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, 0.2, 0]}>
+          <cylinderGeometry args={[0.199, 0.189, 0.055, 18, 1, true]} />
+          <meshStandardMaterial color={LIME} roughness={0.58} side={2} />
         </mesh>
       </group>
-      <group position={[-0.05, 0.79, 0.04]}>
-        <mesh scale={[1.45, 0.62, 0.9]} castShadow>
-          <sphereGeometry args={[0.16, 18, 12]} />
-          <meshStandardMaterial color={CREAM} roughness={0.72} />
+
+      {/* Carry caddy holding two refills */}
+      <group position={[0.12, 0.69, 0.02]} rotation-y={-0.12}>
+        <mesh position={[0, 0.1, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.38, 0.2, 0.26]} />
+          <meshStandardMaterial color={FOREST} roughness={0.55} />
         </mesh>
-        {[-0.06, 0.07].map((x, index) => (
-          <mesh key={x} position={[x, 0.14, 0]}>
-            <capsuleGeometry args={[0.025, 0.15, 5, 10]} />
-            <meshStandardMaterial color={index ? FOREST : LIME} />
+        <mesh position={[0, 0.205, 0]}>
+          <boxGeometry args={[0.35, 0.02, 0.23]} />
+          <meshStandardMaterial color="#1f3f2c" roughness={0.62} />
+        </mesh>
+        <mesh position={[0, 0.235, 0]}>
+          <torusGeometry args={[0.1, 0.014, 5, 12, Math.PI]} />
+          <meshStandardMaterial color={CHARCOAL} roughness={0.6} />
+        </mesh>
+        {[-0.1, 0.1].map((x) => (
+          <mesh key={x} position={[x, 0.27, 0]} castShadow>
+            <cylinderGeometry args={[0.034, 0.042, 0.16, 10]} />
+            <meshStandardMaterial color={x < 0 ? "#62a8c8" : LIME} roughness={0.4} />
           </mesh>
         ))}
       </group>
 
-      {/* paper rolls and stacked sponges */}
-      {[0, 1].map((index) => (
-        <mesh
-          key={index}
-          position={[0.75, 1.4 + index * 0.18, 0.02]}
-          rotation-x={Math.PI / 2}
-          castShadow
-        >
-          <cylinderGeometry args={[0.085, 0.085, 0.16, 18]} />
-          <meshStandardMaterial color="#f5f1e7" roughness={0.9} />
-        </mesh>
-      ))}
+      {/* Folded towels */}
       {[0, 1, 2].map((index) => (
-        <mesh key={index} position={[0.48, 1.36 + index * 0.075, 0.08]} castShadow>
-          <boxGeometry args={[0.22, 0.055, 0.12]} />
-          <meshStandardMaterial color={index % 2 ? "#f0c954" : LIME} roughness={0.82} />
+        <mesh key={index} position={[0.74, 0.73 + index * 0.072, 0.02]} castShadow>
+          <boxGeometry args={[0.34, 0.068, 0.26]} />
+          <meshStandardMaterial color={index % 2 ? CREAM : "#cfe3b6"} roughness={0.9} />
         </mesh>
       ))}
+
+      {/* Refill sprays and a stack of folded cloths on the top shelf */}
+      <SprayBottle position={[-0.6, 2.62, 0.04]} color="#8b6bb0" scale={0.84} />
+      <SprayBottle position={[-0.28, 2.62, 0.04]} color={CREAM} scale={0.8} />
+      {[0, 1, 2].map((index) => (
+        <mesh key={index} position={[0.26, 2.64 + index * 0.05, 0.03]} castShadow>
+          <boxGeometry args={[0.28, 0.046, 0.21]} />
+          <meshStandardMaterial color={index === 1 ? "#cfe3b6" : "#e8f0e2"} roughness={0.92} />
+        </mesh>
+      ))}
+
       <CleaningEquipment />
     </group>
   );
@@ -1889,6 +1959,63 @@ function LeafyPlant({
   );
 }
 
+const SNAKE_BLADES = [
+  { angle: 0.2, tilt: 0.1, height: 0.68 },
+  { angle: 0.95, tilt: 0.24, height: 0.5 },
+  { angle: 1.7, tilt: 0.14, height: 0.62 },
+  { angle: 2.45, tilt: 0.27, height: 0.44 },
+  { angle: 3.2, tilt: 0.11, height: 0.72 },
+  { angle: 3.95, tilt: 0.25, height: 0.52 },
+  { angle: 4.7, tilt: 0.16, height: 0.58 },
+  { angle: 5.45, tilt: 0.29, height: 0.46 },
+  { angle: 0.6, tilt: 0.36, height: 0.38 },
+  { angle: 2.9, tilt: 0.34, height: 0.4 },
+  { angle: 4.3, tilt: 0.38, height: 0.36 },
+] as const;
+
+/**
+ * Upright sword-leaf plant. Deliberately a different species and a lighter
+ * green than the broad-leafed plant in the corner, so the two read as two
+ * different plants rather than a duplicated prop.
+ */
+function SnakePlant({
+  position,
+  scale = 1,
+}: {
+  position: [number, number, number];
+  scale?: number;
+}) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, 0.17, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.2, 0.155, 0.34, 20]} />
+        <meshStandardMaterial color="#efe9dd" roughness={0.55} />
+      </mesh>
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <cylinderGeometry args={[0.208, 0.208, 0.032, 20]} />
+        <meshStandardMaterial color="#e4dccb" roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.366, 0]}>
+        <cylinderGeometry args={[0.182, 0.182, 0.012, 16]} />
+        <meshStandardMaterial color="#3a2b20" roughness={1} />
+      </mesh>
+      {SNAKE_BLADES.map(({ angle, tilt, height }, index) => (
+        <group key={angle} position={[0, 0.36, 0]} rotation-y={angle}>
+          <group rotation-z={tilt}>
+            <mesh position={[0, height / 2, 0]} scale={[1, 1, 0.3]} castShadow>
+              <cylinderGeometry args={[0.013, 0.055, height, 6]} />
+              <meshStandardMaterial
+                color={index % 2 ? "#9ccd63" : "#b2da78"}
+                roughness={0.62}
+              />
+            </mesh>
+          </group>
+        </group>
+      ))}
+    </group>
+  );
+}
+
 function CornerPlant() {
   return <LeafyPlant position={[4.65, 0, -4.35]} scale={1.15} />;
 }
@@ -1939,8 +2066,9 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <JunkZone />
       <TreeCareWall />
       <CornerPlant />
-      <LeafyPlant position={[2.05, 0, -2.35]} scale={0.95} potColor="#e7e2d6" />
+      <SnakePlant position={[2.05, 0, -2.35]} scale={0.78} />
       <WallClock position={[-3.2, 2.6, -5.05]} />
     </>
   );
 }
+

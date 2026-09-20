@@ -206,16 +206,23 @@ function Home() {
 
       {/* top bar */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 sm:p-6">
-        <div className="pointer-events-auto kc-brand">
-          <img
-            className="kc-brand-logo"
-            src={BRAND_LOGO}
-            alt="KleanupCrew"
-            width={1254}
-            height={1254}
-            fetchPriority="high"
-          />
-          <p className="kc-brand-slogan">{BRAND_SLOGAN}</p>
+        <div className="pointer-events-auto flex shrink-0 flex-col items-center gap-1.5">
+          <button
+            type="button"
+            className="kc-brand-btn kc-focus"
+            onClick={() => window.location.assign("/")}
+            aria-label="KleanupCrew — reload the home page"
+          >
+            <img
+              className="kc-brand-btn-logo"
+              src={BRAND_LOGO}
+              alt="KleanupCrew"
+              width={1254}
+              height={1254}
+              fetchPriority="high"
+            />
+          </button>
+          <p className="kc-brand-tagline">{BRAND_SLOGAN}</p>
         </div>
 
         <nav aria-label="Primary" className="pointer-events-auto flex shrink-0 items-center gap-2">

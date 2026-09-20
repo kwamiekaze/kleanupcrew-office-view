@@ -75,6 +75,13 @@
   --cream: oklch(0.96 0.025 92);
   --wood: oklch(0.58 0.09 60);
   --charcoal: oklch(0.25 0.012 160);
+
+  /*
+   * The brand button and the "Get a Free Quote" button are driven by the same
+   * two tokens, so the pair always renders at identical dimensions.
+   */
+  --kc-header-btn-h: 2.75rem;
+  --kc-header-btn-w: 11rem;
 }
 
 @layer components {
@@ -105,6 +112,62 @@
     font-weight: 500;
     letter-spacing: 0.14em;
     line-height: 1.4;
+  }
+
+  /* Header brand button: same shape and size as the quote button, and it
+     keeps the brand card's white fill, hairline border and soft shadow. */
+  .kc-brand-btn,
+  .kc-btn.kc-header-quote {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--kc-header-btn-w);
+    height: var(--kc-header-btn-h);
+    min-height: var(--kc-header-btn-h);
+    padding-block: 0;
+    padding-inline: 0.85rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .kc-brand-btn {
+    border: 1px solid oklch(1 0 0 / 0.8);
+    background: oklch(0.993 0.006 106);
+    box-shadow: 0 8px 30px -18px oklch(0.2 0.03 150 / 0.45);
+    cursor: pointer;
+    transition:
+      box-shadow 0.18s ease,
+      filter 0.18s ease;
+  }
+
+  .kc-brand-btn:hover {
+    filter: brightness(1.03);
+    box-shadow: 0 10px 34px -18px oklch(0.2 0.03 150 / 0.6);
+  }
+
+  .kc-brand-btn-logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 1;
+    object-fit: cover;
+    object-position: center;
+    mix-blend-mode: multiply;
+  }
+
+  /* Tagline sits directly beneath the button, no longer inside it. */
+  .kc-brand-tagline {
+    text-align: center;
+    color: var(--forest);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.35;
+    text-shadow:
+      0 1px 2px oklch(1 0 0 / 0.9),
+      0 0 8px oklch(1 0 0 / 0.75);
   }
 
   .kc-splash {
@@ -429,10 +492,18 @@
     letter-spacing: 0.08em;
   }
 
+  :root {
+    --kc-header-btn-h: 2.5rem;
+    --kc-header-btn-w: 9.25rem;
+  }
+
   .kc-header-quote {
-    min-height: 2.5rem;
-    padding-inline: 0.85rem;
     font-size: 0.72rem;
+  }
+
+  .kc-brand-tagline {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
   }
 
   .kc-service-panel {
