@@ -14,8 +14,10 @@ const AUTO_PAN: Record<
   }
 > = {
   welcome: {
-    orbit: 0.5,
-    mobileOrbit: 0.32,
+    // A calmer arc: wide enough to feel alive, short enough that the window
+    // frame never crops the sun at either end of the sweep.
+    orbit: 0.3,
+    mobileOrbit: 0.22,
     lateral: 0,
     mobileLateral: 0,
     secondsPerLeg: 8,
@@ -23,29 +25,29 @@ const AUTO_PAN: Record<
   lawn: {
     orbit: 0.035,
     mobileOrbit: 0.03,
-    lateral: 0.52,
-    mobileLateral: 0.4,
+    lateral: 0.28,
+    mobileLateral: 0.18,
     secondsPerLeg: 6,
   },
   tree: {
     orbit: 0.035,
     mobileOrbit: 0.03,
-    lateral: 0.46,
-    mobileLateral: 0.36,
+    lateral: 0.4,
+    mobileLateral: 0.22,
     secondsPerLeg: 6,
   },
   cleaning: {
     orbit: 0.03,
     mobileOrbit: 0.025,
-    lateral: 0.42,
-    mobileLateral: 0.34,
+    lateral: 0.36,
+    mobileLateral: 0.18,
     secondsPerLeg: 6,
   },
   junk: {
     orbit: 0.03,
     mobileOrbit: 0.025,
-    lateral: 0.36,
-    mobileLateral: 0.3,
+    lateral: 0.22,
+    mobileLateral: 0.14,
     secondsPerLeg: 6,
   },
   quote: {
@@ -56,6 +58,9 @@ const AUTO_PAN: Record<
     secondsPerLeg: 6,
   },
 };
+
+/** Widest vertical angle a width-driven view may open to on a tall screen. */
+const PORTRAIT_FOV_CAP = 44;
 
 export interface RigInput {
   /** horizontal orbit angle in radians; wraps continuously through 360 degrees */
@@ -171,8 +176,16 @@ export function CameraRig({
     camera.position.copy(pos.current);
     if (camera instanceof PerspectiveCamera) {
       const aspect = Math.max(size.width / Math.max(size.height, 1), 0.1);
+      // Service framing is driven by the horizontal field of view, so a wide
+      // screen always holds the whole display. On a tall phone that same rule
+      // would swing the vertical angle so wide that the display shrank into the
+      // middle of the screen, so the vertical angle is capped: the sides crop
+      // instead, and the equipment stays large enough to recognise.
+      const widthDrivenFov =
+        (2 * Math.atan(Math.tan(((view.horizontalFov ?? 42) * Math.PI) / 360) / aspect) * 180) /
+        Math.PI;
       const responsiveFov = view.horizontalFov
-        ? (2 * Math.atan(Math.tan((view.horizontalFov * Math.PI) / 360) / aspect) * 180) / Math.PI
+        ? Math.min(widthDrivenFov, PORTRAIT_FOV_CAP)
         : isMobile
           ? (view.mobileFov ?? view.fov ?? 42)
           : (view.fov ?? 42);

@@ -29,10 +29,12 @@ export const VIEWS: OfficeView[] = [
     title: BRAND_SLOGAN,
     line: "KleanupCrew connects you with local, insured crews who clean it, clear it, maintain it and improve the property.",
     cta: "Make this property look good again",
+    // Aimed a little higher than the room's centre, so the view tips down and
+    // the whole sun clears the top of the window frame.
     pos: [0, 3.1, 7.6],
-    target: [0, 1.5, -1.2],
+    target: [0, 1.56, -1.2],
     mobilePos: [0, 3.1, 7.35],
-    mobileTarget: [0, 1.16, -1.2],
+    mobileTarget: [0, 1.28, -1.2],
   },
   {
     id: "lawn",
@@ -41,9 +43,11 @@ export const VIEWS: OfficeView[] = [
     title: "Lawn & yard maintenance",
     line: "Mowing, edging, trimming, leaf and yard cleanup, hedge shaping and brush clearing on a one-off or recurring schedule.",
     cta: "Set up lawn service",
-    pos: [0.25, 2.55, 4.9],
-    target: [-5.25, 1.05, 1.85],
-    horizontalFov: 45,
+    // Square on to the lawn board, close enough to read every tool and low
+    // enough to keep the mower's wheels on screen.
+    pos: [1.44, 2.83, 1.0],
+    target: [-5.38, 1.12, 1.78],
+    horizontalFov: 44,
   },
   {
     id: "tree",
@@ -52,9 +56,10 @@ export const VIEWS: OfficeView[] = [
     title: "Tree & heavy yard work",
     line: "Trimming, pruning, removal and stump grinding handled by qualified, equipped providers in your area.",
     cta: "Request a site visit",
+    // Centres the tool board with the loppers, rake and spade at its foot.
     pos: [0.9, 2.75, 1.5],
-    target: [-5.5, 1.45, -1.85],
-    horizontalFov: 42,
+    target: [-5.58, 1.45, -1.7],
+    horizontalFov: 40,
   },
   {
     id: "cleaning",
@@ -63,9 +68,11 @@ export const VIEWS: OfficeView[] = [
     title: "Residential & commercial cleaning",
     line: "Standard, deep, recurring and move-in/move-out cleans, rental turnovers, carpet, upholstery, window, gutter and pressure washing.",
     cta: "Book a cleaning estimate",
-    pos: [-2.0, 2.7, 7.8],
-    target: [5.15, 1.18, -2.0],
-    horizontalFov: 34,
+    // Was set back across the whole room; now it stands in front of the supply
+    // shelf so the bottles, rolls, bucket and caddy are all legible.
+    pos: [-0.8, 2.4, 2.9],
+    target: [5.1, 1.42, -1.05],
+    horizontalFov: 44,
   },
   {
     id: "junk",
@@ -74,9 +81,11 @@ export const VIEWS: OfficeView[] = [
     title: "Junk removal & cleanouts",
     line: "Bulk-item pickup, property, garage and estate cleanouts, plus non-hazardous renovation debris hauled away in one visit.",
     cta: "Get a haul-away price",
-    pos: [-3.0, 2.8, 3.2],
-    target: [5.35, 0.82, 3.2],
-    horizontalFov: 24,
+    // Wider and tipped down, so the hand truck, cartons, bags, bin and offcuts
+    // all sit in frame with floor beneath them instead of bare wall above.
+    pos: [-1.8, 2.72, 5.95],
+    target: [5.32, 0.78, 3.5],
+    horizontalFov: 31,
   },
   {
     id: "quote",

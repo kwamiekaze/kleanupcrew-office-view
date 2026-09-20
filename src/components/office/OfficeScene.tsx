@@ -1,8 +1,16 @@
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
-import { SRGBColorSpace } from "three";
+import {
+  AdditiveBlending,
+  CanvasTexture,
+  DoubleSide,
+  MeshStandardMaterial,
+  Quaternion,
+  SRGBColorSpace,
+  Vector3,
+} from "three";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
 
@@ -1571,8 +1579,10 @@ function SunnyWindowView() {
         <meshBasicMaterial color="#8fd2f2" />
       </mesh>
 
-      {/* cheerful sun wearing shades, with a soft glow and rays */}
-      <group position={[1.25, 2.68, -1.68]}>
+      {/* Cheerful sun wearing shades, with a soft glow and rays. It sits far
+          enough inside the upper right pane that the whole disc stays clear of
+          the window head and jamb right across the welcome camera sweep. */}
+      <group position={[0.72, 2.38, -1.68]}>
         {/* soft layered glow */}
         {[0.54, 0.47, 0.4].map((radius, index) => (
           <mesh key={radius} position={[0, 0, -0.035 + index * 0.004]}>
@@ -1726,7 +1736,7 @@ function Room() {
   return (
     <group>
       {/* floor */}
-      <mesh rotation-x={-Math.PI / 2}>
+      <mesh rotation-x={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[14, 14]} />
         <meshStandardMaterial color="#9b6d43" roughness={0.72} />
       </mesh>
@@ -1738,25 +1748,25 @@ function Room() {
         </mesh>
       ))}
       {/* rug */}
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0.012, -0.6]}>
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.012, -0.6]} receiveShadow>
         <planeGeometry args={[5.2, 4]} />
         <meshStandardMaterial color="#d9cfb4" roughness={1} />
       </mesh>
       {/* back wall with window opening */}
       <group position={[0, 0, -5.2]}>
-        <mesh position={[-3.9, 1.8, 0]} receiveShadow>
+        <mesh position={[-3.9, 1.8, 0]} castShadow receiveShadow>
           <boxGeometry args={[4.4, 3.6, 0.2]} />
           <meshStandardMaterial color={WALL} roughness={1} />
         </mesh>
-        <mesh position={[3.9, 1.8, 0]} receiveShadow>
+        <mesh position={[3.9, 1.8, 0]} castShadow receiveShadow>
           <boxGeometry args={[4.4, 3.6, 0.2]} />
           <meshStandardMaterial color={WALL} roughness={1} />
         </mesh>
-        <mesh position={[0, 3.25, 0]} receiveShadow>
+        <mesh position={[0, 3.25, 0]} castShadow receiveShadow>
           <boxGeometry args={[3.4, 0.7, 0.2]} />
           <meshStandardMaterial color={WALL} roughness={1} />
         </mesh>
-        <mesh position={[0, 0.5, 0]} receiveShadow>
+        <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
           <boxGeometry args={[3.4, 1.0, 0.2]} />
           <meshStandardMaterial color={WALL} roughness={1} />
         </mesh>
@@ -1772,27 +1782,29 @@ function Room() {
             metalness={0.1}
           />
         </mesh>
-        <mesh position={[0, 1.95, 0.04]}>
+        <mesh position={[0, 1.95, 0.04]} castShadow>
           <boxGeometry args={[0.07, 2.2, 0.07]} />
           <meshStandardMaterial color={CREAM} />
         </mesh>
-        <mesh position={[0, 1.95, 0.04]}>
+        <mesh position={[0, 1.95, 0.04]} castShadow>
           <boxGeometry args={[3.4, 0.07, 0.07]} />
           <meshStandardMaterial color={CREAM} />
         </mesh>
       </group>
       {/* side walls */}
-      <mesh position={[-6, 1.8, 0]} rotation-y={Math.PI / 2} receiveShadow>
+      <mesh position={[-6, 1.8, 0]} rotation-y={Math.PI / 2} castShadow receiveShadow>
         <planeGeometry args={[10.4, 3.6]} />
         <meshStandardMaterial color={WALL} roughness={1} />
       </mesh>
-      <mesh position={[6, 1.8, 0]} rotation-y={-Math.PI / 2}>
+      <mesh position={[6, 1.8, 0]} rotation-y={-Math.PI / 2} castShadow receiveShadow>
         <planeGeometry args={[10.4, 3.6]} />
         <meshStandardMaterial color={WALL} roughness={1} />
       </mesh>
       {/* ceiling */}
-      <mesh position={[0, 3.6, 0]} rotation-x={Math.PI / 2}>
-        <planeGeometry args={[12, 10.4]} />
+      {/* The ceiling runs well past the front of the room so the wide welcome
+          framing never looks up past its edge into empty background. */}
+      <mesh position={[0, 3.6, 2.4]} rotation-x={Math.PI / 2} castShadow receiveShadow>
+        <planeGeometry args={[12, 16]} />
         <meshStandardMaterial color="#f3ecdd" roughness={1} />
       </mesh>
       {/* baseboards */}
@@ -2020,29 +2032,172 @@ function CornerPlant() {
   return <LeafyPlant position={[4.65, 0, -4.35]} scale={1.15} />;
 }
 
+/**
+ * Sunlight direction, in world space, travelling from the sun outside the
+ * window down into the room. It leans in from the upper right - the corner the
+ * painted sun sits in - so the beam sweeps across the desk and out onto the rug
+ * towards the front left. The key light, its shadows and the visible shafts are
+ * all built from this one vector, so they can never disagree.
+ */
+const SUN_DIRECTION = new Vector3(-0.27, -0.405, 0.873).normalize();
+const SUN_LIGHT_POSITION = SUN_DIRECTION.clone().multiplyScalar(-18).toArray();
+const WINDOW_CENTRE: [number, number, number] = [0, 1.95, -5.14];
+
+/** Rotation that points local +Z straight down the sunbeam. */
+function useSunOrientation() {
+  return useMemo(() => {
+    const quaternion = new Quaternion();
+    quaternion.setFromUnitVectors(new Vector3(0, 0, 1), SUN_DIRECTION.clone());
+    return quaternion;
+  }, []);
+}
+
+/**
+ * Soft-edged gradient for the visible beam: bright down the middle, feathered
+ * at both sides, and fading out along its length so it dissolves into the room
+ * instead of stopping at a hard edge.
+ */
+function useShaftTexture() {
+  return useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 256;
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+
+    const across = context.createLinearGradient(0, 0, canvas.width, 0);
+    across.addColorStop(0, "rgba(255,255,255,0)");
+    across.addColorStop(0.22, "rgba(255,255,255,0.85)");
+    across.addColorStop(0.5, "rgba(255,255,255,1)");
+    across.addColorStop(0.78, "rgba(255,255,255,0.85)");
+    across.addColorStop(1, "rgba(255,255,255,0)");
+    context.fillStyle = across;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const along = context.createLinearGradient(0, 0, 0, canvas.height);
+    along.addColorStop(0, "rgba(255,255,255,1)");
+    along.addColorStop(0.35, "rgba(255,255,255,0.7)");
+    along.addColorStop(0.75, "rgba(255,255,255,0.22)");
+    along.addColorStop(1, "rgba(255,255,255,0)");
+    context.globalCompositeOperation = "destination-in";
+    context.fillStyle = along;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const texture = new CanvasTexture(canvas);
+    texture.colorSpace = SRGBColorSpace;
+    return texture;
+  }, []);
+}
+
+/**
+ * The visible shaft of light leaning in through the glass: a few feathered
+ * slices stacked through the beam, added together so the light reads as a soft
+ * volume rather than a pane of glass.
+ */
+const SHAFT_SLICES = [-0.62, -0.31, 0, 0.31, 0.62];
+
+function SunShafts() {
+  const orientation = useSunOrientation();
+  const texture = useShaftTexture();
+
+  useEffect(() => () => texture?.dispose(), [texture]);
+  if (!texture) return null;
+
+  return (
+    <group position={WINDOW_CENTRE} quaternion={orientation} renderOrder={4}>
+      {SHAFT_SLICES.map((offset) => (
+        <mesh key={offset} position={[0, offset, 3.35]} rotation-x={-Math.PI / 2}>
+          <planeGeometry args={[3.15, 7.2]} />
+          <meshBasicMaterial
+            map={texture}
+            color="#fff3d2"
+            transparent
+            opacity={0.1}
+            blending={AdditiveBlending}
+            depthWrite={false}
+            side={DoubleSide}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/**
+ * Every solid surface in the room casts and receives the sunlight, so the desk,
+ * the things on it, the plants and the equipment all throw real shadows. Flat
+ * decorative pieces - the view through the window, the painted floor seams, the
+ * light shafts - use basic materials and are skipped, so they neither block the
+ * sun nor pick up shading.
+ *
+ * Nothing that shapes a shadow moves, so the shadow map is drawn during the
+ * opening frames and then frozen. That keeps the cost off the phone's budget.
+ */
+function SunShadowSetup() {
+  const { gl, scene } = useThree();
+  const framesLeft = useRef(24);
+
+  useEffect(() => {
+    gl.shadowMap.autoUpdate = false;
+    gl.shadowMap.needsUpdate = true;
+    framesLeft.current = 24;
+
+    scene.traverse((object) => {
+      const mesh = object as Mesh;
+      if (!mesh.isMesh) return;
+      const material = mesh.material;
+      if (Array.isArray(material)) return;
+      if (!(material instanceof MeshStandardMaterial)) return;
+      if (material.transparent) return;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+    });
+  }, [gl, scene]);
+
+  useFrame(() => {
+    if (framesLeft.current <= 0) return;
+    framesLeft.current -= 1;
+    gl.shadowMap.needsUpdate = true;
+  });
+
+  return null;
+}
+
 export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <>
       <color attach="background" args={["#e8e2d3"]} />
-      <hemisphereLight args={["#dfefff", "#a07c56", 1.0]} />
-      <ambientLight intensity={0.55} />
+      {/* Sky and bounce fill: the room still reads where the sun cannot reach. */}
+      <hemisphereLight args={["#eaf3ff", "#d8bb97", 1.15]} />
+      <ambientLight intensity={0.62} />
+      {/*
+       * Key light. It sits on the far side of the glass along SUN_DIRECTION, so
+       * the only way into the room is the window opening - the wall segments
+       * around it cast shadows, which is what shapes the sunlit patch and the
+       * glazing-bar cross on the floor and desk.
+       */}
       <directionalLight
-        position={[-2.5, 6, -7]}
-        intensity={2.4}
-        color="#fff2d8"
+        position={SUN_LIGHT_POSITION}
+        intensity={3.1}
+        color="#fff1d0"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-left={-9}
-        shadow-camera-right={9}
-        shadow-camera-top={9}
-        shadow-camera-bottom={-9}
-        shadow-normalBias={0.04}
-        shadow-bias={0.00008}
-        shadow-radius={3}
-        shadow-blurSamples={10}
+        shadow-camera-left={-7}
+        shadow-camera-right={7}
+        shadow-camera-top={6}
+        shadow-camera-bottom={-6}
+        shadow-camera-near={4}
+        shadow-camera-far={34}
+        shadow-normalBias={0.03}
+        shadow-bias={-0.00012}
+        shadow-radius={1.8}
+        shadow-blurSamples={12}
       />
-      <pointLight position={[0, 3.2, 0]} intensity={0.6} color="#fff0d2" />
+      {/* Daylight spilling back off the walls, so shadowed faces are not flat. */}
+      <directionalLight position={[-4.5, 4.2, 5.5]} intensity={0.5} color="#e6eeff" />
+      <pointLight position={[0, 3.2, 0]} intensity={0.5} color="#fff0d2" />
 
       <Room />
       <RoomDetails />
@@ -2050,7 +2205,7 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <ContactShadows
         position={[0, 0.018, -0.4]}
         scale={14}
-        opacity={0.23}
+        opacity={0.15}
         blur={2.8}
         far={0.85}
         resolution={512}
@@ -2068,6 +2223,8 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <CornerPlant />
       <SnakePlant position={[2.05, 0, -2.35]} scale={0.78} />
       <WallClock position={[-3.2, 2.6, -5.05]} />
+      <SunShafts />
+      <SunShadowSetup />
     </>
   );
 }
