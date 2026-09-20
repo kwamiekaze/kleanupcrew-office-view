@@ -3,6 +3,7 @@ import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { MeshStandardMaterial, SRGBColorSpace, Vector3 } from "three";
+import { Butterflies } from "./Butterflies";
 import { WallCalendar } from "./WallCalendar";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
@@ -1664,7 +1665,7 @@ function SunnyWindowView() {
       ).map(({ x, y, scale, tone, flip }, index) => (
         <WindowTree
           key={x}
-          position={[x, y, -1.585 + index * 0.014]}
+          position={[x, y, -1.585 + index * 0.02]}
           scale={scale}
           tone={tone}
           flip={flip}
@@ -1699,25 +1700,29 @@ function SunnyWindowView() {
           flip={index === 1}
         />
       ))}
+      {/* Flower beds. Neighbouring beds overlap, so each one is stepped back
+          further than a single bed is deep - otherwise a bed's blossoms land on
+          exactly the same plane as the next bed's foliage and the two flicker
+          against each other wherever they cross. */}
       {[-1.05, -0.82, 0.78, 1.02].map((x, index) => (
-        <group key={x} position={[x, 0.64, -1.44 + index * 0.008]}>
+        <group key={x} position={[x, 0.64, -1.44 + index * 0.05]}>
           <mesh scale={[1.3, 0.7, 1]}>
             <circleGeometry args={[0.21, 18]} />
             <meshBasicMaterial color="#336e42" />
           </mesh>
-          <mesh position={[-0.07, 0.05, 0.004]} scale={[1, 0.82, 1]}>
+          <mesh position={[-0.07, 0.05, 0.008]} scale={[1, 0.82, 1]}>
             <circleGeometry args={[0.13, 16]} />
             <meshBasicMaterial color="#3f8449" />
           </mesh>
-          <mesh position={[0.09, 0.04, 0.006]} scale={[1, 0.8, 1]}>
+          <mesh position={[0.09, 0.04, 0.014]} scale={[1, 0.8, 1]}>
             <circleGeometry args={[0.11, 16]} />
             <meshBasicMaterial color="#4a9152" />
           </mesh>
-          <mesh position={[-0.05, 0.1, 0.012]}>
+          <mesh position={[-0.05, 0.1, 0.02]}>
             <circleGeometry args={[0.028, 10]} />
             <meshBasicMaterial color={index % 2 ? "#fff0ad" : "#f5a1a8"} />
           </mesh>
-          <mesh position={[0.08, 0.09, 0.012]}>
+          <mesh position={[0.08, 0.09, 0.023]}>
             <circleGeometry args={[0.024, 10]} />
             <meshBasicMaterial color={index % 2 ? "#f5a1a8" : "#fff0ad"} />
           </mesh>
@@ -2136,6 +2141,7 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <SnakePlant position={[2.05, 0, -2.35]} scale={0.78} />
       <WallClock position={[-3.2, 2.6, -5.05]} />
       <WallCalendar position={[-4.75, 2.35, -5.07]} />
+      <Butterflies reducedMotion={reducedMotion} />
       <SunShadowSetup />
     </>
   );

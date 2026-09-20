@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RigInput } from "@/components/office/CameraRig";
 import { QuoteDrawer } from "@/components/kleanup/QuoteDrawer";
+import { ServiceDetails } from "@/components/kleanup/ServiceDetails";
 import { SplashScreen } from "@/components/kleanup/SplashScreen";
 import { useAmbientAudio } from "@/lib/use-ambient-audio";
-import { TRUST_CHIPS, VIEWS, type ViewId } from "@/lib/kleanup-content";
+import { SERVICE_DETAILS, TRUST_CHIPS, VIEWS, type ViewId } from "@/lib/kleanup-content";
 import { BRAND_LOGO, BRAND_SLOGAN } from "@/lib/brand";
 
 const OfficeCanvas = lazy(() => import("@/components/kleanup/OfficeCanvas"));
@@ -63,6 +64,7 @@ function clamp(value: number, minimum: number, maximum: number) {
 function Home() {
   const [activeId, setActiveId] = useState<ViewId>("welcome");
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches,
@@ -72,6 +74,8 @@ function Home() {
   const { enabled: soundOn, setEnabled: setSoundOn } = useAmbientAudio();
 
   const view = useMemo(() => VIEWS.find((v) => v.id === activeId) ?? VIEWS[0]!, [activeId]);
+  // Only the service sections have a breakdown worth opening.
+  const detail = SERVICE_DETAILS[activeId];
 
   const input = useRef<RigInput>({ dragX: 0, dragY: 0, zoom: 0 });
   const pointers = useRef(new Map<number, { x: number; y: number }>());
@@ -152,6 +156,10 @@ function Home() {
 
   const select = useCallback((id: ViewId) => {
     setActiveId(id);
+    setDetailsOpen(false);
+    // Choosing a section is a request to see it, so bring the panel back - it
+    // carries the section's actions, including More info.
+    setPanelCollapsed(false);
     input.current.dragX = 0;
     input.current.dragY = 0;
     input.current.zoom = 0;
@@ -329,6 +337,20 @@ function Home() {
             <button className="kc-btn" onClick={() => setQuoteOpen(true)}>
               {view.cta}
             </button>
+            {detail && (
+              <button
+                key={activeId}
+                type="button"
+                className="kc-btn-quiet kc-focus"
+                onClick={() => setDetailsOpen(true)}
+                aria-haspopup="dialog"
+              >
+                More info
+                <span aria-hidden="true" className="text-[11px] opacity-70">
+                  ↗
+                </span>
+              </button>
+            )}
             <span className="text-[11px] text-cream/50 md:hidden">
               Insured providers · Upfront estimates · Local crews
             </span>
@@ -363,6 +385,13 @@ function Home() {
           </li>
         </ul>
       </nav>
+
+      <ServiceDetails
+        detail={detail}
+        open={detailsOpen && Boolean(detail)}
+        onClose={() => setDetailsOpen(false)}
+        onQuote={() => setQuoteOpen(true)}
+      />
 
       <QuoteDrawer open={quoteOpen} onClose={() => setQuoteOpen(false)} viewId={activeId} />
 

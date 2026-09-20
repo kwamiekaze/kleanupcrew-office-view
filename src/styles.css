@@ -313,6 +313,172 @@
     transform: translateY(-1px);
   }
 
+  /* --- Service details ------------------------------------------------ */
+  /* The panel is mostly transparent on purpose: the office behind it should
+     still read through the glass, so the list feels like a layer over the
+     room rather than a page that replaced it. */
+  .kc-details-overlay {
+    background: color-mix(in oklab, var(--charcoal) 26%, transparent);
+    backdrop-filter: blur(2px);
+    animation: kc-details-fade 200ms ease-out;
+  }
+
+  .kc-details-dialog {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 55;
+    display: flex;
+    max-height: min(82vh, 46rem);
+    width: min(46rem, calc(100vw - 1.75rem));
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    border: 1px solid color-mix(in oklab, var(--cream) 26%, transparent);
+    background: color-mix(in oklab, var(--forest-deep) 46%, transparent);
+    backdrop-filter: blur(14px) saturate(1.15);
+    box-shadow: 0 30px 70px -26px oklch(0.15 0.03 150 / 0.8);
+    animation: kc-details-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .kc-details-head {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--cream) 14%, transparent);
+    padding: 1.1rem 1.25rem 1rem;
+  }
+
+  .kc-details-close {
+    position: absolute;
+    right: 0.9rem;
+    top: 0.95rem;
+    display: grid;
+    height: 2rem;
+    width: 2rem;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--cream) 24%, transparent);
+    background: color-mix(in oklab, var(--forest-deep) 40%, transparent);
+    color: color-mix(in oklab, var(--cream) 86%, transparent);
+    transition:
+      background 160ms ease,
+      color 160ms ease;
+  }
+
+  .kc-details-close:hover {
+    background: color-mix(in oklab, var(--cream) 18%, transparent);
+    color: var(--cream);
+  }
+
+  .kc-details-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.35rem 1.25rem 0.9rem;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--cream) 28%, transparent) transparent;
+  }
+
+  .kc-details-group {
+    padding-top: 0.95rem;
+  }
+
+  .kc-details-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lime);
+  }
+
+  .kc-details-item {
+    border-left: 2px solid color-mix(in oklab, var(--lime) 40%, transparent);
+    padding-left: 0.7rem;
+  }
+
+  .kc-details-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid color-mix(in oklab, var(--cream) 14%, transparent);
+    background: color-mix(in oklab, var(--forest-deep) 26%, transparent);
+    padding: 0.85rem 1.25rem;
+  }
+
+  /* Secondary action beside the section's main call to action. */
+  .kc-btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--cream) 30%, transparent);
+    background: color-mix(in oklab, var(--cream) 10%, transparent);
+    color: color-mix(in oklab, var(--cream) 92%, transparent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.52rem 1rem;
+    animation: kc-details-rise 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      background 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .kc-btn-quiet:hover {
+    background: color-mix(in oklab, var(--cream) 18%, transparent);
+    color: var(--cream);
+    transform: translateY(-1px);
+  }
+
+  @keyframes kc-details-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes kc-details-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, calc(-50% + 14px)) scale(0.985);
+    }
+  }
+
+  @keyframes kc-details-rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kc-details-dialog,
+    .kc-details-overlay,
+    .kc-btn-quiet {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .kc-details-dialog {
+      max-height: 78vh;
+      border-radius: 1rem;
+    }
+
+    .kc-details-foot {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+    }
+
+    .kc-details-foot .kc-btn {
+      justify-content: center;
+    }
+  }
+
   .kc-quote-pill {
     display: inline-flex;
     align-items: center;
