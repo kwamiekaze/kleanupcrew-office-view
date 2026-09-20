@@ -250,8 +250,8 @@ function DeskProps() {
           <cylinderGeometry args={[0.085, 0.075, 0.17, 32, 1, true]} />
           <meshStandardMaterial color={CREAM} roughness={0.5} side={2} />
         </mesh>
-        {/* The mug is half-full: the coffee surface sits at its vertical midpoint. */}
-        <mesh position={[0, 0, 0]}>
+        {/* The mug is filled generously, well clear of the rim. */}
+        <mesh position={[0, 0.035, 0]}>
           <cylinderGeometry args={[0.073, 0.073, 0.006, 40]} />
           <meshBasicMaterial color="#2a1008" />
         </mesh>
@@ -263,7 +263,7 @@ function DeskProps() {
           <torusGeometry args={[0.077, 0.008, 10, 32]} />
           <meshStandardMaterial color={CREAM} roughness={0.3} />
         </mesh>
-        <mesh position={[0.09, 0.004, 0]} scale={[1, 1.18, 1]} castShadow>
+        <mesh position={[0.148, 0.004, 0]} scale={[1, 1.18, 1]} castShadow>
           <torusGeometry args={[0.049, 0.012, 12, 32]} />
           <meshStandardMaterial color={CREAM} roughness={0.3} />
         </mesh>
@@ -787,7 +787,7 @@ function JunkZone() {
       ))}
 
       {/* wheeled green cleanup bin and flattened cardboard */}
-      <group position={[1.65, 0, -0.52]} rotation-y={-0.1}>
+      <group position={[1.9, 0, -0.52]} rotation-y={-0.1}>
         <mesh position={[0, 0.48, 0]} castShadow>
           <boxGeometry args={[0.58, 0.82, 0.52]} />
           <meshStandardMaterial color={FOREST} roughness={0.56} />
@@ -810,7 +810,7 @@ function JunkZone() {
       {[0, 1, 2].map((index) => (
         <mesh
           key={index}
-          position={[1.95 + index * 0.045, 0.36, 0.35]}
+          position={[2.2 + index * 0.045, 0.36, 0.35]}
           rotation-z={-0.08}
           castShadow
         >
@@ -997,11 +997,51 @@ function SunnyWindowView() {
         <meshBasicMaterial color="#8fd2f2" />
       </mesh>
 
-      {/* sun and soft clouds */}
-      <mesh position={[1.25, 2.68, -1.68]}>
-        <circleGeometry args={[0.27, 28]} />
-        <meshBasicMaterial color="#ffe579" />
-      </mesh>
+      {/* cheerful sun wearing shades, with a soft glow and rays */}
+      <group position={[1.25, 2.68, -1.68]}>
+        {/* soft outer glow */}
+        <mesh position={[0, 0, -0.02]}>
+          <circleGeometry args={[0.46, 32]} />
+          <meshBasicMaterial color="#ffc266" transparent opacity={0.28} />
+        </mesh>
+        {/* sun rays */}
+        {Array.from({ length: 8 }, (_, index) => {
+          const angle = (index / 8) * Math.PI * 2;
+          return (
+            <mesh
+              key={index}
+              position={[Math.cos(angle) * 0.37, Math.sin(angle) * 0.37, -0.01]}
+              rotation-z={angle}
+            >
+              <planeGeometry args={[0.16, 0.045]} />
+              <meshBasicMaterial color="#ffd35c" transparent opacity={0.9} />
+            </mesh>
+          );
+        })}
+        {/* sun face */}
+        <mesh>
+          <circleGeometry args={[0.28, 32]} />
+          <meshBasicMaterial color="#ffdb5c" />
+        </mesh>
+        {/* dark sunglasses */}
+        <mesh position={[-0.095, 0.035, 0.01]}>
+          <circleGeometry args={[0.075, 20]} />
+          <meshBasicMaterial color="#242424" />
+        </mesh>
+        <mesh position={[0.095, 0.035, 0.01]}>
+          <circleGeometry args={[0.075, 20]} />
+          <meshBasicMaterial color="#242424" />
+        </mesh>
+        <mesh position={[0, 0.045, 0.01]}>
+          <planeGeometry args={[0.09, 0.02]} />
+          <meshBasicMaterial color="#242424" />
+        </mesh>
+        {/* big smile */}
+        <mesh position={[0, -0.03, 0.01]} rotation-z={3.49}>
+          <torusGeometry args={[0.1, 0.018, 8, 24, 2.44]} />
+          <meshBasicMaterial color="#c76b1f" />
+        </mesh>
+      </group>
       {(
         [
           [-1.2, 2.63, 0.22],
@@ -1102,6 +1142,10 @@ function SunnyWindowView() {
       ))}
       {[-1.05, -0.82, 0.78, 1.02].map((x, index) => (
         <group key={x} position={[x, 0.66, -1.44 + index * 0.008]}>
+          <mesh position={[0, -0.25, -0.01]}>
+            <boxGeometry args={[0.035, 0.22, 0.02]} />
+            <meshBasicMaterial color="#77523a" />
+          </mesh>
           <mesh scale={[1.25, 0.65, 1]}>
             <circleGeometry args={[0.22, 16]} />
             <meshBasicMaterial color="#397648" />
