@@ -2,15 +2,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
-import {
-  AdditiveBlending,
-  CanvasTexture,
-  DoubleSide,
-  MeshStandardMaterial,
-  Quaternion,
-  SRGBColorSpace,
-  Vector3,
-} from "three";
+import { MeshStandardMaterial, SRGBColorSpace, Vector3 } from "three";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
 
@@ -610,8 +602,10 @@ function CleaningEquipment() {
             <cylinderGeometry args={[0.103, 0.103, 0.06, 14]} />
             <meshStandardMaterial color={LIME} roughness={0.4} />
           </mesh>
-          <mesh position={[0, 0.86, -0.02]} castShadow>
-            <boxGeometry args={[0.27, 0.24, 0.2]} />
+          {/* Slightly shallower than the body below, so the two boxes never
+              share a face and the overlap cannot flicker. */}
+          <mesh position={[0, 0.86, -0.021]} castShadow>
+            <boxGeometry args={[0.27, 0.24, 0.185]} />
             <meshStandardMaterial color={FOREST} roughness={0.5} />
           </mesh>
           <mesh position={[0, 1.18, -0.03]} castShadow>
@@ -2036,93 +2030,10 @@ function CornerPlant() {
  * Sunlight direction, in world space, travelling from the sun outside the
  * window down into the room. It leans in from the upper right - the corner the
  * painted sun sits in - so the beam sweeps across the desk and out onto the rug
- * towards the front left. The key light, its shadows and the visible shafts are
- * all built from this one vector, so they can never disagree.
+ * towards the front left.
  */
 const SUN_DIRECTION = new Vector3(-0.27, -0.405, 0.873).normalize();
 const SUN_LIGHT_POSITION = SUN_DIRECTION.clone().multiplyScalar(-18).toArray();
-const WINDOW_CENTRE: [number, number, number] = [0, 1.95, -5.14];
-
-/** Rotation that points local +Z straight down the sunbeam. */
-function useSunOrientation() {
-  return useMemo(() => {
-    const quaternion = new Quaternion();
-    quaternion.setFromUnitVectors(new Vector3(0, 0, 1), SUN_DIRECTION.clone());
-    return quaternion;
-  }, []);
-}
-
-/**
- * Soft-edged gradient for the visible beam: bright down the middle, feathered
- * at both sides, and fading out along its length so it dissolves into the room
- * instead of stopping at a hard edge.
- */
-function useShaftTexture() {
-  return useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 64;
-    canvas.height = 256;
-    const context = canvas.getContext("2d");
-    if (!context) return null;
-
-    const across = context.createLinearGradient(0, 0, canvas.width, 0);
-    across.addColorStop(0, "rgba(255,255,255,0)");
-    across.addColorStop(0.22, "rgba(255,255,255,0.85)");
-    across.addColorStop(0.5, "rgba(255,255,255,1)");
-    across.addColorStop(0.78, "rgba(255,255,255,0.85)");
-    across.addColorStop(1, "rgba(255,255,255,0)");
-    context.fillStyle = across;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    const along = context.createLinearGradient(0, 0, 0, canvas.height);
-    along.addColorStop(0, "rgba(255,255,255,1)");
-    along.addColorStop(0.35, "rgba(255,255,255,0.7)");
-    along.addColorStop(0.75, "rgba(255,255,255,0.22)");
-    along.addColorStop(1, "rgba(255,255,255,0)");
-    context.globalCompositeOperation = "destination-in";
-    context.fillStyle = along;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    const texture = new CanvasTexture(canvas);
-    texture.colorSpace = SRGBColorSpace;
-    return texture;
-  }, []);
-}
-
-/**
- * The visible shaft of light leaning in through the glass: a few feathered
- * slices stacked through the beam, added together so the light reads as a soft
- * volume rather than a pane of glass.
- */
-const SHAFT_SLICES = [-0.62, -0.31, 0, 0.31, 0.62];
-
-function SunShafts() {
-  const orientation = useSunOrientation();
-  const texture = useShaftTexture();
-
-  useEffect(() => () => texture?.dispose(), [texture]);
-  if (!texture) return null;
-
-  return (
-    <group position={WINDOW_CENTRE} quaternion={orientation} renderOrder={4}>
-      {SHAFT_SLICES.map((offset) => (
-        <mesh key={offset} position={[0, offset, 3.35]} rotation-x={-Math.PI / 2}>
-          <planeGeometry args={[3.15, 7.2]} />
-          <meshBasicMaterial
-            map={texture}
-            color="#fff3d2"
-            transparent
-            opacity={0.1}
-            blending={AdditiveBlending}
-            depthWrite={false}
-            side={DoubleSide}
-            toneMapped={false}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
 
 /**
  * Every solid surface in the room casts and receives the sunlight, so the desk,
@@ -2223,7 +2134,6 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <CornerPlant />
       <SnakePlant position={[2.05, 0, -2.35]} scale={0.78} />
       <WallClock position={[-3.2, 2.6, -5.05]} />
-      <SunShafts />
       <SunShadowSetup />
     </>
   );
