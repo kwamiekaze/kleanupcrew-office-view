@@ -941,6 +941,100 @@ function LawnMower() {
   );
 }
 
+/** A tied-off refuse sack: slumped lumpy body, gathered neck and a knot. */
+function DebrisBag({
+  position,
+  scale = 1,
+  tone = "#3a413c",
+  lean = 0,
+}: {
+  position: [number, number, number];
+  scale?: number;
+  tone?: string;
+  lean?: number;
+}) {
+  return (
+    <group position={position} scale={scale} rotation-z={lean}>
+      {/* two soft lumps give the sack a slumped, irregular silhouette */}
+      <mesh scale={[1, 0.98, 0.9]} castShadow receiveShadow>
+        <sphereGeometry args={[0.3, 14, 10]} />
+        <meshStandardMaterial color={tone} roughness={0.96} />
+      </mesh>
+      <mesh position={[0.11, -0.09, 0.04]} scale={[0.76, 0.66, 0.78]} castShadow>
+        <sphereGeometry args={[0.3, 12, 8]} />
+        <meshStandardMaterial color={tone} roughness={0.96} />
+      </mesh>
+      {/* the plastic gathers into a neck, then a knot */}
+      <mesh position={[0, 0.29, 0]} castShadow>
+        <cylinderGeometry args={[0.07, 0.19, 0.15, 10]} />
+        <meshStandardMaterial color={tone} roughness={0.94} />
+      </mesh>
+      <mesh position={[0, 0.38, 0]} castShadow>
+        <sphereGeometry args={[0.072, 10, 7]} />
+        <meshStandardMaterial color="#2a2f2c" roughness={0.92} />
+      </mesh>
+      {/* loose ends of the tie flop over and hang down */}
+      {[-1, 1].map((side) => (
+        <mesh
+          key={side}
+          position={[side * 0.085, 0.395, side * 0.02]}
+          rotation-z={side * 1.45}
+          scale={[1, 1, 0.55]}
+          castShadow
+        >
+          <capsuleGeometry args={[0.024, 0.075, 3, 6]} />
+          <meshStandardMaterial color={tone} roughness={0.95} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/** A taped shipping carton with closed flaps and a seam of packing tape. */
+function Carton({
+  position,
+  size,
+  rotation = 0,
+  tone = "#c49a66",
+  label = false,
+}: {
+  position: [number, number, number];
+  size: [number, number, number];
+  rotation?: number;
+  tone?: string;
+  label?: boolean;
+}) {
+  const [width, height, depth] = size;
+  return (
+    <group position={position} rotation-y={rotation}>
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[width, height, depth]} />
+        <meshStandardMaterial color={tone} roughness={0.93} />
+      </mesh>
+      {/* closed flaps sit slightly proud of the walls */}
+      <mesh position={[0, height / 2 + 0.006, 0]} castShadow>
+        <boxGeometry args={[width * 0.96, 0.014, depth * 0.96]} />
+        <meshStandardMaterial color="#b08052" roughness={0.95} />
+      </mesh>
+      {/* packing tape over the seam and down the face */}
+      <mesh position={[0, height / 2 + 0.015, 0]}>
+        <boxGeometry args={[width * 1.005, 0.008, 0.085]} />
+        <meshStandardMaterial color="#e8d9b8" roughness={0.55} />
+      </mesh>
+      <mesh position={[0, height * 0.22, depth / 2 + 0.005]}>
+        <boxGeometry args={[0.085, height * 0.56, 0.008]} />
+        <meshStandardMaterial color="#e8d9b8" roughness={0.55} />
+      </mesh>
+      {label ? (
+        <mesh position={[width * 0.24, height * 0.06, depth / 2 + 0.007]}>
+          <boxGeometry args={[0.19, 0.13, 0.006]} />
+          <meshStandardMaterial color="#f3ede1" roughness={0.9} />
+        </mesh>
+      ) : null}
+    </group>
+  );
+}
+
 function JunkZone() {
   return (
     <group position={[5.35, 0, 2.55]} rotation-y={-Math.PI / 2}>
@@ -972,63 +1066,30 @@ function JunkZone() {
           <boxGeometry args={[0.56, 0.035, 0.08]} />
           <meshStandardMaterial color="#7a281f" roughness={0.55} />
         </mesh>
-        <mesh position={[0, 0.18, -0.08]} rotation-z={Math.PI / 2}>
-          <cylinderGeometry args={[0.018, 0.018, 0.62, 8]} />
-          <meshStandardMaterial color={CHARCOAL} metalness={0.35} roughness={0.42} />
-        </mesh>
         {[-0.3, 0.3].map((x) => (
           <DetailedWheel key={x} position={[x, 0.18, -0.08]} radius={0.17} />
         ))}
       </group>
 
-      {/* taped cartons with seams and branded green handling marks */}
-      <mesh position={[0.5, 0.26, 0]} rotation-y={0.2} castShadow receiveShadow>
-        <boxGeometry args={[0.66, 0.52, 0.6]} />
-        <meshStandardMaterial color="#c49a66" roughness={0.9} />
-      </mesh>
-      <mesh position={[0.5, 0.535, 0]} rotation-y={0.2}>
-        <boxGeometry args={[0.1, 0.018, 0.58]} />
-        <meshStandardMaterial color="#e0c394" roughness={0.9} />
-      </mesh>
-      <mesh position={[0.5, 0.27, 0.305]} rotation-y={0.2}>
-        <planeGeometry args={[0.2, 0.15]} />
-        <meshBasicMaterial color={FOREST} />
-      </mesh>
-      <mesh position={[0.56, 0.72, 0.06]} rotation-y={-0.32} castShadow>
-        <boxGeometry args={[0.5, 0.4, 0.48]} />
-        <meshStandardMaterial color="#b98f5e" roughness={0.9} />
-      </mesh>
-      <mesh position={[0.56, 0.925, 0.06]} rotation-y={-0.32}>
-        <boxGeometry args={[0.08, 0.018, 0.46]} />
-        <meshStandardMaterial color="#dec397" roughness={0.9} />
-      </mesh>
-      <mesh position={[1.15, 0.2, 0.3]} rotation-y={0.8} castShadow>
-        <boxGeometry args={[0.44, 0.4, 0.42]} />
-        <meshStandardMaterial color="#cfa878" roughness={0.9} />
-      </mesh>
+      {/* A stacked run of taped cartons, each clear of its neighbours. */}
+      <Carton position={[0.45, 0.26, -0.02]} size={[0.66, 0.52, 0.6]} rotation={0.18} label />
+      <Carton
+        position={[0.5, 0.72, 0.04]}
+        size={[0.5, 0.4, 0.48]}
+        rotation={-0.3}
+        tone="#b98f5e"
+      />
+      <Carton
+        position={[1.32, 0.21, 0.36]}
+        size={[0.44, 0.42, 0.42]}
+        rotation={0.72}
+        tone="#cfa878"
+        label
+      />
 
-      {/* cinched debris bags with gathered tops */}
-      {(
-        [
-          [1.22, 0.3, -0.44, 0.3],
-          [0.78, 0.26, -0.58, 0.25],
-        ] as Array<[number, number, number, number]>
-      ).map(([x, y, z, scale]) => (
-        <group key={x} position={[x, y, z]}>
-          <mesh scale={[1, 1.25, 0.84]} castShadow>
-            <sphereGeometry args={[scale, 20, 14]} />
-            <meshStandardMaterial color="#303633" roughness={0.82} />
-          </mesh>
-          <mesh position={[0, scale * 1.28, 0]}>
-            <cylinderGeometry args={[scale * 0.12, scale * 0.32, scale * 0.26, 10]} />
-            <meshStandardMaterial color="#2a302c" roughness={0.88} />
-          </mesh>
-          <mesh position={[0, scale * 1.53, 0]} rotation-z={0.16}>
-            <coneGeometry args={[scale * 0.13, scale * 0.26, 8]} />
-            <meshStandardMaterial color="#202522" roughness={0.9} />
-          </mesh>
-        </group>
-      ))}
+      {/* Tied refuse sacks, slumped together beside the cartons. */}
+      <DebrisBag position={[1.2, 0.29, -0.5]} scale={1} lean={0.06} />
+      <DebrisBag position={[0.72, 0.25, -0.62]} scale={0.84} tone="#343b36" lean={-0.09} />
 
       {/* Wheeled cleanup bin with a hinged lid, grab handle and castors. */}
       <group position={[1.9, 0, -0.52]} rotation-y={-0.1}>
@@ -1048,10 +1109,6 @@ function JunkZone() {
           <boxGeometry args={[0.6, 0.045, 0.05]} />
           <meshStandardMaterial color="#26503a" roughness={0.55} />
         </mesh>
-        <mesh position={[0, 0.93, -0.27]} rotation-z={Math.PI / 2}>
-          <cylinderGeometry args={[0.024, 0.024, 0.5, 8]} />
-          <meshStandardMaterial color={CHARCOAL} roughness={0.6} />
-        </mesh>
         <mesh position={[0, 0.858, 0.268]} rotation-x={Math.PI / 2}>
           <torusGeometry args={[0.085, 0.017, 5, 10, Math.PI]} />
           <meshStandardMaterial color="#26503a" roughness={0.6} />
@@ -1067,16 +1124,28 @@ function JunkZone() {
           </mesh>
         ))}
       </group>
+
+      {/* Broken-down cartons leaning flat against the wall for recycling. */}
       {[0, 1, 2].map((index) => (
-        <mesh
+        <group
           key={index}
-          position={[2.2 + index * 0.045, 0.36, 0.35]}
-          rotation-z={-0.08}
-          castShadow
+          position={[2.27 + index * 0.055, 0.47, -0.46 + index * 0.035]}
+          rotation-x={-0.2}
+          rotation-z={0.02 + index * 0.012}
         >
-          <boxGeometry args={[0.035, 0.66, 0.44]} />
-          <meshStandardMaterial color="#ba8d59" roughness={0.94} />
-        </mesh>
+          <mesh castShadow>
+            <boxGeometry args={[0.02, 0.95, 0.66 - index * 0.06]} />
+            <meshStandardMaterial
+              color={index % 2 ? "#c09062" : "#b38552"}
+              roughness={0.96}
+            />
+          </mesh>
+          {/* pale corrugated edge reads as cardboard rather than timber */}
+          <mesh position={[0, 0.478, 0]}>
+            <boxGeometry args={[0.022, 0.022, 0.66 - index * 0.06]} />
+            <meshStandardMaterial color="#d9bb8e" roughness={0.96} />
+          </mesh>
+        </group>
       ))}
     </group>
   );
