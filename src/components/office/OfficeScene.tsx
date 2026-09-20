@@ -3,6 +3,7 @@ import { ContactShadows, useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { MeshStandardMaterial, SRGBColorSpace, Vector3 } from "three";
+import { WallCalendar } from "./WallCalendar";
 import { WallClock } from "./WallClock";
 import { BRAND_LOGO } from "@/lib/brand";
 
@@ -2134,6 +2135,7 @@ export function OfficeScene({ reducedMotion }: { reducedMotion: boolean }) {
       <CornerPlant />
       <SnakePlant position={[2.05, 0, -2.35]} scale={0.78} />
       <WallClock position={[-3.2, 2.6, -5.05]} />
+      <WallCalendar position={[-4.78, 2.08, -5.07]} />
       <SunShadowSetup />
     </>
   );
