@@ -44,6 +44,10 @@ export const VIEWS: OfficeView[] = [
     // enough to keep the mower's wheels on screen.
     pos: [1.44, 2.83, 1.0],
     target: [-5.38, 1.12, 1.78],
+    // A tall screen sees far less across, so the phone stands back a step and
+    // centres on the board, which keeps the whole bay in shot end to end.
+    mobilePos: [2.55, 3.05, 1.05],
+    mobileTarget: [-5.38, 1.14, 1.95],
     horizontalFov: 44,
   },
   {

@@ -1,12 +1,12 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, useTexture } from "@react-three/drei";
+import { ContactShadows } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
-import { MeshStandardMaterial, SRGBColorSpace, Vector3 } from "three";
+import { MeshStandardMaterial, Vector3 } from "three";
 import { Butterflies } from "./Butterflies";
+import { DeskScreen } from "./DeskScreen";
 import { WallCalendar } from "./WallCalendar";
 import { WallClock } from "./WallClock";
-import { BRAND_LOGO } from "@/lib/brand";
 
 const WOOD = "#8a5a33";
 const WOOD_DARK = "#5e3c22";
@@ -102,19 +102,6 @@ function Desk() {
 }
 
 function Monitor() {
-  const source = useTexture(BRAND_LOGO);
-  const logo = useMemo(() => {
-    // Frame the original square artwork without stretching or modifying it.
-    const texture = source.clone();
-    texture.colorSpace = SRGBColorSpace;
-    texture.repeat.set(1, 0.24);
-    texture.offset.set(0, 0.38);
-    texture.anisotropy = 4;
-    texture.needsUpdate = true;
-    return texture;
-  }, [source]);
-  useEffect(() => () => logo.dispose(), [logo]);
-
   return (
     <group position={[0, 0.78, -2.75]}>
       {/* Soft contact patch anchors the monitor without a harsh floating shadow. */}
@@ -157,31 +144,10 @@ function Monitor() {
           <boxGeometry args={[1.11, 0.6, 0.034]} />
           <meshStandardMaterial color="#b8bdc1" metalness={0.3} roughness={0.34} />
         </mesh>
-        <mesh position={[0, 0, 0.032]}>
-          <planeGeometry args={[1.14, 0.62]} />
-          <meshBasicMaterial color="#fdfef8" toneMapped={false} />
-        </mesh>
-        {/* KleanupCrew dispatch dashboard */}
-        <mesh position={[0, 0.14, 0.041]}>
-          <planeGeometry args={[1.1, 0.264]} />
-          <meshBasicMaterial map={logo} toneMapped={false} />
-        </mesh>
-        {[-0.01, -0.12, -0.23].map((y, index) => (
-          <group key={y} position={[0, y, 0.038]}>
-            <mesh position={[-0.4, 0, 0]}>
-              <circleGeometry args={[0.026, 12]} />
-              <meshBasicMaterial color={index === 1 ? "#f0b44d" : LIME} />
-            </mesh>
-            <mesh position={[-0.14, 0, 0]}>
-              <planeGeometry args={[0.4, 0.028]} />
-              <meshBasicMaterial color="#779181" />
-            </mesh>
-            <mesh position={[0.35, 0, 0]}>
-              <planeGeometry args={[0.19, 0.055]} />
-              <meshBasicMaterial color="#4f8b5d" />
-            </mesh>
-          </group>
-        ))}
+        {/* The live KleanupCrew dashboard. */}
+        <group position={[0, 0, 0.032]}>
+          <DeskScreen width={1.14} height={0.62} />
+        </group>
       </group>
     </group>
   );
@@ -918,24 +884,24 @@ function LawnMower() {
   return (
     <group position={[-5.72, 0, 1.85]} rotation-y={Math.PI / 2}>
       {/* Lawn-care zone sits on the left wall, with a clear gap before Tree & Yard. */}
-      <group position={[0, 1.62, -0.03]}>
+      <group position={[-0.14, 1.62, -0.03]}>
         <SlatWall
-          width={2.12}
+          width={2.42}
           height={1.76}
           rails={[-0.54, -0.06, 0.42]}
           pegs={[
-            [-0.66, 0.44],
-            [-0.2, 0.44],
-            [0.24, 0.24],
-            [0.4, 0.24],
-            [0.78, -0.5],
-            [0.94, -0.5],
+            [-0.9, 0.44],
+            [-0.46, 0.44],
+            [0.36, 0.24],
+            [0.52, 0.24],
+            [0.86, -0.5],
+            [1.02, -0.5],
           ]}
         />
       </group>
 
       {/* Cordless blower: fan housing, scroll, two-stage nozzle and a battery. */}
-      <group position={[-0.44, 2.06, 0.2]} rotation-z={-0.1}>
+      <group position={[-0.82, 2.11, 0.2]} rotation-z={-0.1}>
         <mesh rotation-z={Math.PI / 2} castShadow>
           <cylinderGeometry args={[0.17, 0.17, 0.22, 14]} />
           <meshStandardMaterial color={LIME} roughness={0.42} />
@@ -1000,7 +966,7 @@ function LawnMower() {
       </group>
 
       {/* Hedge shears: long blades, a bumper at the pivot and timber handles. */}
-      <group position={[0.32, 1.8, 0.2]} rotation-z={0.14}>
+      <group position={[0.3, 1.8, 0.2]} rotation-z={0.14}>
         {[-1, 1].map((side) => (
           <group key={side} rotation-z={side * 0.075}>
             <mesh position={[side * 0.05, 0.2, side * 0.012]} castShadow>
@@ -1036,7 +1002,7 @@ function LawnMower() {
       </group>
 
       {/* Fan rake: braced head bar with tines that splay and curve forward. */}
-      <group position={[0.86, 1.15, 0.2]} rotation-z={-0.03}>
+      <group position={[0.8, 1.15, 0.2]} rotation-z={-0.03}>
         <mesh position={[0, 0.16, 0]} castShadow>
           <cylinderGeometry args={[0.021, 0.025, 0.72, 8]} />
           <meshStandardMaterial color="#c39154" roughness={0.78} />
@@ -1218,7 +1184,7 @@ function LawnMower() {
       </group>
 
       {/* String trimmer: split shaft, guard with a line blade and a D-handle. */}
-      <group position={[-0.78, 0, 0.36]} rotation-z={0.12}>
+      <group position={[-1.04, 0, 0.36]} rotation-z={0.12}>
         <mesh position={[0, 1.02, 0]} castShadow>
           <cylinderGeometry args={[0.024, 0.026, 0.92, 8]} />
           <meshStandardMaterial color="#aeb8b2" metalness={0.35} roughness={0.36} />
@@ -1321,7 +1287,7 @@ function LawnMower() {
         </mesh>
       </group>
 
-      <FuelCan position={[-1.12, 0, 0.42]} />
+      <FuelCan position={[-1.52, 0, 0.44]} />
 
     </group>
   );
