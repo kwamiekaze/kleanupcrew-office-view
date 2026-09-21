@@ -13,10 +13,12 @@ const AUTO_PAN: Record<
     secondsPerLeg: number;
   }
 > = {
-  // Welcome does not orbit; it walks the room. See WELCOME_TOUR below.
   welcome: {
-    orbit: 0,
-    mobileOrbit: 0,
+    // A calmer arc: wide enough to feel alive, short enough that the window
+    // frame never crops the sun at either end of the sweep. Welcome runs this
+    // as its opening pan, then walks the room. See WELCOME_TOUR below.
+    orbit: 0.3,
+    mobileOrbit: 0.22,
     lateral: 0,
     mobileLateral: 0,
     secondsPerLeg: 8,
@@ -74,26 +76,32 @@ interface TourStop {
 }
 
 /**
- * The Welcome camera walks the office instead of orbiting in place. It opens
- * wide on the whole room, moves in close enough on the calendar to read the
- * dates, drifts right across the desk, carries on to the plant in the far
- * corner, then pulls back out to the wide shot and begins again. The move is
- * one continuous rightward sweep, so it reads as a single take rather than a
- * set of cuts.
+ * Welcome runs two pans back to back. The first is the original wide sweep,
+ * unchanged: the camera holds the whole room and arcs gently right, then left,
+ * then back to centre.
+ *
+ * The second walks the office. It leaves the wide shot for the calendar, close
+ * enough to read the dates, then widens on the way out so the desk and the
+ * window behind it are in one frame, carries on forward past the desk to the
+ * plant in the far corner, and pulls back to the wide shot where the first pan
+ * picks up again. Both pans start and end centred, so the loop has no seam.
+ *
+ * Nothing stops for long. Each framing gets a beat to settle, never a pause,
+ * and the camera creeps into and out of every move rather than parking.
  *
  * Phones get their own framing for each stop, pulled back and opened up,
  * because a tall screen sees far less across than a wide one.
  */
 const WELCOME_TOUR: TourStop[] = [
   {
-    // The whole room.
+    // The whole room. Its dwell is the opening pan, so it holds nothing here.
     pos: [0, 3.3, 7.95],
     target: [0, 1.56, -1.2],
     fov: 42,
     mobilePos: [0, 3.17, 7.0],
     mobileTarget: [0, 1.28, -1.2],
-    hold: 4.5,
-    travel: 10,
+    hold: 0,
+    travel: 10.5,
   },
   {
     // Close on the calendar: the spiral, the hanger and every date legible.
@@ -101,37 +109,56 @@ const WELCOME_TOUR: TourStop[] = [
     target: [-4.78, 2.33, -5.05],
     fov: 42,
     mobilePos: [-3.28, 2.37, -1.95],
-    hold: 4.5,
-    travel: 7,
+    hold: 1.6,
+    travel: 8,
   },
   {
-    // Across the desk: monitor, lamp, keyboard, mouse and the steaming mug.
-    pos: [1.45, 1.52, -0.55],
-    target: [0.05, 1.12, -2.55],
-    fov: 40,
-    mobilePos: [1.96, 1.63, 0.32],
-    mobileTarget: [0.25, 1.25, -2.6],
-    mobileFov: 46,
-    hold: 4.5,
-    travel: 6,
+    // Wider again on the way out of the calendar, so the desk and the window
+    // behind it read as one picture: monitor, lamp, mug, sun and trees.
+    pos: [1.85, 1.66, -0.3],
+    target: [0.1, 1.2, -2.75],
+    fov: 50,
+    mobilePos: [2.4, 1.85, 1.4],
+    mobileTarget: [0.25, 1.25, -2.8],
+    mobileFov: 52,
+    hold: 1.6,
+    travel: 8.5,
   },
   {
-    // The plant in the far corner, with the prints behind it.
-    pos: [2.45, 1.42, -1.25],
-    target: [4.5, 1.05, -4.2],
+    // Forward, towards the near side of the room, turning onto the corner
+    // plant with the botanical prints behind it.
+    pos: [2.7, 1.52, 0.15],
+    target: [4.45, 1.08, -4.3],
     fov: 44,
-    mobilePos: [2.2, 1.46, -0.89],
-    hold: 4,
-    travel: 10,
+    mobilePos: [3.0, 1.62, 0.9],
+    mobileTarget: [4.45, 1.3, -4.3],
+    mobileFov: 48,
+    hold: 1.3,
+    travel: 8,
   },
 ];
 
 const TOUR_LENGTH = WELCOME_TOUR.reduce((total, stop) => total + stop.hold + stop.travel, 0);
 
+/** Seconds the opening pan runs before the walk starts: one sweep, both ways. */
+const OPENING_LEG = 8;
+const OPENING_PAN = OPENING_LEG * 2;
+const WELCOME_CYCLE = OPENING_PAN + TOUR_LENGTH;
+
 /** Eases in and out with no kick at either end, so stops feel settled. */
 function smootherstep(value: number) {
   const k = Math.max(0, Math.min(1, value));
   return k * k * k * (k * (k * 6 - 15) + 10);
+}
+
+/**
+ * The same ease with a thread of constant speed left in it. The camera slows
+ * into a framing and creeps out of it instead of coming to a dead stop, which
+ * is what keeps the walk reading as one move rather than a run of little ones.
+ */
+function glide(value: number) {
+  const k = Math.max(0, Math.min(1, value));
+  return smootherstep(k) * 0.86 + k * 0.14;
 }
 
 function readStop(
@@ -207,6 +234,7 @@ export function CameraRig({
       ...(isMobile && view.mobileTarget ? view.mobileTarget : view.target),
     );
     let tourFov: number | null = null;
+    let tourOrbit = 0;
     if (view.id === "welcome") {
       // Frozen on the opening shot until the visitor is through the splash, and
       // frozen there for good if they have asked for reduced motion.
@@ -216,28 +244,44 @@ export function CameraRig({
         elapsed = clock.elapsedTime - tourStart.current;
       }
 
-      let remaining = elapsed % TOUR_LENGTH;
-      let index = 0;
-      let blend = 0;
-      for (let step = 0; step < WELCOME_TOUR.length; step += 1) {
-        const stop = WELCOME_TOUR[step]!;
-        index = step;
-        if (remaining < stop.hold) break;
-        remaining -= stop.hold;
-        if (remaining < stop.travel) {
-          blend = smootherstep(remaining / stop.travel);
-          break;
+      const cycle = elapsed % WELCOME_CYCLE;
+      const wide = WELCOME_TOUR[0]!;
+      if (cycle < OPENING_PAN) {
+        // Pan one, as it always was: the whole room, arcing right then left.
+        // A sine rather than a cosine so the arc begins and ends centred and
+        // the handover to the walk has nothing to catch up on.
+        const pan = AUTO_PAN.welcome;
+        tourFov = readStop(wide, isMobile, stopPos.current, stopLook.current);
+        base.copy(stopPos.current);
+        target.copy(stopLook.current);
+        tourOrbit =
+          Math.sin((Math.PI * cycle) / OPENING_LEG) *
+          (isMobile ? pan.mobileOrbit : pan.orbit);
+      } else {
+        // Pan two: the walk.
+        let remaining = cycle - OPENING_PAN;
+        let index = 0;
+        let blend = 0;
+        for (let step = 0; step < WELCOME_TOUR.length; step += 1) {
+          const stop = WELCOME_TOUR[step]!;
+          index = step;
+          if (remaining < stop.hold) break;
+          remaining -= stop.hold;
+          if (remaining < stop.travel) {
+            blend = glide(remaining / stop.travel);
+            break;
+          }
+          remaining -= stop.travel;
         }
-        remaining -= stop.travel;
-      }
 
-      const from = WELCOME_TOUR[index]!;
-      const to = WELCOME_TOUR[(index + 1) % WELCOME_TOUR.length]!;
-      const fromFov = readStop(from, isMobile, stopPos.current, stopLook.current);
-      const toFov = readStop(to, isMobile, nextPos.current, nextLook.current);
-      base.copy(stopPos.current).lerp(nextPos.current, blend);
-      target.copy(stopLook.current).lerp(nextLook.current, blend);
-      tourFov = fromFov + (toFov - fromFov) * blend;
+        const from = WELCOME_TOUR[index]!;
+        const to = WELCOME_TOUR[(index + 1) % WELCOME_TOUR.length]!;
+        const fromFov = readStop(from, isMobile, stopPos.current, stopLook.current);
+        const toFov = readStop(to, isMobile, nextPos.current, nextLook.current);
+        base.copy(stopPos.current).lerp(nextPos.current, blend);
+        target.copy(stopLook.current).lerp(nextLook.current, blend);
+        tourFov = fromFov + (toFov - fromFov) * blend;
+      }
 
       if (introStarted && !reducedMotion) {
         // A held frame still breathes. Two slow waves of different periods, so
@@ -253,7 +297,7 @@ export function CameraRig({
     const dist = offset.length();
     const baseYaw = Math.atan2(offset.x, offset.z);
     const basePitch = Math.asin(offset.y / Math.max(dist, 0.001));
-    let automaticOrbit = 0;
+    let automaticOrbit = tourOrbit;
     let automaticLateral = 0;
     const automaticLift = 0;
     const automaticDistance = 1;
