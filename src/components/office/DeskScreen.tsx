@@ -8,14 +8,20 @@ import { BRAND_SLOGAN } from "@/lib/brand";
  * front-garden scene, with the visitor's real local date and time on a card and
  * the four service lines below it.
  *
- * It is drawn into one offscreen canvas at screen resolution and repainted on
- * the minute, into the same canvas, so the clock stays true without churning a
- * new texture every time. Nothing is downloaded: the whole picture is 2D canvas
- * work, which keeps the scene as light on a phone as it was before.
+ * The whole picture is 2D canvas work at screen resolution, repainted on the
+ * minute, so the clock is true and the page still downloads nothing for it.
+ *
+ * The painter and its dimensions are exported so the same artwork can back a
+ * sign-in or preview screen elsewhere on the site: size a canvas to
+ * SCREEN_WIDTH by SCREEN_HEIGHT, call paintScreen(context, new Date()), and
+ * repaint it each minute.
  */
 
-const TEXTURE_WIDTH = 1600;
-const TEXTURE_HEIGHT = 870;
+export const SCREEN_WIDTH = 1600;
+export const SCREEN_HEIGHT = 870;
+
+const TEXTURE_WIDTH = SCREEN_WIDTH;
+const TEXTURE_HEIGHT = SCREEN_HEIGHT;
 
 const FOREST = "#14502f";
 const FOREST_SOFT = "#1d5f39";
@@ -366,7 +372,7 @@ function drawService(
 }
 
 /** Paint the whole screen for the given local moment. */
-function drawScreen(context: CanvasRenderingContext2D, now: Date) {
+export function paintScreen(context: CanvasRenderingContext2D, now: Date) {
   const width = TEXTURE_WIDTH;
   const height = TEXTURE_HEIGHT;
   context.clearRect(0, 0, width, height);
@@ -531,6 +537,30 @@ function drawScreen(context: CanvasRenderingContext2D, now: Date) {
   context.fillRect(width / 2 + rule, 782, 46, 3);
 }
 
+
+/** Last-resort face: the wordmark and the clock on a clean ground. */
+function drawFallback(context: CanvasRenderingContext2D, now: Date) {
+  context.fillStyle = "#f4f8ed";
+  context.fillRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+  context.textAlign = "center";
+  context.textBaseline = "alphabetic";
+  context.font = `800 104px ${SANS}`;
+  context.fillStyle = FOREST;
+  context.fillText("KleanupCrew", TEXTURE_WIDTH / 2, 360);
+  context.font = `600 36px ${SANS}`;
+  context.fillStyle = FOREST_SOFT;
+  context.fillText(BRAND_SLOGAN, TEXTURE_WIDTH / 2, 420);
+  const hours = now.getHours();
+  const display = hours % 12 === 0 ? 12 : hours % 12;
+  context.font = `800 112px ${SANS}`;
+  context.fillStyle = FOREST;
+  context.fillText(
+    `${String(display).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} ${hours < 12 ? "AM" : "PM"}`,
+    TEXTURE_WIDTH / 2,
+    560,
+  );
+}
+
 /**
  * The current local minute. It re-renders on the turn of each minute rather
  * than on a fixed interval, so the clock never sits a beat behind, and it
@@ -574,35 +604,47 @@ export function DeskScreen({ width, height }: { width: number; height: number })
   const moment = useLocalMinute();
   const canvas = useRef<HTMLCanvasElement | null>(null);
 
+  // Painted before the texture is built, so the very first upload already
+  // carries the picture. A texture handed to the renderer blank stays blank on
+  // the GPU, which is how this screen came out black, and a fresh texture each
+  // minute is the same shape the wall calendar uses for its daily repaint.
   const texture = useMemo(() => {
     if (typeof document === "undefined") return null;
-    const element = document.createElement("canvas");
-    element.width = TEXTURE_WIDTH;
-    element.height = TEXTURE_HEIGHT;
-    canvas.current = element;
-    const created = new CanvasTexture(element);
+    if (!canvas.current) {
+      const element = document.createElement("canvas");
+      element.width = TEXTURE_WIDTH;
+      element.height = TEXTURE_HEIGHT;
+      canvas.current = element;
+    }
+    const context = canvas.current.getContext("2d");
+    if (!context) return null;
+    try {
+      paintScreen(context, moment);
+    } catch {
+      // Whatever the engine choked on, the screen still has to read as a
+      // screen rather than a dead panel.
+      drawFallback(context, moment);
+    }
+    const created = new CanvasTexture(canvas.current);
     created.colorSpace = SRGBColorSpace;
     created.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
     return created;
-  }, [gl]);
+  }, [moment, gl]);
 
   useEffect(() => () => texture?.dispose(), [texture]);
 
-  // Repainted into the same canvas, so a new minute costs one upload, not a
-  // new texture.
-  useEffect(() => {
-    const element = canvas.current;
-    if (!texture || !element) return;
-    const context = element.getContext("2d");
-    if (!context) return;
-    drawScreen(context, moment);
-    texture.needsUpdate = true;
-  }, [texture, moment]);
-
   return (
-    <mesh>
-      <planeGeometry args={[width, height]} />
-      <meshBasicMaterial map={texture} toneMapped={false} />
-    </mesh>
+    <group>
+      {/* Backlight behind the artwork: a blank panel then reads as an unlit
+          screen, never as a hole. */}
+      <mesh position={[0, 0, -0.002]}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial color="#f4f8ed" toneMapped={false} />
+      </mesh>
+      <mesh>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial map={texture} toneMapped={false} />
+      </mesh>
+    </group>
   );
 }
