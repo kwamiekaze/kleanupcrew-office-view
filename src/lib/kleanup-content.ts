@@ -4,7 +4,6 @@ export type ViewId = "welcome" | "cleaning" | "lawn" | "junk" | "tree" | "quote"
 
 export interface OfficeView {
   id: ViewId;
-  index: string;
   label: string;
   title: string;
   line: string;
@@ -24,7 +23,6 @@ export interface OfficeView {
 export const VIEWS: OfficeView[] = [
   {
     id: "welcome",
-    index: "01",
     label: "Welcome",
     title: BRAND_SLOGAN,
     line: "We clean it, clear it, cut it back and haul it away. One company, our own people, and one number to call for anything a property needs.",
@@ -38,7 +36,6 @@ export const VIEWS: OfficeView[] = [
   },
   {
     id: "lawn",
-    index: "02",
     label: "Lawn Care",
     title: "Lawn & yard maintenance",
     line: "We mow, edge, trim, clear the leaves, shape the hedges and cut back the brush, on a single visit or a schedule you set.",
@@ -51,7 +48,6 @@ export const VIEWS: OfficeView[] = [
   },
   {
     id: "tree",
-    index: "03",
     label: "Tree & Yard",
     title: "Tree & heavy yard work",
     line: "We trim, prune, take trees down, grind the stumps out, and pressure wash the hard surfaces around the property.",
@@ -63,7 +59,6 @@ export const VIEWS: OfficeView[] = [
   },
   {
     id: "cleaning",
-    index: "04",
     label: "Home Cleaning",
     title: "Residential & commercial cleaning",
     line: "Standard, deep, recurring and move-out cleans, rental turnovers, carpet, upholstery, windows and gutters. We do all of it ourselves.",
@@ -76,7 +71,6 @@ export const VIEWS: OfficeView[] = [
   },
   {
     id: "junk",
-    index: "05",
     label: "Junk Removal",
     title: "Junk removal & cleanouts",
     line: "Bulk items, garage and estate cleanouts, and non-hazardous renovation debris. We do the loading and haul it away in one visit.",
@@ -89,7 +83,6 @@ export const VIEWS: OfficeView[] = [
   },
   {
     id: "quote",
-    index: "06",
     label: "Get a Quote",
     title: "Property prep & curb appeal",
     line: "Tell us about the property once and we price the whole job, from a single tidy up to year round care.",

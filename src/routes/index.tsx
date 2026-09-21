@@ -269,8 +269,7 @@ function Home() {
                 aria-current={v.id === activeId}
                 onClick={() => select(v.id)}
               >
-                <span className="idx">{v.index}</span>
-                <span>{v.label}</span>
+                {v.label}
               </button>
             </li>
           ))}
@@ -328,7 +327,7 @@ function Home() {
             <Minus size={16} aria-hidden="true" />
           </button>
           <p className="pr-10 text-[10px] uppercase tracking-[0.22em] text-lime">
-            {view.index} · {view.label}
+            {view.label}
           </p>
           <h1 className="mt-1.5 pr-10 text-lg font-semibold leading-snug tracking-tight sm:text-xl">
             {view.title}
@@ -367,8 +366,7 @@ function Home() {
                 aria-current={v.id === activeId}
                 onClick={() => select(v.id)}
               >
-                <span className="idx">{v.index}</span>
-                <span>{v.label}</span>
+                {v.label}
               </button>
             </li>
           ))}
