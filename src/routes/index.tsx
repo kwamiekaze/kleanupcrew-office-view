@@ -332,7 +332,6 @@ function Home() {
           <h1 className="mt-1.5 pr-10 text-lg font-semibold leading-snug tracking-tight sm:text-xl">
             {view.title}
           </h1>
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-cream/75">{view.line}</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button className="kc-btn" onClick={() => setQuoteOpen(true)}>
               {view.cta}
@@ -350,7 +349,7 @@ function Home() {
               </span>
             </button>
             <span className="text-[11px] text-cream/50 md:hidden">
-              Fully insured · Upfront pricing · We do the work
+              Fully insured · Upfront pricing
             </span>
           </div>
         </section>

@@ -140,10 +140,26 @@ const WELCOME_TOUR: TourStop[] = [
 
 const TOUR_LENGTH = WELCOME_TOUR.reduce((total, stop) => total + stop.hold + stop.travel, 0);
 
-/** Seconds the opening pan runs before the walk starts: one sweep, both ways. */
+/** Seconds one wide sweep runs, out and back. */
 const OPENING_LEG = 8;
 const OPENING_PAN = OPENING_LEG * 2;
-const WELCOME_CYCLE = OPENING_PAN + TOUR_LENGTH;
+
+/**
+ * Welcome runs ten passes before it repeats. The walk takes the third, the
+ * seventh and the tenth; the rest are the wide sweep, mirrored turn about so
+ * that two in a row never look like the same shot twice. Every pass starts and
+ * ends on the centred wide framing, so they can be strung together in any
+ * order without a seam.
+ */
+const WALK_PASSES = new Set([3, 7, 10]);
+const PASS_COUNT = 10;
+const PASSES: boolean[] = Array.from({ length: PASS_COUNT }, (_, index) =>
+  WALK_PASSES.has(index + 1),
+);
+const SEQUENCE_LENGTH = PASSES.reduce(
+  (total, walks) => total + (walks ? TOUR_LENGTH : OPENING_PAN),
+  0,
+);
 
 /** Eases in and out with no kick at either end, so stops feel settled. */
 function smootherstep(value: number) {
@@ -244,22 +260,33 @@ export function CameraRig({
         elapsed = clock.elapsedTime - tourStart.current;
       }
 
-      const cycle = elapsed % WELCOME_CYCLE;
+      let cycle = elapsed % SEQUENCE_LENGTH;
+      let pass = 0;
+      for (let step = 0; step < PASS_COUNT; step += 1) {
+        pass = step;
+        const span = PASSES[step] ? TOUR_LENGTH : OPENING_PAN;
+        if (cycle < span) break;
+        cycle -= span;
+      }
+
       const wide = WELCOME_TOUR[0]!;
-      if (cycle < OPENING_PAN) {
-        // Pan one, as it always was: the whole room, arcing right then left.
-        // A sine rather than a cosine so the arc begins and ends centred and
-        // the handover to the walk has nothing to catch up on.
+      if (!PASSES[pass]) {
+        // The wide sweep, as it always was: the whole room, arcing out and
+        // back. A sine rather than a cosine so the arc begins and ends centred
+        // and the handover to the next pass has nothing to catch up on, and a
+        // flipped sign on alternate passes so it leads the other way.
         const pan = AUTO_PAN.welcome;
+        const lead = pass % 2 === 0 ? 1 : -1;
         tourFov = readStop(wide, isMobile, stopPos.current, stopLook.current);
         base.copy(stopPos.current);
         target.copy(stopLook.current);
         tourOrbit =
           Math.sin((Math.PI * cycle) / OPENING_LEG) *
+          lead *
           (isMobile ? pan.mobileOrbit : pan.orbit);
       } else {
-        // Pan two: the walk.
-        let remaining = cycle - OPENING_PAN;
+        // The walk.
+        let remaining = cycle;
         let index = 0;
         let blend = 0;
         for (let step = 0; step < WELCOME_TOUR.length; step += 1) {

@@ -6,7 +6,8 @@ export interface OfficeView {
   id: ViewId;
   label: string;
   title: string;
-  line: string;
+  /** Short summary, kept for the section data; the panel itself stays bare. */
+  line?: string;
   cta: string;
   /** camera position */
   pos: [number, number, number];
@@ -25,7 +26,6 @@ export const VIEWS: OfficeView[] = [
     id: "welcome",
     label: "Welcome",
     title: BRAND_SLOGAN,
-    line: "We clean it, clear it, cut it back and haul it away. One company, our own people, and one number to call for anything a property needs.",
     cta: "Make this property look good again",
     // Aimed a little higher than the room's centre, so the view tips down and
     // the whole sun clears the top of the window frame.
@@ -61,7 +61,7 @@ export const VIEWS: OfficeView[] = [
     id: "cleaning",
     label: "Home Cleaning",
     title: "Residential & commercial cleaning",
-    line: "Standard, deep, recurring and move-out cleans, rental turnovers, carpet, upholstery, windows and gutters. We do all of it ourselves.",
+    line: "Standard, deep, recurring and move-out cleans, rental turnovers, carpet, upholstery, windows and gutters.",
     cta: "Book a cleaning estimate",
     // Was set back across the whole room; now it stands in front of the supply
     // shelf so the bottles, rolls, bucket and caddy are all legible.
@@ -113,7 +113,7 @@ export const SERVICE_FOR_VIEW: Record<ViewId, string> = {
   quote: "Make this property look good again",
 };
 
-export const TRUST_CHIPS = ["Fully insured", "Upfront pricing", "We do the work"];
+export const TRUST_CHIPS = ["Fully insured", "Upfront pricing"];
 
 export interface ServiceGroup {
   heading: string;
