@@ -56,13 +56,24 @@ function ready(env: QuoteEnv) {
       env.QUOTE_DELIVERY_ENABLED === "true" &&
       recipients(env).length > 0 &&
       EMAIL.test(env.QUOTE_FROM_EMAIL ?? "") &&
-      Boolean(env.RESEND_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) &&
+      Boolean(env.RESEND_API_KEY) &&
       origin.protocol === "https:" &&
       origin.origin === env.QUOTE_SITE_ORIGIN
     );
   } catch {
     return false;
   }
+}
+
+/**
+ * The Turnstile challenge is used when both of its keys are present, and
+ * skipped when they are not. Delivery works either way: without Turnstile the
+ * form still runs behind the same-origin check and the honeypot field, so
+ * requests can be sent as soon as the email settings are in place, and the
+ * stronger bot check can be switched on later just by adding the two keys.
+ */
+function turnstileConfigured(env: QuoteEnv) {
+  return Boolean(env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY);
 }
 
 async function limitedForm(request: Request): Promise<FormData> {
@@ -188,7 +199,10 @@ export async function handleQuoteRequest(
 ): Promise<Response> {
   if (request.method === "GET") {
     const enabled = ready(env);
-    return json({ enabled, siteKey: enabled ? env.TURNSTILE_SITE_KEY : null });
+    return json({
+      enabled,
+      siteKey: enabled && turnstileConfigured(env) ? env.TURNSTILE_SITE_KEY : null,
+    });
   }
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
   if (!ready(env)) return json({ error: UNAVAILABLE }, 503);
@@ -231,7 +245,7 @@ export async function handleQuoteRequest(
       zip: field(form, "zip", 5, 10),
       service: field(form, "service", 2, 100),
       description: field(form, "description", 10, 3000),
-      token: field(form, "token", 1, 2048),
+      token: turnstileConfigured(env) ? field(form, "token", 1, 2048) : "",
       requestId: field(form, "requestId", 36, 36),
     };
     if (
@@ -267,30 +281,32 @@ export async function handleQuoteRequest(
   }
 
   try {
-    const verification = await transport(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(10000),
-        body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: details.token }),
-      },
-    );
-    const check = (await verification.json()) as {
-      success?: boolean;
-      hostname?: string;
-      action?: string;
-    };
-    if (
-      !verification.ok ||
-      !check.success ||
-      check.hostname !== new URL(env.QUOTE_SITE_ORIGIN!).hostname ||
-      check.action !== "quote"
-    ) {
-      return json(
-        { error: "Verification expired or failed. Please complete the check and try again." },
-        403,
+    if (turnstileConfigured(env)) {
+      const verification = await transport(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(10000),
+          body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: details.token }),
+        },
       );
+      const check = (await verification.json()) as {
+        success?: boolean;
+        hostname?: string;
+        action?: string;
+      };
+      if (
+        !verification.ok ||
+        !check.success ||
+        check.hostname !== new URL(env.QUOTE_SITE_ORIGIN!).hostname ||
+        check.action !== "quote"
+      ) {
+        return json(
+          { error: "Verification expired or failed. Please complete the check and try again." },
+          403,
+        );
+      }
     }
     const attachments: { filename: string; content: string; content_type: string }[] = [];
     for (const [index, file] of files.entries()) {

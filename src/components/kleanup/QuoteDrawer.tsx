@@ -61,8 +61,8 @@ export function QuoteDrawer({
         const result = (await response.json()) as DeliveryConfig;
         if (!controller.signal.aborted)
           setConfig({
-            enabled: result.enabled === true && typeof result.siteKey === "string",
-            siteKey: result.siteKey,
+            enabled: result.enabled === true,
+            siteKey: typeof result.siteKey === "string" ? result.siteKey : null,
           });
       })
       .catch(() => {
@@ -123,7 +123,7 @@ export function QuoteDrawer({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!config?.enabled || !token || sending || processing) return;
+    if (!config?.enabled || (config.siteKey && !token) || sending || processing) return;
     setSending(true);
     setError("");
     const body = new FormData(event.currentTarget);
@@ -443,7 +443,9 @@ export function QuoteDrawer({
               <button
                 type="submit"
                 className="kc-btn col-span-2 min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={!config?.enabled || !token || sending || processing}
+                disabled={
+                  !config?.enabled || (!!config?.siteKey && !token) || sending || processing
+                }
               >
                 {sending ? "Sending request…" : "Request my estimate"}
               </button>

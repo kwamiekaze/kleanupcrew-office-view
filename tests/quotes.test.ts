@@ -63,10 +63,26 @@ test("delivery is disabled by default and does not expose secrets", async () => 
   assert.equal((await handleQuoteRequest(request(), {}, noNetwork)).status, 503);
 });
 test("every required configuration value is needed", async () => {
-  for (const key of Object.keys(env) as Array<keyof QuoteEnv>) {
+  const required: Array<keyof QuoteEnv> = [
+    "QUOTE_DELIVERY_ENABLED",
+    "QUOTE_TO_EMAIL",
+    "QUOTE_FROM_EMAIL",
+    "QUOTE_SITE_ORIGIN",
+    "RESEND_API_KEY",
+  ];
+  for (const key of required) {
     const partial = { ...env };
     delete partial[key];
     assert.equal((await handleQuoteRequest(request(), partial, noNetwork)).status, 503, key);
+  }
+});
+test("the Turnstile keys are optional, not required", async () => {
+  for (const key of ["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"] as Array<keyof QuoteEnv>) {
+    const partial = { ...env };
+    delete partial[key];
+    // Delivery still runs; the stubbed transport throwing is what yields 502,
+    // which only happens once the request is accepted as configured.
+    assert.notEqual((await handleQuoteRequest(request(), partial, noNetwork)).status, 503, key);
   }
 });
 test("configuration exposes only readiness and public site key", async () => {
@@ -166,6 +182,31 @@ test("de-duplicates recipients and ignores malformed entries", async () => {
 test("stays disabled when no valid recipient is configured", async () => {
   const broken: QuoteEnv = { ...env, QUOTE_TO_EMAIL: "not-an-email" };
   assert.equal((await handleQuoteRequest(request(), broken, noNetwork)).status, 503);
+});
+const noTurnstile: QuoteEnv = {
+  ...env,
+  TURNSTILE_SITE_KEY: undefined,
+  TURNSTILE_SECRET_KEY: undefined,
+};
+test("delivers without a Turnstile challenge when its keys are absent", async () => {
+  const mock = transport();
+  const result = await handleQuoteRequest(request(), noTurnstile, mock.fake);
+  assert.deepEqual(await result.json(), { ok: true });
+  assert.equal(mock.calls.length, 1);
+  assert.ok(mock.calls[0]!.url.includes("api.resend.com"));
+});
+test("GET reports enabled with no site key when Turnstile is unset", async () => {
+  const get = new Request("https://example.invalid/api/quotes", { method: "GET" });
+  const body = (await (await handleQuoteRequest(get, noTurnstile, noNetwork)).json()) as {
+    enabled: boolean;
+    siteKey: string | null;
+  };
+  assert.equal(body.enabled, true);
+  assert.equal(body.siteKey, null);
+});
+test("stays disabled without a Resend key even if everything else is set", async () => {
+  const noKey: QuoteEnv = { ...noTurnstile, RESEND_API_KEY: undefined };
+  assert.equal((await handleQuoteRequest(request(), noKey, noNetwork)).status, 503);
 });
 test("email failures do not return a false success", async () => {
   const mock = transport(true, 503);
