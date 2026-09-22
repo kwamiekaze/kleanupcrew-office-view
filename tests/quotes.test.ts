@@ -140,6 +140,33 @@ test("Other sends job details and safe attachments only to configured address", 
   assert.equal(attachment.filename, "property-photo-1.jpg");
   assert.ok(Buffer.from(attachment.content, "base64").length > 100);
 });
+test("delivers every request to all configured recipients", async () => {
+  const multi: QuoteEnv = {
+    ...env,
+    QUOTE_TO_EMAIL: "kleanup365@example.invalid, kwamiekaze@example.invalid",
+  };
+  const mock = transport();
+  const result = await handleQuoteRequest(request(), multi, mock.fake);
+  assert.deepEqual(await result.json(), { ok: true });
+  assert.deepEqual(mock.calls[1]!.body["to"], [
+    "kleanup365@example.invalid",
+    "kwamiekaze@example.invalid",
+  ]);
+});
+test("de-duplicates recipients and ignores malformed entries", async () => {
+  const messy: QuoteEnv = {
+    ...env,
+    QUOTE_TO_EMAIL: "kleanup365@example.invalid, not-an-email, KLEANUP365@example.invalid",
+  };
+  const mock = transport();
+  const result = await handleQuoteRequest(request(), messy, mock.fake);
+  assert.deepEqual(await result.json(), { ok: true });
+  assert.deepEqual(mock.calls[1]!.body["to"], ["kleanup365@example.invalid"]);
+});
+test("stays disabled when no valid recipient is configured", async () => {
+  const broken: QuoteEnv = { ...env, QUOTE_TO_EMAIL: "not-an-email" };
+  assert.equal((await handleQuoteRequest(request(), broken, noNetwork)).status, 503);
+});
 test("email failures do not return a false success", async () => {
   const mock = transport(true, 503);
   const result = await handleQuoteRequest(request(), env, mock.fake);

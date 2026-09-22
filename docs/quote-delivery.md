@@ -8,7 +8,7 @@ Use the server runtime's secrets/environment settings (Lovable/Cloudflare), neve
 
 | Setting | Value |
 | --- | --- |
-| QUOTE_TO_EMAIL | Business inbox supplied by the owner |
+| QUOTE_TO_EMAIL | Business inbox, or several separated by commas, that every request is sent to (for example `kleanup365@gmail.com, kwamiekaze@gmail.com`) |
 | QUOTE_FROM_EMAIL | A sender address on a domain verified in Resend |
 | QUOTE_SITE_ORIGIN | Exact HTTPS origin of the deployed site, with no trailing slash |
 | RESEND_API_KEY | Resend sending key restricted to the verified domain |

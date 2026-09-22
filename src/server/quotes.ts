@@ -16,8 +16,31 @@ export type QuoteEnv = Partial<
 
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
 const EMAIL = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/;
+const MAX_RECIPIENTS = 20;
 const UNAVAILABLE =
   "Online requests are not available yet. Your details and photos have not been sent.";
+
+/**
+ * The inboxes every booking request is delivered to. QUOTE_TO_EMAIL may name
+ * one address or several, separated by commas or spaces, so the business can
+ * copy in additional recipients without a code change. Each is validated, the
+ * list is de-duplicated case-insensitively, and it is capped so a misconfigured
+ * value can never fan a single request out to an unbounded set of addresses.
+ */
+function recipients(env: QuoteEnv): string[] {
+  const seen = new Set<string>();
+  const list: string[] = [];
+  for (const part of (env.QUOTE_TO_EMAIL ?? "").split(/[\s,]+/)) {
+    const address = part.trim();
+    if (!EMAIL.test(address)) continue;
+    const key = address.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    list.push(address);
+    if (list.length >= MAX_RECIPIENTS) break;
+  }
+  return list;
+}
 
 function json(body: unknown, status = 200) {
   return Response.json(body, {
@@ -31,7 +54,7 @@ function ready(env: QuoteEnv) {
     const origin = new URL(env.QUOTE_SITE_ORIGIN ?? "");
     return (
       env.QUOTE_DELIVERY_ENABLED === "true" &&
-      EMAIL.test(env.QUOTE_TO_EMAIL ?? "") &&
+      recipients(env).length > 0 &&
       EMAIL.test(env.QUOTE_FROM_EMAIL ?? "") &&
       Boolean(env.RESEND_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) &&
       origin.protocol === "https:" &&
@@ -296,7 +319,7 @@ export async function handleQuoteRequest(
       },
       body: JSON.stringify({
         from: `KleanupCrew Website <${env.QUOTE_FROM_EMAIL}>`,
-        to: [env.QUOTE_TO_EMAIL],
+        to: recipients(env),
         ...(EMAIL.test(details.contact) ? { reply_to: details.contact } : {}),
         subject: `Quote request: ${details.service}`,
         text: [
