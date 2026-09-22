@@ -216,6 +216,7 @@ export function CameraRig({
   const panRight = useRef(new Vector3());
   const introStart = useRef<number | null>(null);
   const tourStart = useRef<number | null>(null);
+  const tourHeld = useRef(0);
   const stopPos = useRef(new Vector3());
   const stopLook = useRef(new Vector3());
   const nextPos = useRef(new Vector3());
@@ -257,6 +258,14 @@ export function CameraRig({
       let elapsed = 0;
       if (introStarted && !reducedMotion) {
         tourStart.current ??= clock.elapsedTime;
+        if (i.zoom < -0.05) {
+          // Someone who has pinched in is reading something. Hold the walk
+          // where it stands rather than carrying them off the subject, and
+          // let it pick up from the same frame when they zoom back out.
+          tourStart.current = clock.elapsedTime - tourHeld.current;
+        } else {
+          tourHeld.current = clock.elapsedTime - tourStart.current;
+        }
         elapsed = clock.elapsedTime - tourStart.current;
       }
 
@@ -350,7 +359,17 @@ export function CameraRig({
     const safeOrbitDistance = dist > 5 ? dist + (4.35 - dist) * orbitProgress : dist;
     // A small dolly plus a wider field-of-view range makes pinch zoom feel
     // immediate on phones without pushing the camera through the room walls.
-    const radius = Math.max(1.2, safeOrbitDistance * (1 + i.zoom * 0.1) * automaticDistance);
+    //
+    // Welcome is the exception. It opens from across the room, so a tenth of
+    // that distance is no travel at all and the desk stayed out of reach.
+    // Pinching in there is a real dolly down to a fifth of the opening
+    // distance, which brings the monitor as close as Get a Quote reaches, and
+    // the path runs down the middle of the rug and stops in front of the
+    // chair. Pushing back out stays restrained everywhere, so no view can be
+    // pulled outside the walls.
+    const pullIn = view.id === "welcome" ? 0.8 : 0.1;
+    const zoomScale = i.zoom < 0 ? 1 + i.zoom * pullIn : 1 + i.zoom * 0.1;
+    const radius = Math.max(1.2, safeOrbitDistance * zoomScale * automaticDistance);
     const horizontalRadius = Math.cos(pitch) * radius;
     desiredPos.current.set(
       target.x + Math.sin(yaw) * horizontalRadius,
