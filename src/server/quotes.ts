@@ -4,7 +4,6 @@ import { MAX_PHOTOS, MAX_ATTACHMENT_BYTES } from "../lib/quote-photos.ts";
 export type QuoteEnv = Partial<
   Record<
     | "QUOTE_DELIVERY_ENABLED"
-    | "QUOTE_TO_EMAIL"
     | "QUOTE_FROM_EMAIL"
     | "QUOTE_SITE_ORIGIN"
     | "RESEND_API_KEY"
@@ -16,6 +15,7 @@ export type QuoteEnv = Partial<
 
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
 const EMAIL = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/;
+export const QUOTE_RECIPIENTS = ["kwamiekaze@gmail.com", "kleanup365@gmail.com"] as const;
 const UNAVAILABLE =
   "Online requests are not available yet. Your details and photos have not been sent.";
 
@@ -31,7 +31,6 @@ function ready(env: QuoteEnv) {
     const origin = new URL(env.QUOTE_SITE_ORIGIN ?? "");
     return (
       env.QUOTE_DELIVERY_ENABLED === "true" &&
-      EMAIL.test(env.QUOTE_TO_EMAIL ?? "") &&
       EMAIL.test(env.QUOTE_FROM_EMAIL ?? "") &&
       Boolean(env.RESEND_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) &&
       origin.protocol === "https:" &&
@@ -296,7 +295,7 @@ export async function handleQuoteRequest(
       },
       body: JSON.stringify({
         from: `KleanupCrew Website <${env.QUOTE_FROM_EMAIL}>`,
-        to: [env.QUOTE_TO_EMAIL],
+        to: [...QUOTE_RECIPIENTS],
         ...(EMAIL.test(details.contact) ? { reply_to: details.contact } : {}),
         subject: `Quote request: ${details.service}`,
         text: [

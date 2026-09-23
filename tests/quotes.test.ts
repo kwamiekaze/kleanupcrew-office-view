@@ -1,11 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cleanJpeg, handleQuoteRequest, type QuoteEnv } from "../src/server/quotes.ts";
+import {
+  cleanJpeg,
+  handleQuoteRequest,
+  QUOTE_RECIPIENTS,
+  type QuoteEnv,
+} from "../src/server/quotes.ts";
 
 const env: QuoteEnv = {
   QUOTE_DELIVERY_ENABLED: "true",
-  QUOTE_TO_EMAIL: "crew@example.invalid",
   QUOTE_FROM_EMAIL: "website@example.invalid",
   QUOTE_SITE_ORIGIN: "https://example.invalid",
   RESEND_API_KEY: "test-only",
@@ -125,7 +129,7 @@ test("verifies the challenge hostname and action", async () => {
     Response.json({ success: true, hostname: "untrusted.invalid", action: "other-form" });
   assert.equal((await handleQuoteRequest(request(), env, fake)).status, 403);
 });
-test("Other sends job details and safe attachments only to configured address", async () => {
+test("Other sends job details and safe attachments only to both owner addresses", async () => {
   const data = form();
   data.append("photos", new File([photo], "private-original-name.jpg", { type: "image/jpeg" }));
   data.set("to", "attacker@example.invalid");
@@ -133,7 +137,7 @@ test("Other sends job details and safe attachments only to configured address", 
   const result = await handleQuoteRequest(request(data), env, mock.fake);
   assert.deepEqual(await result.json(), { ok: true });
   const body = mock.calls[1]!.body;
-  assert.deepEqual(body["to"], [env.QUOTE_TO_EMAIL]);
+  assert.deepEqual(body["to"], QUOTE_RECIPIENTS);
   assert.equal(body["reply_to"], "customer@example.invalid");
   assert.match(String(body["text"]), /unlisted property service/);
   const attachment = (body["attachments"] as Array<{ filename: string; content: string }>)[0]!;
