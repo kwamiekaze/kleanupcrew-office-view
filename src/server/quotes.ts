@@ -4,6 +4,7 @@ import { MAX_PHOTOS, MAX_ATTACHMENT_BYTES } from "../lib/quote-photos.ts";
 export type QuoteEnv = Partial<
   Record<
     | "QUOTE_DELIVERY_ENABLED"
+    | "QUOTE_TO_EMAIL"
     | "QUOTE_FROM_EMAIL"
     | "QUOTE_SITE_ORIGIN"
     | "RESEND_API_KEY"
@@ -16,8 +17,31 @@ export type QuoteEnv = Partial<
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
 const EMAIL = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/;
 export const QUOTE_RECIPIENTS = ["kwamiekaze@gmail.com", "kleanup365@gmail.com"] as const;
+const MAX_RECIPIENTS = 20;
 const UNAVAILABLE =
   "Online requests are not available yet. Your details and photos have not been sent.";
+
+/**
+ * The two owner inboxes are mandatory recipients. QUOTE_TO_EMAIL may add more
+ * addresses, separated by commas or spaces. The final list is validated,
+ * de-duplicated case-insensitively, and capped so a misconfigured value cannot
+ * fan a single request out to an unbounded set of addresses.
+ */
+function recipients(env: QuoteEnv): string[] {
+  const seen = new Set<string>();
+  const list: string[] = [];
+  const configured = [QUOTE_RECIPIENTS.join(","), env.QUOTE_TO_EMAIL ?? ""].join(",");
+  for (const part of configured.split(/[\s,]+/)) {
+    const address = part.trim();
+    if (!EMAIL.test(address)) continue;
+    const key = address.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    list.push(address);
+    if (list.length >= MAX_RECIPIENTS) break;
+  }
+  return list;
+}
 
 function json(body: unknown, status = 200) {
   return Response.json(body, {
@@ -32,13 +56,24 @@ function ready(env: QuoteEnv) {
     return (
       env.QUOTE_DELIVERY_ENABLED === "true" &&
       EMAIL.test(env.QUOTE_FROM_EMAIL ?? "") &&
-      Boolean(env.RESEND_API_KEY && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) &&
+      Boolean(env.RESEND_API_KEY) &&
       origin.protocol === "https:" &&
       origin.origin === env.QUOTE_SITE_ORIGIN
     );
   } catch {
     return false;
   }
+}
+
+/**
+ * The Turnstile challenge is used when both of its keys are present, and
+ * skipped when they are not. Delivery works either way: without Turnstile the
+ * form still runs behind the same-origin check and the honeypot field, so
+ * requests can be sent as soon as the email settings are in place, and the
+ * stronger bot check can be switched on later just by adding the two keys.
+ */
+function turnstileConfigured(env: QuoteEnv) {
+  return Boolean(env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY);
 }
 
 async function limitedForm(request: Request): Promise<FormData> {
@@ -164,7 +199,10 @@ export async function handleQuoteRequest(
 ): Promise<Response> {
   if (request.method === "GET") {
     const enabled = ready(env);
-    return json({ enabled, siteKey: enabled ? env.TURNSTILE_SITE_KEY : null });
+    return json({
+      enabled,
+      siteKey: enabled && turnstileConfigured(env) ? env.TURNSTILE_SITE_KEY : null,
+    });
   }
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
   if (!ready(env)) return json({ error: UNAVAILABLE }, 503);
@@ -207,7 +245,7 @@ export async function handleQuoteRequest(
       zip: field(form, "zip", 5, 10),
       service: field(form, "service", 2, 100),
       description: field(form, "description", 10, 3000),
-      token: field(form, "token", 1, 2048),
+      token: turnstileConfigured(env) ? field(form, "token", 1, 2048) : "",
       requestId: field(form, "requestId", 36, 36),
     };
     if (
@@ -243,30 +281,32 @@ export async function handleQuoteRequest(
   }
 
   try {
-    const verification = await transport(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(10000),
-        body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: details.token }),
-      },
-    );
-    const check = (await verification.json()) as {
-      success?: boolean;
-      hostname?: string;
-      action?: string;
-    };
-    if (
-      !verification.ok ||
-      !check.success ||
-      check.hostname !== new URL(env.QUOTE_SITE_ORIGIN!).hostname ||
-      check.action !== "quote"
-    ) {
-      return json(
-        { error: "Verification expired or failed. Please complete the check and try again." },
-        403,
+    if (turnstileConfigured(env)) {
+      const verification = await transport(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(10000),
+          body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: details.token }),
+        },
       );
+      const check = (await verification.json()) as {
+        success?: boolean;
+        hostname?: string;
+        action?: string;
+      };
+      if (
+        !verification.ok ||
+        !check.success ||
+        check.hostname !== new URL(env.QUOTE_SITE_ORIGIN!).hostname ||
+        check.action !== "quote"
+      ) {
+        return json(
+          { error: "Verification expired or failed. Please complete the check and try again." },
+          403,
+        );
+      }
     }
     const attachments: { filename: string; content: string; content_type: string }[] = [];
     for (const [index, file] of files.entries()) {
@@ -295,7 +335,7 @@ export async function handleQuoteRequest(
       },
       body: JSON.stringify({
         from: `KleanupCrew Website <${env.QUOTE_FROM_EMAIL}>`,
-        to: [...QUOTE_RECIPIENTS],
+        to: recipients(env),
         ...(EMAIL.test(details.contact) ? { reply_to: details.contact } : {}),
         subject: `Quote request: ${details.service}`,
         text: [

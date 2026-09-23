@@ -67,10 +67,25 @@ test("delivery is disabled by default and does not expose secrets", async () => 
   assert.equal((await handleQuoteRequest(request(), {}, noNetwork)).status, 503);
 });
 test("every required configuration value is needed", async () => {
-  for (const key of Object.keys(env) as Array<keyof QuoteEnv>) {
+  const required: Array<keyof QuoteEnv> = [
+    "QUOTE_DELIVERY_ENABLED",
+    "QUOTE_FROM_EMAIL",
+    "QUOTE_SITE_ORIGIN",
+    "RESEND_API_KEY",
+  ];
+  for (const key of required) {
     const partial = { ...env };
     delete partial[key];
     assert.equal((await handleQuoteRequest(request(), partial, noNetwork)).status, 503, key);
+  }
+});
+test("the Turnstile keys are optional, not required", async () => {
+  for (const key of ["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"] as Array<keyof QuoteEnv>) {
+    const partial = { ...env };
+    delete partial[key];
+    // Delivery still runs; the stubbed transport throwing is what yields 502,
+    // which only happens once the request is accepted as configured.
+    assert.notEqual((await handleQuoteRequest(request(), partial, noNetwork)).status, 503, key);
   }
 });
 test("configuration exposes only readiness and public site key", async () => {
@@ -143,6 +158,62 @@ test("Other sends job details and safe attachments only to both owner addresses"
   const attachment = (body["attachments"] as Array<{ filename: string; content: string }>)[0]!;
   assert.equal(attachment.filename, "property-photo-1.jpg");
   assert.ok(Buffer.from(attachment.content, "base64").length > 100);
+});
+test("delivers every request to all configured recipients", async () => {
+  const multi: QuoteEnv = {
+    ...env,
+    QUOTE_TO_EMAIL: "kleanup365@example.invalid, kwamiekaze@example.invalid",
+  };
+  const mock = transport();
+  const result = await handleQuoteRequest(request(), multi, mock.fake);
+  assert.deepEqual(await result.json(), { ok: true });
+  assert.deepEqual(mock.calls[1]!.body["to"], [
+    ...QUOTE_RECIPIENTS,
+    "kleanup365@example.invalid",
+    "kwamiekaze@example.invalid",
+  ]);
+});
+test("de-duplicates recipients and ignores malformed entries", async () => {
+  const messy: QuoteEnv = {
+    ...env,
+    QUOTE_TO_EMAIL: "kleanup365@example.invalid, not-an-email, KLEANUP365@example.invalid",
+  };
+  const mock = transport();
+  const result = await handleQuoteRequest(request(), messy, mock.fake);
+  assert.deepEqual(await result.json(), { ok: true });
+  assert.deepEqual(mock.calls[1]!.body["to"], [...QUOTE_RECIPIENTS, "kleanup365@example.invalid"]);
+});
+test("invalid optional recipients never replace the owner inboxes", async () => {
+  const broken: QuoteEnv = { ...env, QUOTE_TO_EMAIL: "not-an-email" };
+  const mock = transport();
+  const result = await handleQuoteRequest(request(), broken, mock.fake);
+  assert.deepEqual(await result.json(), { ok: true });
+  assert.deepEqual(mock.calls[1]!.body["to"], QUOTE_RECIPIENTS);
+});
+const noTurnstile: QuoteEnv = {
+  ...env,
+  TURNSTILE_SITE_KEY: undefined,
+  TURNSTILE_SECRET_KEY: undefined,
+};
+test("delivers without a Turnstile challenge when its keys are absent", async () => {
+  const mock = transport();
+  const result = await handleQuoteRequest(request(), noTurnstile, mock.fake);
+  assert.deepEqual(await result.json(), { ok: true });
+  assert.equal(mock.calls.length, 1);
+  assert.ok(mock.calls[0]!.url.includes("api.resend.com"));
+});
+test("GET reports enabled with no site key when Turnstile is unset", async () => {
+  const get = new Request("https://example.invalid/api/quotes", { method: "GET" });
+  const body = (await (await handleQuoteRequest(get, noTurnstile, noNetwork)).json()) as {
+    enabled: boolean;
+    siteKey: string | null;
+  };
+  assert.equal(body.enabled, true);
+  assert.equal(body.siteKey, null);
+});
+test("stays disabled without a Resend key even if everything else is set", async () => {
+  const noKey: QuoteEnv = { ...noTurnstile, RESEND_API_KEY: undefined };
+  assert.equal((await handleQuoteRequest(request(), noKey, noNetwork)).status, 503);
 });
 test("email failures do not return a false success", async () => {
   const mock = transport(true, 503);

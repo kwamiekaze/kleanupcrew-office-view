@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Subtle synthesized ambience (soft air / outdoor hush) — no external assets.
+ * Subtle synthesized ambience (soft air, outdoor hush) with no external assets.
  * Off by default; only starts after an explicit user gesture.
  */
 export function useAmbientAudio() {

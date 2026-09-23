@@ -75,6 +75,13 @@
   --cream: oklch(0.96 0.025 92);
   --wood: oklch(0.58 0.09 60);
   --charcoal: oklch(0.25 0.012 160);
+
+  /*
+   * The brand button and the "Get a Free Quote" button are driven by the same
+   * two tokens, so the pair always renders at identical dimensions.
+   */
+  --kc-header-btn-h: 2.75rem;
+  --kc-header-btn-w: 11rem;
 }
 
 @layer components {
@@ -105,6 +112,62 @@
     font-weight: 500;
     letter-spacing: 0.14em;
     line-height: 1.4;
+  }
+
+  /* Header brand button: same shape and size as the quote button, and it
+     keeps the brand card's white fill, hairline border and soft shadow. */
+  .kc-brand-btn,
+  .kc-btn.kc-header-quote {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--kc-header-btn-w);
+    height: var(--kc-header-btn-h);
+    min-height: var(--kc-header-btn-h);
+    padding-block: 0;
+    padding-inline: 0.85rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .kc-brand-btn {
+    border: 1px solid oklch(1 0 0 / 0.8);
+    background: oklch(0.993 0.006 106);
+    box-shadow: 0 8px 30px -18px oklch(0.2 0.03 150 / 0.45);
+    cursor: pointer;
+    transition:
+      box-shadow 0.18s ease,
+      filter 0.18s ease;
+  }
+
+  .kc-brand-btn:hover {
+    filter: brightness(1.03);
+    box-shadow: 0 10px 34px -18px oklch(0.2 0.03 150 / 0.6);
+  }
+
+  .kc-brand-btn-logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 1;
+    object-fit: cover;
+    object-position: center;
+    mix-blend-mode: multiply;
+  }
+
+  /* Tagline sits directly beneath the button, no longer inside it. */
+  .kc-brand-tagline {
+    text-align: center;
+    color: var(--forest);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.35;
+    text-shadow:
+      0 1px 2px oklch(1 0 0 / 0.9),
+      0 0 8px oklch(1 0 0 / 0.75);
   }
 
   .kc-splash {
@@ -185,8 +248,8 @@
   }
 
   .kc-glass {
-    background: color-mix(in oklab, var(--forest-deep) 78%, transparent);
-    backdrop-filter: blur(14px);
+    background: color-mix(in oklab, var(--forest-deep) 58%, transparent);
+    backdrop-filter: blur(11px);
     border: 1px solid color-mix(in oklab, var(--cream) 18%, transparent);
     box-shadow: 0 18px 50px -20px oklch(0.2 0.03 150 / 0.75);
   }
@@ -220,8 +283,21 @@
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--lime) 22%, transparent);
   }
 
+  /* The section panel and the details window both sit over the office, so they
+     are kept close to clear glass. The blur and a soft shadow on the type carry
+     the contrast instead of a solid fill. */
   .kc-service-panel {
     animation: kc-panel-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    background: color-mix(in oklab, var(--forest-deep) 17%, transparent);
+    backdrop-filter: blur(8px) saturate(1.08);
+    border-color: color-mix(in oklab, var(--cream) 22%, transparent);
+  }
+
+  .kc-service-panel,
+  .kc-details-dialog {
+    text-shadow:
+      0 1px 2px oklch(0.14 0.02 150 / 0.9),
+      0 0 10px oklch(0.14 0.02 150 / 0.55);
   }
 
   .kc-panel-minimize {
@@ -248,6 +324,172 @@
     background: color-mix(in oklab, var(--cream) 16%, transparent);
     color: var(--cream);
     transform: translateY(-1px);
+  }
+
+  /* --- Service details ------------------------------------------------ */
+  /* The panel is mostly transparent on purpose: the office behind it should
+     still read through the glass, so the list feels like a layer over the
+     room rather than a page that replaced it. */
+  .kc-details-overlay {
+    background: color-mix(in oklab, var(--charcoal) 7%, transparent);
+    backdrop-filter: blur(0.5px);
+    animation: kc-details-fade 200ms ease-out;
+  }
+
+  .kc-details-dialog {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 55;
+    display: flex;
+    max-height: min(82vh, 46rem);
+    width: min(46rem, calc(100vw - 1.75rem));
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    border: 1px solid color-mix(in oklab, var(--cream) 26%, transparent);
+    background: color-mix(in oklab, var(--forest-deep) 15%, transparent);
+    backdrop-filter: blur(8px) saturate(1.1);
+    box-shadow: 0 30px 70px -26px oklch(0.15 0.03 150 / 0.8);
+    animation: kc-details-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .kc-details-head {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--cream) 14%, transparent);
+    padding: 1.1rem 1.25rem 1rem;
+  }
+
+  .kc-details-close {
+    position: absolute;
+    right: 0.9rem;
+    top: 0.95rem;
+    display: grid;
+    height: 2rem;
+    width: 2rem;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--cream) 24%, transparent);
+    background: color-mix(in oklab, var(--forest-deep) 34%, transparent);
+    color: color-mix(in oklab, var(--cream) 90%, transparent);
+    transition:
+      background 160ms ease,
+      color 160ms ease;
+  }
+
+  .kc-details-close:hover {
+    background: color-mix(in oklab, var(--cream) 18%, transparent);
+    color: var(--cream);
+  }
+
+  .kc-details-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.35rem 1.25rem 0.9rem;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--cream) 28%, transparent) transparent;
+  }
+
+  .kc-details-group {
+    padding-top: 0.95rem;
+  }
+
+  .kc-details-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lime);
+  }
+
+  .kc-details-item {
+    border-left: 2px solid color-mix(in oklab, var(--lime) 40%, transparent);
+    padding-left: 0.7rem;
+  }
+
+  .kc-details-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid color-mix(in oklab, var(--cream) 14%, transparent);
+    background: color-mix(in oklab, var(--forest-deep) 8%, transparent);
+    padding: 0.85rem 1.25rem;
+  }
+
+  /* Secondary action beside the section's main call to action. */
+  .kc-btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--cream) 30%, transparent);
+    background: color-mix(in oklab, var(--cream) 10%, transparent);
+    color: color-mix(in oklab, var(--cream) 92%, transparent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.52rem 1rem;
+    animation: kc-details-rise 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      background 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .kc-btn-quiet:hover {
+    background: color-mix(in oklab, var(--cream) 18%, transparent);
+    color: var(--cream);
+    transform: translateY(-1px);
+  }
+
+  @keyframes kc-details-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes kc-details-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, calc(-50% + 14px)) scale(0.985);
+    }
+  }
+
+  @keyframes kc-details-rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kc-details-dialog,
+    .kc-details-overlay,
+    .kc-btn-quiet {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .kc-details-dialog {
+      max-height: 78vh;
+      border-radius: 1rem;
+    }
+
+    .kc-details-foot {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+    }
+
+    .kc-details-foot .kc-btn {
+      justify-content: center;
+    }
   }
 
   .kc-quote-pill {
@@ -360,8 +602,7 @@
 
   .kc-rail-btn {
     display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
+    align-items: center;
     width: 100%;
     border-radius: 0.7rem;
     padding: 0.45rem 0.7rem;
@@ -379,11 +620,6 @@
     background: color-mix(in oklab, var(--lime) 88%, transparent);
     color: var(--charcoal);
     font-weight: 600;
-  }
-  .kc-rail-btn .idx {
-    font-size: 0.64rem;
-    letter-spacing: 0.1em;
-    opacity: 0.75;
   }
 }
 
@@ -429,10 +665,18 @@
     letter-spacing: 0.08em;
   }
 
+  :root {
+    --kc-header-btn-h: 2.5rem;
+    --kc-header-btn-w: 9.25rem;
+  }
+
   .kc-header-quote {
-    min-height: 2.5rem;
-    padding-inline: 0.85rem;
     font-size: 0.72rem;
+  }
+
+  .kc-brand-tagline {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
   }
 
   .kc-service-panel {

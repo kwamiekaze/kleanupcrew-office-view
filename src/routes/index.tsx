@@ -1,17 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Minus } from "lucide-react";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RigInput } from "@/components/office/CameraRig";
 import { QuoteDrawer } from "@/components/kleanup/QuoteDrawer";
+import { ServiceDetails } from "@/components/kleanup/ServiceDetails";
 import { SplashScreen } from "@/components/kleanup/SplashScreen";
 import { useAmbientAudio } from "@/lib/use-ambient-audio";
-import { TRUST_CHIPS, VIEWS, type ViewId } from "@/lib/kleanup-content";
+import { SERVICE_DETAILS, TRUST_CHIPS, VIEWS, type ViewId } from "@/lib/kleanup-content";
 import { BRAND_LOGO, BRAND_SLOGAN } from "@/lib/brand";
 
 const OfficeCanvas = lazy(() => import("@/components/kleanup/OfficeCanvas"));
 
-const TITLE = `KleanupCrew — ${BRAND_SLOGAN}`;
+const TITLE = `KleanupCrew | ${BRAND_SLOGAN}`;
 const DESC =
-  "KleanupCrew connects property owners with insured local crews for cleaning, junk removal, lawn care, tree work and curb-appeal property care.";
+  "We clean, clear, mow, trim and haul away. KleanupCrew does the work itself, inside and outside the property, with one price agreed before we start.";
 const SOCIAL_IMAGE = "https://kleanupcrew.com/kleanupcrew-social.jpg";
 
 export const Route = createFileRoute("/")({
@@ -32,13 +34,13 @@ export const Route = createFileRoute("/")({
       { property: "og:image:height", content: "720" },
       {
         property: "og:image:alt",
-        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+        content: "KleanupCrew. Inside. Outside. Handled. Get a Free Quote.",
       },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: SOCIAL_IMAGE },
       {
         name: "twitter:image:alt",
-        content: "KleanupCrew — Inside. Outside. Handled. Get a Free Quote.",
+        content: "KleanupCrew. Inside. Outside. Handled. Get a Free Quote.",
       },
     ],
   }),
@@ -48,7 +50,7 @@ export const Route = createFileRoute("/")({
 const NAV = [
   { label: "Services", id: "cleaning" as ViewId },
   { label: "How It Works", id: "quote" as ViewId },
-  { label: "For Providers", id: "junk" as ViewId },
+  { label: "Outdoor Work", id: "tree" as ViewId },
   { label: "About", id: "welcome" as ViewId },
 ];
 
@@ -63,6 +65,7 @@ function clamp(value: number, minimum: number, maximum: number) {
 function Home() {
   const [activeId, setActiveId] = useState<ViewId>("welcome");
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches,
@@ -72,6 +75,8 @@ function Home() {
   const { enabled: soundOn, setEnabled: setSoundOn } = useAmbientAudio();
 
   const view = useMemo(() => VIEWS.find((v) => v.id === activeId) ?? VIEWS[0]!, [activeId]);
+  // Every section has a breakdown behind its More info button.
+  const detail = SERVICE_DETAILS[activeId];
 
   const input = useRef<RigInput>({ dragX: 0, dragY: 0, zoom: 0 });
   const pointers = useRef(new Map<number, { x: number; y: number }>());
@@ -152,6 +157,10 @@ function Home() {
 
   const select = useCallback((id: ViewId) => {
     setActiveId(id);
+    setDetailsOpen(false);
+    // Choosing a section is a request to see it, so bring the panel back. It
+    // carries the section's actions, including More info.
+    setPanelCollapsed(false);
     input.current.dragX = 0;
     input.current.dragY = 0;
     input.current.zoom = 0;
@@ -206,16 +215,23 @@ function Home() {
 
       {/* top bar */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 sm:p-6">
-        <div className="pointer-events-auto kc-brand">
-          <img
-            className="kc-brand-logo"
-            src={BRAND_LOGO}
-            alt="KleanupCrew"
-            width={1254}
-            height={1254}
-            fetchPriority="high"
-          />
-          <p className="kc-brand-slogan">{BRAND_SLOGAN}</p>
+        <div className="pointer-events-auto flex shrink-0 flex-col items-center gap-1.5">
+          <button
+            type="button"
+            className="kc-brand-btn kc-focus"
+            onClick={() => window.location.assign("/")}
+            aria-label="KleanupCrew, reload the home page"
+          >
+            <img
+              className="kc-brand-btn-logo"
+              src={BRAND_LOGO}
+              alt="KleanupCrew"
+              width={1254}
+              height={1254}
+              fetchPriority="high"
+            />
+          </button>
+          <p className="kc-brand-tagline">{BRAND_SLOGAN}</p>
         </div>
 
         <nav aria-label="Primary" className="pointer-events-auto flex shrink-0 items-center gap-2">
@@ -253,8 +269,7 @@ function Home() {
                 aria-current={v.id === activeId}
                 onClick={() => select(v.id)}
               >
-                <span className="idx">{v.index}</span>
-                <span>{v.label}</span>
+                {v.label}
               </button>
             </li>
           ))}
@@ -309,21 +324,32 @@ function Home() {
             aria-label="Minimize quote information"
             title="Minimize"
           >
-            <span aria-hidden="true">—</span>
+            <Minus size={16} aria-hidden="true" />
           </button>
           <p className="pr-10 text-[10px] uppercase tracking-[0.22em] text-lime">
-            {view.index} · {view.label}
+            {view.label}
           </p>
           <h1 className="mt-1.5 pr-10 text-lg font-semibold leading-snug tracking-tight sm:text-xl">
             {view.title}
           </h1>
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-cream/75">{view.line}</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button className="kc-btn" onClick={() => setQuoteOpen(true)}>
               {view.cta}
             </button>
+            <button
+              key={activeId}
+              type="button"
+              className="kc-btn-quiet kc-focus"
+              onClick={() => setDetailsOpen(true)}
+              aria-haspopup="dialog"
+            >
+              More info
+              <span aria-hidden="true" className="text-[11px] opacity-70">
+                ↗
+              </span>
+            </button>
             <span className="text-[11px] text-cream/50 md:hidden">
-              Insured providers · Upfront estimates · Local crews
+              Fully insured · Upfront pricing
             </span>
           </div>
         </section>
@@ -339,8 +365,7 @@ function Home() {
                 aria-current={v.id === activeId}
                 onClick={() => select(v.id)}
               >
-                <span className="idx">{v.index}</span>
-                <span>{v.label}</span>
+                {v.label}
               </button>
             </li>
           ))}
@@ -356,6 +381,13 @@ function Home() {
           </li>
         </ul>
       </nav>
+
+      <ServiceDetails
+        detail={detail}
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        onQuote={() => setQuoteOpen(true)}
+      />
 
       <QuoteDrawer open={quoteOpen} onClose={() => setQuoteOpen(false)} viewId={activeId} />
 

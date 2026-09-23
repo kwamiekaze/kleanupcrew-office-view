@@ -6,14 +6,15 @@ The form supports Other, a job description, up to five local photo previews, rem
 
 Use the server runtime's secrets/environment settings (Lovable/Cloudflare), never client code or `VITE_` variables:
 
-| Setting                | Value                                                           |
-| ---------------------- | --------------------------------------------------------------- |
-| QUOTE_FROM_EMAIL       | A sender address on a domain verified in Resend                 |
-| QUOTE_SITE_ORIGIN      | Exact HTTPS origin of the deployed site, with no trailing slash |
-| RESEND_API_KEY         | Resend sending key restricted to the verified domain            |
-| TURNSTILE_SITE_KEY     | Public key for a Turnstile widget restricted to that hostname   |
-| TURNSTILE_SECRET_KEY   | Corresponding private key                                       |
-| QUOTE_DELIVERY_ENABLED | Set to true only after the other settings are ready             |
+| Setting                | Value                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| QUOTE_TO_EMAIL         | Optional additional inboxes, separated by commas; the two owner inboxes above are always included |
+| QUOTE_FROM_EMAIL       | A sender address on a domain verified in Resend                                                   |
+| QUOTE_SITE_ORIGIN      | Exact HTTPS origin of the deployed site, with no trailing slash                                   |
+| RESEND_API_KEY         | Resend sending key restricted to the verified domain                                              |
+| TURNSTILE_SITE_KEY     | Public key for a Turnstile widget restricted to that hostname                                     |
+| TURNSTILE_SECRET_KEY   | Corresponding private key                                                                         |
+| QUOTE_DELIVERY_ENABLED | Set to true only after the other settings are ready                                               |
 
 `GET /api/quotes` returns only readiness and the public widget key. `POST /api/quotes` fails closed if anything is unconfigured. The server reads deployment bindings when provided, then runtime environment values. Deployments must include the server output; a static-only export cannot deliver requests.
 
